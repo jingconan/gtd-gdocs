@@ -23,6 +23,18 @@ Another useful trick is that when you document becomes very long, you can press 
 
 For more info about GTD, please read [This awesome book by David Allen](http://www.amazon.com/Getting-Things-Done-Stress-Free-Productivity/dp/0142000280).
 
+Usage
+-----
+
+ 1. Create a new google document.
+ 2. Click *Tools->Script Editor...*
+ 3. Click Black Project.
+ 4. Paste the code in script.js to the window.
+ 5. Choose and *onOpen* function and click run in the toolbar.
+ 6. Enjoy your trip!
+
+
+
 Author Info
 -----------
 Jing Conan Wang
