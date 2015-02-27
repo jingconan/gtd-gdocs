@@ -74,16 +74,22 @@ var app = {
     return this.colIdx[name];
   },
   
-  _getID: function(s) {
+  getID: function(s) {
+    // Use timestamp as id if there is timestamp
     var res = s.split(']')[0].split('[')[1];
-    //debug('s: ' + s + ' res: ' + res);
+    //debug('string: ' + s + ' id: ' + res);
 
-    if (typeof res == 'undefined') {
+    if (typeof res === 'undefined') {
       return s;
     }
   },
   
-  findFirstCell: function(col, target) {
+  // this function returns the first empty cell in a column. 
+  findFirstEmptyCell: function(col) {
+    return this.findFirstCell(col, '', false);
+  },
+  
+  findFirstCell: function(col, target, useID) {
     if (typeof col === 'string') {
       col = this.getColIdx(col);
     }
@@ -93,7 +99,11 @@ var app = {
     var i, cell, rowNum = this.taskTable.getNumRows();
     for (i = 0; i < rowNum; ++i) {
       cell = this.taskTable.getCell(i, col);
-      if (this._getID(cell.getText()) == this._getID(target)) {
+      if (useID && (this.getID(cell.getText()) === this.getID(target))) {
+      // compare using ID 
+        return cell;
+      } else if (cell.getText() === target) {
+      // compare the full string
         return cell;
       }
     }
@@ -116,7 +126,7 @@ var app = {
     var cell = this.findFirstCell(type, taskName);   
     if (typeof cell === 'undefined') {
       if (alert) {
-         DocumentApp.getUi().alert('cannot find task name');
+        DocumentApp.getUi().alert('cannot find task name: ' + taskName);
       }
     } else {
       cell.clear();
@@ -124,7 +134,7 @@ var app = {
   },
   
   addTask: function(type, taskName) {
-    cell = this.findFirstCell(type, '');
+    cell = this.findFirstEmptyCell(type);
     if (typeof cell === 'undefined') {
       this.appendRow(1);
       cell = this.taskTable.getCell(this.taskTable.getNumRows() - 1, this.getColIdx(type));
@@ -156,6 +166,72 @@ var app = {
     var row = this.taskTable.appendTableRow();
     this.mutateRow(row, rowContent);
     return this
+  },
+  
+  getCurrentSelection: function() {
+    var res = '';
+    var selection = DocumentApp.getActiveDocument().getSelection();
+    if (selection) {
+      var elements = selection.getRangeElements();
+      for (var i = 0; i < elements.length; i++) {
+        var element = elements[i];
+        
+        // Only get text from elements that can be edited as text; skip images and other non-text elements.
+        if (element.getElement().editAsText) {
+          var text = element.getElement().editAsText();
+          
+          // Bold the selected part of the element, or the full element if it's completely selected.
+          if (element.isPartial()) {
+            res += text.getText().slice(element.getStartOffset(), element.getEndOffsetInclusive() + 1);
+          } else {
+            res += text.getText();
+          }
+        }
+      }
+    }
+    return res;
+  },
+  
+  selectBackwardToTimestamp: function() {
+    function getTimeStamp(s) {
+      //FIXME now it only checks brackets
+      return s.split(']')[0].split('[')[1];
+    }
+    
+    var cursor = DocumentApp.getActiveDocument().getCursor();
+    if (!cursor) {
+      return;
+    }
+    var ele = cursor.getElement();
+    var selectTexts = [], text, i;
+    if (ele.getType() === DocumentApp.ElementType.TEXT) {
+      ele = ele.getParent();
+    }
+    if (ele.getType() === DocumentApp.ElementType.PARAGRAPH) {
+      for (i = 0; i < 10 && ele; ++i) {
+        text = ele.asText().getText();
+        if (typeof getTimeStamp(text) !== 'undefined') {
+          selectTexts.push(text);          
+          break;
+        }
+        selectTexts.push(text);
+        ele = ele.getPreviousSibling();    
+      } 
+    }
+    selectTexts.reverse();
+    return selectTexts.join('\n');
+  },
+
+  
+  // this function returns the selected task
+  // if any text is selected, the function will return the selected text
+  // else the function will return the surrounding text of current cursor.
+  getSelectedTask: function() {
+    var selectedText = this.getCurrentSelection();
+    if (selectedText.length > 0) {
+      return selectedText;
+    }
+    return this.selectBackwardToTimestamp();
   },
   
   appendLogEntry: function() {
@@ -213,46 +289,25 @@ var app = {
 };
 
 
+app.initTaskTable();
 
 function initTaskFunction() {
   app.initTaskTable();
-  //app.appendRow(['a', 'b','c']);
-//  app.findFirstEmptyCell('Actionable')
-//    .editAsText()
-//    .appendText('happy');
-//    
-//  app.findFirstEmptyCell('Waiting For')
-//    .editAsText()
-//    .appendText('bad');
-}
-
-function appendLogEntry() {
-  insertDate();
-  app.appendLogEntry();
-}
-
-app.initTaskTable();
-
-function getSelectedTask() {
- var cursor = DocumentApp.getActiveDocument().getCursor();
- if (cursor) {
-   return cursor.getElement().getText();
- }
- return undefined;
 }
 
 function createActionableTask() {
-  var task = getSelectedTask();
+  var task = app.getSelectedTask();
   if (!task) {
     DocumentApp.getUi().alert('cannot find task name');
     return;
   }
+  //debug('task name: ' + task);
   app.cleanTask('All', task);
   app.addTask('Actionable', task);
 }
 
 function moveTaskToWaitingFor() {
-  var task = getSelectedTask();
+  var task = app.getSelectedTask();
   if (!task) {
     DocumentApp.getUi().alert('cannot find task name');
     return;
@@ -262,7 +317,7 @@ function moveTaskToWaitingFor() {
 }
 
 function moveTaskToDone() {
-  var task = getSelectedTask();
+  var task = app.getSelectedTask();
   if (!task) {
     DocumentApp.getUi().alert('cannot find task name');
     return;
@@ -279,7 +334,7 @@ function onOpen() {
   ui.createMenu('GTD')
       .addItem('insert date', 'insertDate')
       .addItem('create task table', 'initTaskFunction')
-      .addItem('create task', 'createActionableTask')
+      .addItem('move to Actionable', 'createActionableTask')
       .addItem('move to WaitingFor', 'moveTaskToWaitingFor')
       .addItem('move to Done', 'moveTaskToDone')
       .addToUi();
