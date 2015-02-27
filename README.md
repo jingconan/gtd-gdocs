@@ -28,7 +28,7 @@ Usage
 
  1. Create a new google document.
  2. Click *Tools->Script Editor...*
- 3. Click Black Project.
+ 3. Click Blank Project.
  4. Paste the code in script.js to the window.
  5. Choose and *onOpen* function and click run in the toolbar.
  6. Enjoy your trip!
