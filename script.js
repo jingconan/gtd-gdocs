@@ -24,12 +24,12 @@ Date.prototype.toISO = function (key) {
     // Format integers to have at least two digits.
     return n < 10 ? '0' + n : n;
   }
-  return '[' + this.getUTCFullYear()   + '-' +
-       f(this.getUTCMonth() + 1) + '-' +
-       f(this.getUTCDate())      + ' ' +
-       f(this.getUTCHours())     + ':' +
-       f(this.getUTCMinutes())   + ':' +
-       f(this.getUTCSeconds())   + '' + 
+  return '[' + this.getFullYear()   + '-' +
+       f(this.getMonth() + 1) + '-' +
+       f(this.getDate())      + ' ' +
+       f(this.getHours())     + ':' +
+       f(this.getMinutes())   + ':' +
+       f(this.getSeconds())   + '' + 
        ']';
 };
 
