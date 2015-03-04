@@ -133,6 +133,26 @@ var app = {
     }
   },
   
+  // Change the color of a task according to its current type
+  setTaskColor: function(type, taskName) {
+    setColor = (function (type, ele) {
+      if (!ele) return;
+      ele.asText().editAsText().setForegroundColor(this.headerColor[this.getColIdx(type)])
+    }).bind(this, type);
+    // Change the color of the task in the task table
+    var timeStamp = this.getTimeStamp(taskName);
+    var body = DocumentApp.getActiveDocument().getBody();
+    var re = body.findText(timeStamp);
+    setColor(re.getElement());
+    
+    // If the task exists in the main body, change its color, too. 
+    re = body.findText(timeStamp, re);
+    if (re) {
+      setColor(re.getElement());
+    }
+    
+  }, 
+  
   addTask: function(type, taskName) {
     cell = this.findFirstEmptyCell(type);
     if (typeof cell === 'undefined') {
@@ -140,6 +160,7 @@ var app = {
       cell = this.taskTable.getCell(this.taskTable.getNumRows() - 1, this.getColIdx(type));
     }
     cell.setText(taskName);
+    this.setTaskColor(type, taskName);
   },
   
   moveTask: function(from, to, taskName) {
@@ -192,12 +213,12 @@ var app = {
     return res;
   },
   
+  getTimeStamp: function(s) {
+    //FIXME now it only checks brackets
+    return s.split(']')[0].split('[')[1];
+  },
+  
   selectBackwardToTimestamp: function() {
-    function getTimeStamp(s) {
-      //FIXME now it only checks brackets
-      return s.split(']')[0].split('[')[1];
-    }
-    
     var cursor = DocumentApp.getActiveDocument().getCursor();
     if (!cursor) {
       return;
@@ -210,7 +231,7 @@ var app = {
     if (ele.getType() === DocumentApp.ElementType.PARAGRAPH) {
       for (i = 0; i < 10 && ele; ++i) {
         text = ele.asText().getText();
-        if (typeof getTimeStamp(text) !== 'undefined') {
+        if (typeof this.getTimeStamp(text) !== 'undefined') {
           selectTexts.push(text);          
           break;
         }
