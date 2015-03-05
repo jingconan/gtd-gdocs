@@ -303,7 +303,7 @@ var app = {
   
   body: DocumentApp.getActiveDocument().getBody(),
   header: ['Actionable', 'Waiting For', 'Done'],
-  headerColor: ['#ff0000', '#fffe06', '#16a031'], 
+  headerColor: ['#ff0000', '#9d922e', '#16a031'], 
   defaultRows: 1,
 
 
