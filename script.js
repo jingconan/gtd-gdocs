@@ -386,7 +386,7 @@ function moveTaskToDone() {
 
 
 function showSidebar() {
-  var htmlContent = '';
+  var htmlContent = '<div align="right"><input type="button" value="Refresh" onclick="google.script.run.showSidebar()" /></div>';
   var html = HtmlService.createHtmlOutput(htmlContent)
       .setSandboxMode(HtmlService.SandboxMode.IFRAME)
       .setTitle('My custom sidebar')
