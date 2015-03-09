@@ -34,6 +34,10 @@ Usage
  5. Choose and *onOpen* function and click run in the toolbar.
  6. Enjoy your trip!
 
+Screen Shot
+------------
+![screen shot gtd-docs](https://cloud.githubusercontent.com/assets/522201/6548740/046c06cc-c5c0-11e4-8d8a-ceea787e1cf8.png)
+
 
 
 Author Info
