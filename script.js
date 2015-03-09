@@ -406,6 +406,6 @@ function onOpen() {
       .addItem('move to Actionable', 'createActionableTask')
       .addItem('move to WaitingFor', 'moveTaskToWaitingFor')
       .addItem('move to Done', 'moveTaskToDone')
-      .addItem('show sidebar', 'showSidebar')
+      .addItem('show task sidebar', 'showSidebar')
       .addToUi();
 }
