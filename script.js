@@ -389,7 +389,7 @@ function showSidebar() {
   var htmlContent = '<div align="right"><input type="button" value="Refresh" onclick="google.script.run.showSidebar()" /></div>';
   var html = HtmlService.createHtmlOutput(htmlContent)
       .setSandboxMode(HtmlService.SandboxMode.IFRAME)
-      .setTitle('My custom sidebar')
+      .setTitle('My task list')
       .setWidth(300)
       .append(app.getSideBarTableContent());
       
