@@ -63,6 +63,43 @@ var app = {
    this.taskTable = taskTable;
   },
   
+  getTaskTable: function() {
+    return this.taskTable;
+  },
+  
+  getAllTasksFromCol: function(col) {
+    var i, cell, rowNum = this.taskTable.getNumRows(), res = [];
+      for (i = 1; i < rowNum; ++i) {
+        cell = this.taskTable.getCell(i, col);
+        if (typeof cell !== 'undefined' && cell.getText() !== '') {
+          res.push(cell.getText());
+        }
+    }
+    return res;
+  },
+  
+  getSideBarTableContent: function() {
+    var res = [];
+    res.push('<div>');
+    var i, j, colName, tasks;
+    for (i = 0; i < this.header.length; ++i) {
+      // set table header
+      res.push('<div style="color:' + this.headerColor[i] + '";>')
+      res.push(this.header[i]);
+      res.push('</div>');
+      
+      // set tasks
+      tasks = this.getAllTasksFromCol(i);
+      res.push('<ul>');
+      for (j = 0; j < tasks.length; ++j) {
+        res.push('<li>' + tasks[j] + '</li>');
+      }
+      res.push('</ul>');
+    }
+    res.push('</div>');
+    return res.join('\n');
+  },
+  
   getColIdx: function(name) {
     var i;
     if (typeof this.colIdx === 'undefined') {
@@ -348,6 +385,17 @@ function moveTaskToDone() {
 }
 
 
+function showSidebar() {
+  var htmlContent = '';
+  var html = HtmlService.createHtmlOutput(htmlContent)
+      .setSandboxMode(HtmlService.SandboxMode.IFRAME)
+      .setTitle('My custom sidebar')
+      .setWidth(300)
+      .append(app.getSideBarTableContent());
+      
+  DocumentApp.getUi() // Or DocumentApp or FormApp.
+      .showSidebar(html);
+}
 
 function onOpen() {
   var ui = DocumentApp.getUi();
@@ -358,5 +406,6 @@ function onOpen() {
       .addItem('move to Actionable', 'createActionableTask')
       .addItem('move to WaitingFor', 'moveTaskToWaitingFor')
       .addItem('move to Done', 'moveTaskToDone')
+      .addItem('show sidebar', 'showSidebar')
       .addToUi();
 }
