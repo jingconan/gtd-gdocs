@@ -38,8 +38,24 @@
 {{/task_queues}}
 </div>
 
+
+<div id='table_of_content' style='display:none'>
+<label class='collapse' style='color: black' for='_5'>Table of Content</label>
+<input id='_5' type='checkbox' checked='checked'>
+<div><ul>
+{{#headers}}
+<li id='{{toc}}'>{{text}}</li>
+{{/headers}}
+{{^headers}}
+Please insert a table of content in the document using insert->table of content
+{{/headers}}
+</ul></div>
+</div>
+
 <script>
 SB = {};
+SB.LEVEL = 3;
+
 SB.buildTaskQueue = function (result) {
     var taskQueue = document.getElementById('task_queue');
     var content = JSON.parse(result);
@@ -47,5 +63,13 @@ SB.buildTaskQueue = function (result) {
     taskQueue.style.display = 'block';
 };
 
+SB.buildToC = function (result){
+  var content = JSON.parse(result);
+  var list = document.getElementById('table_of_content');
+  list.innerHTML = Mustache.to_html(list.innerHTML, content);
+  list.style.display = 'block';
+};
+
 google.script.run.withSuccessHandler(SB.buildTaskQueue).getTasksString();
+google.script.run.withSuccessHandler(SB.buildToC).getTOCString();
 </script>

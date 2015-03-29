@@ -344,6 +344,31 @@ var app = {
   templates: {},
 };
 
+app.TOC = {};
+
+app.TOC.pullHeaders = function () {
+  var doc = DocumentApp.getActiveDocument();
+  headers = [];
+  for (var i = 0; i < doc.getNumChildren(); i++) {
+    var p = doc.getChild(i);
+    if (p.getType() == DocumentApp.ElementType.TABLE_OF_CONTENTS) {
+      var toc = p.asTableOfContents();
+      for (var ti = 0; ti < toc.getNumChildren(); ti++) {
+        var itemToc = toc.getChild(ti).asParagraph().getChild(0).asText();
+        var itemText = itemToc.getText();
+        var itemUrl = itemToc.getLinkUrl();
+	headers.push({
+	  toc: itemToc,
+	  text: itemText,
+	  url: itemUrl
+	});
+      }
+      break;
+    }
+  }
+  return {headers: headers};
+  
+};
 
 app.initTaskTable();
 
@@ -382,6 +407,10 @@ function moveTaskToDone() {
   app.addTask('Done', task);
 }
 
+function getTOCString() {
+  return JSON.stringify(app.TOC.pullHeaders());
+}
+
 function getTasksString() {
     return JSON.stringify(app.getSideBarTableContent());
 }
@@ -410,5 +439,5 @@ function onOpen() {
 }
 
 
-app.templates.sidebar = "<link rel='stylesheet' href='https://ssl.gstatic.com/docs/script/css/add-ons.css'><script src='https://code.jquery.com/jquery-2.1.3.min.js'></script><script src='https://cdnjs.cloudflare.com/ajax/libs/mustache.js/0.8.1/mustache.min.js'></script><style>.collapse{  font-size: 20px;  display:block;}.collapse + input{  display:none;}.collapse + input + *{  display:none;}.collapse+ input:checked + *{  display:block;}</style><div align='right'>    <input type='button' value='Refresh' onclick='google.script.run.showSidebar()' /></div><div id='task_queue' style='display:none'>{{#task_queues}}<div>    <label class='collapse' style='color: {{color}}' for='_{{index}}'>{{type}}</label>    <input id='_{{index}}' type='checkbox' checked='checked'>    <div>        <ul>        {{#tasks}}            <li>{{name}}</li>        {{/tasks}}        </ul>    </div></div>{{/task_queues}}</div><script>SB = {};SB.buildTaskQueue = function (result) {    var taskQueue = document.getElementById('task_queue');    var content = JSON.parse(result);    taskQueue.innerHTML = Mustache.to_html(taskQueue.innerHTML, content);    taskQueue.style.display = 'block';};google.script.run.withSuccessHandler(SB.buildTaskQueue).getTasksString();</script>";
+app.templates.sidebar = "<link rel='stylesheet' href='https://ssl.gstatic.com/docs/script/css/add-ons.css'><script src='https://code.jquery.com/jquery-2.1.3.min.js'></script><script src='https://cdnjs.cloudflare.com/ajax/libs/mustache.js/0.8.1/mustache.min.js'></script><style>.collapse{  font-size: 20px;  display:block;}.collapse + input{  display:none;}.collapse + input + *{  display:none;}.collapse+ input:checked + *{  display:block;}</style><div align='right'>    <input type='button' value='Refresh' onclick='google.script.run.showSidebar()' /></div><div id='task_queue' style='display:none'>{{#task_queues}}<div>    <label class='collapse' style='color: {{color}}' for='_{{index}}'>{{type}}</label>    <input id='_{{index}}' type='checkbox' checked='checked'>    <div>        <ul>        {{#tasks}}            <li>{{name}}</li>        {{/tasks}}        </ul>    </div></div>{{/task_queues}}</div><div id='table_of_content' style='display:none'><label class='collapse' style='color: black' for='_5'>Table of Content</label><input id='_5' type='checkbox' checked='checked'><div><ul>{{#headers}}<li id='{{toc}}'>{{text}}</li>{{/headers}}{{^headers}}Please insert a table of content in the document using insert->table of content{{/headers}}</ul></div></div><script>SB = {};SB.LEVEL = 3;SB.buildTaskQueue = function (result) {    var taskQueue = document.getElementById('task_queue');    var content = JSON.parse(result);    taskQueue.innerHTML = Mustache.to_html(taskQueue.innerHTML, content);    taskQueue.style.display = 'block';};SB.buildToC = function (result){  var content = JSON.parse(result);  var list = document.getElementById('table_of_content');  list.innerHTML = Mustache.to_html(list.innerHTML, content);  list.style.display = 'block';};google.script.run.withSuccessHandler(SB.buildTaskQueue).getTasksString();google.script.run.withSuccessHandler(SB.buildToC).getTOCString();</script>";
 

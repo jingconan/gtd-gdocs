@@ -344,6 +344,31 @@ var app = {
   templates: {},
 };
 
+app.TOC = {};
+
+app.TOC.pullHeaders = function () {
+  var doc = DocumentApp.getActiveDocument();
+  headers = [];
+  for (var i = 0; i < doc.getNumChildren(); i++) {
+    var p = doc.getChild(i);
+    if (p.getType() == DocumentApp.ElementType.TABLE_OF_CONTENTS) {
+      var toc = p.asTableOfContents();
+      for (var ti = 0; ti < toc.getNumChildren(); ti++) {
+        var itemToc = toc.getChild(ti).asParagraph().getChild(0).asText();
+        var itemText = itemToc.getText();
+        var itemUrl = itemToc.getLinkUrl();
+	headers.push({
+	  toc: itemToc,
+	  text: itemText,
+	  url: itemUrl
+	});
+      }
+      break;
+    }
+  }
+  return {headers: headers};
+  
+};
 
 app.initTaskTable();
 
@@ -380,6 +405,10 @@ function moveTaskToDone() {
   }
   app.cleanTask('All', task);
   app.addTask('Done', task);
+}
+
+function getTOCString() {
+  return JSON.stringify(app.TOC.pullHeaders());
 }
 
 function getTasksString() {
