@@ -27,6 +27,10 @@ For more info about GTD, please read [This awesome book by David Allen](http://w
 Usage
 -----
 
+Here is an [example doc](https://docs.google.com/document/d/18dowuhhSB5kajFRbJpmm7efWjU3V4AxYkuWMqhObPeI/edit?usp=sharing), you can copy it to a new document and start to play.
+
+If you want to configure by yourself, here are the steps:
+
  1. Create a new google document.
  2. Click *Tools->Script Editor...*
  3. Click Blank Project.
