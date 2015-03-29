@@ -30,7 +30,7 @@ Usage
  1. Create a new google document.
  2. Click *Tools->Script Editor...*
  3. Click Blank Project.
- 4. Paste the code in script.js to the window.
+ 4. Paste the code in *build/compiled_script.js* to the window.
  5. Choose and *onOpen* function and click run in the toolbar.
  6. You can click *GTD->insert date* to insert a timestamp
  7. Add you description of task just after the timestamp (there is no empty line between timestamp and the description. )

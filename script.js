@@ -79,25 +79,24 @@ var app = {
   },
   
   getSideBarTableContent: function() {
-    var res = [];
-    res.push('<div>');
-    var i, j, colName, tasks;
+    var i, j, tasks, thisTasks;
+    var res = {
+        task_queues: [],
+    };
     for (i = 0; i < this.header.length; ++i) {
-      // set table header
-      res.push('<div style="color:' + this.headerColor[i] + '";>')
-      res.push(this.header[i]);
-      res.push('</div>');
-      
-      // set tasks
-      tasks = this.getAllTasksFromCol(i);
-      res.push('<ul>');
-      for (j = 0; j < tasks.length; ++j) {
-        res.push('<li>' + tasks[j] + '</li>');
-      }
-      res.push('</ul>');
+        tasks = this.getAllTasksFromCol(i);
+        thisTasks = [];
+        for (j = 0; j < tasks.length; ++j) {
+            thisTasks.push({name: tasks[j]});
+        }
+        res.task_queues.push({
+            index: (i + 1).toString(),
+            type: this.header[i],
+            color: this.headerColor[i],
+            tasks: thisTasks
+        });
     }
-    res.push('</div>');
-    return res.join('\n');
+    return res;
   },
   
   getColIdx: function(name) {
@@ -342,8 +341,7 @@ var app = {
   header: ['Actionable', 'Waiting For', 'Done'],
   headerColor: ['#ff0000', '#9d922e', '#16a031'], 
   defaultRows: 1,
-
-
+  templates: {},
 };
 
 
@@ -386,12 +384,13 @@ function moveTaskToDone() {
 
 
 function showSidebar() {
-  var htmlContent = '<div align="right"><input type="button" value="Refresh" onclick="google.script.run.showSidebar()" /></div>';
-  var html = HtmlService.createHtmlOutput(htmlContent)
+  var sidebarHTML = Mustache.to_html(app.templates.sidebar, app.getSideBarTableContent());
+  // debug(JSON.stringify(app.getSideBarTableContent()));
+  // debug(sidebarHTML);
+  var html = HtmlService.createHtmlOutput(sidebarHTML)
       .setSandboxMode(HtmlService.SandboxMode.IFRAME)
       .setTitle('My task list')
-      .setWidth(300)
-      .append(app.getSideBarTableContent());
+      .setWidth(300);
       
   DocumentApp.getUi() // Or DocumentApp or FormApp.
       .showSidebar(html);
