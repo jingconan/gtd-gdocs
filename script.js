@@ -382,12 +382,12 @@ function moveTaskToDone() {
   app.addTask('Done', task);
 }
 
+function getTasksString() {
+    return JSON.stringify(app.getSideBarTableContent());
+}
 
 function showSidebar() {
-  var sidebarHTML = Mustache.to_html(app.templates.sidebar, app.getSideBarTableContent());
-  // debug(JSON.stringify(app.getSideBarTableContent()));
-  // debug(sidebarHTML);
-  var html = HtmlService.createHtmlOutput(sidebarHTML)
+  var html = HtmlService.createHtmlOutput(app.templates.sidebar)
       .setSandboxMode(HtmlService.SandboxMode.IFRAME)
       .setTitle('My task list')
       .setWidth(300);
