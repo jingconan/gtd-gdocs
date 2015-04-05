@@ -1,4 +1,7 @@
-GTD.Task = {};
+GTD.Task = {
+    CONTENT_ROW: 1,
+    SIZE: [2, 4]
+};
 
 GTD.Task.createNewTask = function(name) {
     var body = DocumentApp.getActiveDocument().getBody(),
@@ -17,6 +20,7 @@ GTD.Task.addThreadHeader = function( name) {
     var subTaskStatus = this.subTasksDone + '/' + this.subTasksTotal;
 
     var headerTable = GTD.util.insertTableAtCursor([
+        ['Timestamp', 'Name', 'Status', 'Subtasks'],
         [currentTime, name, taskStatus, subTaskStatus],
     ]);
 
@@ -24,10 +28,7 @@ GTD.Task.addThreadHeader = function( name) {
     var taskColor = GTD.headerColor[this.status];
     headerTable.editAsText().setForegroundColor(taskColor);
 
-    var i;
-    for (i = 0; i < 4; ++i) {
-        headerTable.getCell(0, i).setBackgroundColor('#dde4e6');
-    }
+    this.setBackgroundColor(headerTable, '#dde4e6');
 
     GTD.util.setCursorAfterTable(headerTable);
 
@@ -81,4 +82,31 @@ GTD.Task.getTaskThreadHeader = function() {
     return;
  }
  return ele;
+};
+
+
+GTD.Task.setBackgroundColor = function(headerTable, color) {
+    var i, j;
+    for (i = 0; i < this.SIZE[0]; ++i) {
+        for (j = 0; j < this.SIZE[1]; ++j) {
+            // headerTable.getCell(0, i).setBackgroundColor('#dde4e6');
+            headerTable.getCell(i, j).setBackgroundColor(color);
+        }
+    }
+
+}
+
+GTD.Task.setThreadHeaderStatus = function(threadHeader, status) {
+
+    // Change color
+    var colIdx = GTD.getColIdx(status);
+    var color = GTD.headerColor[colIdx];
+    threadHeader.editAsText().setForegroundColor(color);
+
+    // Change text
+    threadHeader.getCell(this.CONTENT_ROW, 2).setText(status);
+};
+
+GTD.Task.getTaskDesc = function(threadHeader) {
+    return threadHeader.getCell(this.CONTENT_ROW, 0).getText() + '\n' + threadHeader.getCell(0, 1).getText();
 }

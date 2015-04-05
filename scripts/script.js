@@ -196,10 +196,8 @@ GTD.getTimeStamp = function(s) {
 // this function returns the task under cursor
 GTD.getSelectedTask = function(type) {
     var taskHeader = GTD.Task.getTaskThreadHeader();
-    var colIdx = this.getColIdx(type);
-    taskHeader.editAsText().setForegroundColor(this.headerColor[colIdx]);
-    taskHeader.getCell(0, 2).setText(type);
-    return taskHeader.getCell(0, 0).getText() + '\n' + taskHeader.getCell(0, 1).getText();
+    GTD.Task.setThreadHeaderStatus(taskHeader, type);
+    return GTD.Task.getTaskDesc(taskHeader);
 };
 
 GTD.appendLogEntry = function() {
