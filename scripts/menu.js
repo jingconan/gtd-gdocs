@@ -50,18 +50,17 @@ function initTaskFunction() {
 }
 
 function createActionableTask() {
-  var task = GTD.getSelectedTask();
+  var task = GTD.getSelectedTask('Actionable');
   if (!task) {
     DocumentApp.getUi().alert('cannot find task name');
     return;
   }
-  //debug('task name: ' + task);
   GTD.cleanTask('All', task);
   GTD.addTask('Actionable', task);
 }
 
 function moveTaskToWaitingFor() {
-  var task = GTD.getSelectedTask();
+  var task = GTD.getSelectedTask('Waiting For');
   if (!task) {
     DocumentApp.getUi().alert('cannot find task name');
     return;
@@ -71,7 +70,7 @@ function moveTaskToWaitingFor() {
 }
 
 function moveTaskToDone() {
-  var task = GTD.getSelectedTask();
+  var task = GTD.getSelectedTask('Done');
   if (!task) {
     DocumentApp.getUi().alert('cannot find task name');
     return;

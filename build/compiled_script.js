@@ -239,7 +239,7 @@ GTD.addTask = function(type, taskName) {
         cell = this.taskTable.getCell(this.taskTable.getNumRows() - 1, this.getColIdx(type));
     }
     cell.setText(taskName);
-    this.setTaskColor(type, taskName);
+    // this.setTaskColor(type, taskName);
 };
 
 GTD.moveTask = function(from, to, taskName) {
@@ -322,16 +322,52 @@ GTD.selectBackwardToTimestamp = function() {
     return selectTexts.join('\n');
 };
 
+GTD.getTaskHeader = function() {
+ var cursor = DocumentApp.getActiveDocument().getCursor();
+ if (!cursor) {
+    debug('no cursor');
+    return;
+ }
+ var ele = cursor.getElement();
+ if (ele.getType() === DocumentApp.ElementType.TEXT) {
+    ele = ele.getParent();
+ }
+ if (ele.getType() === DocumentApp.ElementType.PARAGRAPH) {
+    ele = ele.getParent();
+ }
+ if (ele.getType() === DocumentApp.ElementType.TABLE_CELL) {
+    ele = ele.getParent();
+ }
+ if (ele.getType() === DocumentApp.ElementType.TABLE_ROW) {
+    ele = ele.getParent();
+ }
+ if (!ele || ele.getType() != DocumentApp.ElementType.TABLE) {
+    DocumentApp.getUi().alert('Cannot find task header under cursor! ele.type: ' + ele.getType());
+    return;
+ }
+ return ele;
+ // debug('ele, ' + ele);
+ // var time = ele.getPreviousSibling().editAsText().getText();
+ // var taskName = ele.editAsText().getText();
+ // return  time + '\n' + taskName;
+
+}
+
 
 // this function returns the selected task
 // if any text is selected, the function will return the selected text
 // else the function will return the surrounding text of current cursor.
-GTD.getSelectedTask = function() {
-    var selectedText = this.getCurrentSelection();
-    if (selectedText.length > 0) {
-        return selectedText;
-    }
-    return this.selectBackwardToTimestamp();
+GTD.getSelectedTask = function(type) {
+    // var selectedText = this.getCurrentSelection();
+    // if (selectedText.length > 0) {
+    //     return selectedText;
+    // }
+    // return this.getTaskNameFromHeader();
+    var taskHeader = this.getTaskHeader();
+    var colIdx = this.getColIdx(type);
+    taskHeader.editAsText().setForegroundColor(this.headerColor[colIdx]);
+    taskHeader.getCell(0, 2).setText(type);
+    return taskHeader.getCell(0, 0).getText() + '\n' + taskHeader.getCell(0, 1).getText();
 };
 
 GTD.appendLogEntry = function() {
@@ -534,18 +570,17 @@ function initTaskFunction() {
 }
 
 function createActionableTask() {
-  var task = GTD.getSelectedTask();
+  var task = GTD.getSelectedTask('Actionable');
   if (!task) {
     DocumentApp.getUi().alert('cannot find task name');
     return;
   }
-  //debug('task name: ' + task);
   GTD.cleanTask('All', task);
   GTD.addTask('Actionable', task);
 }
 
 function moveTaskToWaitingFor() {
-  var task = GTD.getSelectedTask();
+  var task = GTD.getSelectedTask('Waiting For');
   if (!task) {
     DocumentApp.getUi().alert('cannot find task name');
     return;
@@ -555,7 +590,7 @@ function moveTaskToWaitingFor() {
 }
 
 function moveTaskToDone() {
-  var task = GTD.getSelectedTask();
+  var task = GTD.getSelectedTask('Done');
   if (!task) {
     DocumentApp.getUi().alert('cannot find task name');
     return;
