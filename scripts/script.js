@@ -183,58 +183,10 @@ GTD.appendRow = function(rowContent) {
     return this
 };
 
-GTD.getCurrentSelection = function() {
-    var res = '';
-    var selection = DocumentApp.getActiveDocument().getSelection();
-    if (selection) {
-        var elements = selection.getRangeElements();
-        for (var i = 0; i < elements.length; i++) {
-            var element = elements[i];
-
-            // Only get text from elements that can be edited as text; skip images and other non-text elements.
-            if (element.getElement().editAsText) {
-                var text = element.getElement().editAsText();
-
-                // Bold the selected part of the element, or the full element if it's completely selected.
-                if (element.isPartial()) {
-                    res += text.getText().slice(element.getStartOffset(), element.getEndOffsetInclusive() + 1);
-                } else {
-                    res += text.getText();
-                }
-            }
-        }
-    }
-    return res;
-};
 
 GTD.getTimeStamp = function(s) {
     //FIXME now it only checks brackets
     return s.split(']')[0].split('[')[1];
-};
-
-GTD.selectBackwardToTimestamp = function() {
-    var cursor = DocumentApp.getActiveDocument().getCursor();
-    if (!cursor) {
-        return;
-    }
-    var ele = cursor.getElement();
-    var selectTexts = [], text, i;
-    if (ele.getType() === DocumentApp.ElementType.TEXT) {
-        ele = ele.getParent();
-    }
-    if (ele.getType() === DocumentApp.ElementType.PARAGRAPH) {
-        for (i = 0; i < 10 && ele; ++i) {
-            text = ele.asText().getText();
-            if (typeof this.getTimeStamp(text) !== 'undefined') {
-                selectTexts.push(text);          
-                break;
-            }
-            selectTexts.push(text);
-            ele = ele.getPreviousSibling();    
-        } 
-    }
-    selectTexts.reverse();
-    return selectTexts.join('\n');
 };
 
 GTD.getTaskHeader = function() {
@@ -261,23 +213,11 @@ GTD.getTaskHeader = function() {
     return;
  }
  return ele;
- // debug('ele, ' + ele);
- // var time = ele.getPreviousSibling().editAsText().getText();
- // var taskName = ele.editAsText().getText();
- // return  time + '\n' + taskName;
-
 }
 
 
-// this function returns the selected task
-// if any text is selected, the function will return the selected text
-// else the function will return the surrounding text of current cursor.
+// this function returns the task under cursor
 GTD.getSelectedTask = function(type) {
-    // var selectedText = this.getCurrentSelection();
-    // if (selectedText.length > 0) {
-    //     return selectedText;
-    // }
-    // return this.getTaskNameFromHeader();
     var taskHeader = this.getTaskHeader();
     var colIdx = this.getColIdx(type);
     taskHeader.editAsText().setForegroundColor(this.headerColor[colIdx]);
