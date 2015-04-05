@@ -19,13 +19,12 @@ GTD.toISO = function(date) {
     // Format integers to have at least two digits.
     return n < 10 ? '0' + n : n;
   }
-  return '[' + date.getFullYear()   + '-' +
+  return date.getFullYear()   + '-' +
        f(date.getMonth() + 1) + '-' +
        f(date.getDate())      + ' ' +
        f(date.getHours())     + ':' +
        f(date.getMinutes())   + ':' +
-       f(date.getSeconds())   + '' + 
-       ']';
+       f(date.getSeconds());
 }
 
 if (typeof String.prototype.startsWith != 'function') {
@@ -62,4 +61,13 @@ GTD.setCursorAfterTable = function(table) {
     var doc = DocumentApp.getActiveDocument();
     var position = doc.newPosition(table, table.getNumChildren());
     doc.setCursor(position);
+
+    // Change the text color back to default color
+    var cursor = DocumentApp.getActiveDocument().getCursor();
+    var text = cursor.insertText('\n');
+    if (text) {
+        text.setForegroundColor('#000000');
+    }
+
+
 };

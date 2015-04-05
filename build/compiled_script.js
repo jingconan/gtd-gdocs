@@ -29,13 +29,12 @@ GTD.toISO = function(date) {
     // Format integers to have at least two digits.
     return n < 10 ? '0' + n : n;
   }
-  return '[' + date.getFullYear()   + '-' +
+  return date.getFullYear()   + '-' +
        f(date.getMonth() + 1) + '-' +
        f(date.getDate())      + ' ' +
        f(date.getHours())     + ':' +
        f(date.getMinutes())   + ':' +
-       f(date.getSeconds())   + '' + 
-       ']';
+       f(date.getSeconds());
 }
 
 if (typeof String.prototype.startsWith != 'function') {
@@ -72,6 +71,15 @@ GTD.setCursorAfterTable = function(table) {
     var doc = DocumentApp.getActiveDocument();
     var position = doc.newPosition(table, table.getNumChildren());
     doc.setCursor(position);
+
+    // Change the text color back to default color
+    var cursor = DocumentApp.getActiveDocument().getCursor();
+    var text = cursor.insertText('\n');
+    if (text) {
+        text.setForegroundColor('#000000');
+    }
+
+
 };
 
 
@@ -419,9 +427,17 @@ GTD.Task.addHeader = function( name) {
         [currentTime, name, taskStatus, subTaskStatus],
     ]);
 
+    // set table color
     var taskColor = GTD.headerColor[this.status];
-    headerTable.getCell(0, 2).editAsText().setForegroundColor(taskColor);
+    headerTable.editAsText().setForegroundColor(taskColor);
+
+    var i;
+    for (i = 0; i < 4; ++i) {
+        headerTable.getCell(0, i).setBackgroundColor('#dde4e6');
+    }
+
     GTD.setCursorAfterTable(headerTable);
+
 };
 
 // GTD.Task.addBody = function(cell) {
@@ -431,7 +447,19 @@ GTD.Task.addHeader = function( name) {
 // };
 
 GTD.Task.insertComment = function() {
-    var table = GTD.insertTableAtCursor([['JW', '']]);
+    var user = Session.getActiveUser().getEmail().split("@")[0];
+    var currentTime = GTD.toISO(new Date());
+    var table = GTD.insertTableAtCursor([[user + '\n' + currentTime, '']]);
+
+    var text = table.getCell(0, 0).editAsText();
+    text.setFontSize(user.length+1, text.getText().length-1, 7);
+
+    var width = Math.max(11 * user.length, 80);
+    table.getCell(0, 0)
+        .setWidth(width)
+        .setBackgroundColor('#dde4e6');
+    table.getCell(0, 1)
+        .setBackgroundColor('#f7f7f7');
     GTD.setCursorAfterTable(table);
 }
 
