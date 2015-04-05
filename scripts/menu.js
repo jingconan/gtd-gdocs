@@ -4,12 +4,17 @@ function onOpen() {
   ui.createMenu('GTD')
       .addItem('insert date', 'insertDate')
       .addItem('insert task', 'insertTask')
+      .addItem('insert comment', 'insertComment')
       .addItem('create task table', 'initTaskFunction')
       .addItem('move to Actionable', 'createActionableTask')
       .addItem('move to WaitingFor', 'moveTaskToWaitingFor')
       .addItem('move to Done', 'moveTaskToDone')
       .addItem('show task sidebar', 'showSidebar')
       .addToUi();
+}
+
+function insertComment() {
+    GTD.insertComment();
 }
 
 function insertTask() {

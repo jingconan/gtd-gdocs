@@ -35,3 +35,15 @@ if (typeof String.prototype.startsWith != 'function') {
   };
 }
 
+
+GTD.appendTableInTableCell = function(cell, subCells) {
+    //add a blank paragraph. Required because of a bug in app script.
+    //See
+    //https://code.google.com/p/google-apps-script-issues/issues/detail?id=894
+    cell.appendParagraph(""); 
+    if (subCells) {
+        return cell.insertTable(1, subCells);
+    } else {
+        return cell.insertTable(1);
+    }
+};

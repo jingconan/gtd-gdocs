@@ -340,12 +340,8 @@ GTD.Task.addHeader = function(cell, name) {
     var taskStatus = GTD.header[this.status];
     var subTaskStatus = this.subTasksDone + '/' + this.subTasksTotal;
 
-    //add a blank paragraph. Required because of a bug in app script.
-    //See
-    //https://code.google.com/p/google-apps-script-issues/issues/detail?id=894
-    cell.appendParagraph(""); 
-    var headerTable = cell.insertTable(1, [
-    [currentTime, name, taskStatus, subTaskStatus],
+    var headerTable = GTD.appendTableInTableCell(cell, [
+        [currentTime, name, taskStatus, subTaskStatus],
     ]);
 
     var taskColor = GTD.headerColor[this.status];
@@ -358,9 +354,32 @@ GTD.Task.addBody = function(cell) {
     doc.setCursor(position);
 };
 
+GTD.Task.insertComment = function() {
+    var document = DocumentApp.getActiveDocument();
+    var body = document.getBody();
+
+    var cursor = document.getCursor();
+    var ele = cursor.getElement();
+    debug('ele:' + ele);
+    var index = body.getChildIndex(ele); 
+    debug('index:' + index);
+    body.insertTable(index, [['JW', '']]);
+
+    // if (!ele || ele.getType() !== DocumentApp.ElementType.TABLE_CELL) {
+    //     debug('ele.type: ' + ele.getType());
+    //     return;
+    // }
+    // var cell = ele.asTableCell();
+    // GTD.appendTableInTableCell(cell, [['JW', '']]);
+}
+
 GTD.insertTask = function(name) {
     GTD.Task.createNewTask(name);
 };
+
+GTD.insertComment = function() {
+    GTD.Task.insertComment();
+}
 
 GTD.initTaskTable();
 
