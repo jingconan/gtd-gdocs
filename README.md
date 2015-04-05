@@ -18,7 +18,7 @@ With this google app script, you can turn any google doc to a GTD system. It add
 3. **move to Actionable**. After you put your cursor in the brief description of a task, or you select the timestamp & brief description, you can click this menu to add the task to the "Actionable" queue. 
 4. **move to Waiting For**. Move a task to "Waiting For" queue.
 5. **move to Done**. Move a task to "Done" queue.
-6. **show task sidebar**. It will show a sidebar that displays all the tasks and their timestamps. If you want to navigate to a task, just search the timestamp (by pressing Ctrl+f). You can hide/unhide tasks by clicking the 'Actionable', 'Waiting For' and 'Done'. If your document body has a table of content, it will also be displayed in the side bar to faciliate navigation.
+6. **show task sidebar**. It will show a sidebar that displays all the tasks.
 
 Another useful trick is that when you document becomes very long, you can press Ctrl+f and then input the timestamp to switch conveniently between the task table and the context of the task. 
 
