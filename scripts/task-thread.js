@@ -12,11 +12,11 @@ GTD.Task.createNewTask = function(name) {
 };
 
 GTD.Task.addHeader = function( name) {
-    var currentTime = GTD.toISO(new Date());
+    var currentTime = GTD.util.toISO(new Date());
     var taskStatus = GTD.header[this.status];
     var subTaskStatus = this.subTasksDone + '/' + this.subTasksTotal;
 
-    var headerTable = GTD.insertTableAtCursor([
+    var headerTable = GTD.util.insertTableAtCursor([
         [currentTime, name, taskStatus, subTaskStatus],
     ]);
 
@@ -29,7 +29,7 @@ GTD.Task.addHeader = function( name) {
         headerTable.getCell(0, i).setBackgroundColor('#dde4e6');
     }
 
-    GTD.setCursorAfterTable(headerTable);
+    GTD.util.setCursorAfterTable(headerTable);
 
 };
 
@@ -41,7 +41,7 @@ GTD.Task.addHeader = function( name) {
 
 GTD.Task.insertComment = function() {
     var user = Session.getActiveUser().getEmail().split("@")[0];
-    var currentTime = GTD.toISO(new Date());
+    var currentTime = GTD.util.toISO(new Date());
     var table = GTD.insertTableAtCursor([[user + '\n' + currentTime, '']]);
 
     var text = table.getCell(0, 0).editAsText();

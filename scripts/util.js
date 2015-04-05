@@ -1,5 +1,7 @@
 // This file contails all the utility functions
 
+GTD.util = {};
+
 function assert(condition, message) {
     if (!condition) {
         message = message || "Assertion failed";
@@ -14,7 +16,7 @@ function debug(s) {
   DocumentApp.getActiveDocument().getBody().appendParagraph(s);
 }
 
-GTD.toISO = function(date) {
+GTD.util.toISO = function(date) {
   function f(n) {
     // Format integers to have at least two digits.
     return n < 10 ? '0' + n : n;
@@ -35,7 +37,7 @@ if (typeof String.prototype.startsWith != 'function') {
 }
 
 
-GTD.appendTableInTableCell = function(cell, subCells) {
+GTD.util.appendTableInTableCell = function(cell, subCells) {
     //add a blank paragraph. Required because of a bug in app script.
     //See
     //https://code.google.com/p/google-apps-script-issues/issues/detail?id=894
@@ -47,7 +49,7 @@ GTD.appendTableInTableCell = function(cell, subCells) {
     }
 };
 
-GTD.insertTableAtCursor = function(cells) {
+GTD.util.insertTableAtCursor = function(cells) {
     var document = DocumentApp.getActiveDocument();
     var body = document.getBody();
 
@@ -57,7 +59,7 @@ GTD.insertTableAtCursor = function(cells) {
     return body.insertTable(index, cells);
 };
 
-GTD.setCursorAfterTable = function(table) {
+GTD.util.setCursorAfterTable = function(table) {
     var doc = DocumentApp.getActiveDocument();
     var position = doc.newPosition(table, table.getNumChildren());
     doc.setCursor(position);

@@ -10,6 +10,8 @@ var GTD = {
 
 // This file contails all the utility functions
 
+GTD.util = {};
+
 function assert(condition, message) {
     if (!condition) {
         message = message || "Assertion failed";
@@ -24,7 +26,7 @@ function debug(s) {
   DocumentApp.getActiveDocument().getBody().appendParagraph(s);
 }
 
-GTD.toISO = function(date) {
+GTD.util.toISO = function(date) {
   function f(n) {
     // Format integers to have at least two digits.
     return n < 10 ? '0' + n : n;
@@ -45,7 +47,7 @@ if (typeof String.prototype.startsWith != 'function') {
 }
 
 
-GTD.appendTableInTableCell = function(cell, subCells) {
+GTD.util.appendTableInTableCell = function(cell, subCells) {
     //add a blank paragraph. Required because of a bug in app script.
     //See
     //https://code.google.com/p/google-apps-script-issues/issues/detail?id=894
@@ -57,7 +59,7 @@ GTD.appendTableInTableCell = function(cell, subCells) {
     }
 };
 
-GTD.insertTableAtCursor = function(cells) {
+GTD.util.insertTableAtCursor = function(cells) {
     var document = DocumentApp.getActiveDocument();
     var body = document.getBody();
 
@@ -67,7 +69,7 @@ GTD.insertTableAtCursor = function(cells) {
     return body.insertTable(index, cells);
 };
 
-GTD.setCursorAfterTable = function(table) {
+GTD.util.setCursorAfterTable = function(table) {
     var doc = DocumentApp.getActiveDocument();
     var position = doc.newPosition(table, table.getNumChildren());
     doc.setCursor(position);
@@ -97,11 +99,11 @@ GTD.Task.createNewTask = function(name) {
 };
 
 GTD.Task.addHeader = function( name) {
-    var currentTime = GTD.toISO(new Date());
+    var currentTime = GTD.util.toISO(new Date());
     var taskStatus = GTD.header[this.status];
     var subTaskStatus = this.subTasksDone + '/' + this.subTasksTotal;
 
-    var headerTable = GTD.insertTableAtCursor([
+    var headerTable = GTD.util.insertTableAtCursor([
         [currentTime, name, taskStatus, subTaskStatus],
     ]);
 
@@ -114,7 +116,7 @@ GTD.Task.addHeader = function( name) {
         headerTable.getCell(0, i).setBackgroundColor('#dde4e6');
     }
 
-    GTD.setCursorAfterTable(headerTable);
+    GTD.util.setCursorAfterTable(headerTable);
 
 };
 
@@ -126,7 +128,7 @@ GTD.Task.addHeader = function( name) {
 
 GTD.Task.insertComment = function() {
     var user = Session.getActiveUser().getEmail().split("@")[0];
-    var currentTime = GTD.toISO(new Date());
+    var currentTime = GTD.util.toISO(new Date());
     var table = GTD.insertTableAtCursor([[user + '\n' + currentTime, '']]);
 
     var text = table.getCell(0, 0).editAsText();
