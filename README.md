@@ -13,12 +13,21 @@ With GTD, you will be able to focus on what you can do and do it "worry-free".
 
 With this google app script, you can turn any google doc to a GTD system. It adds the following menus to google docs:
 
-1. **insert date**. it can insert an ISO format date after the current cursor. Every small task begins with a date, which is also used as an unique identifier of the task. The first line after the date is a brief description of the task. After that you can put any information (context) related to this task. There should be a empty line between the brief description and the context.
-2. **create task table**. It will create a table with three columns. The first column stores all the "Actionable" tasks, the second column stores all the "Waiting For" tasks, the third column stores all the "Done" tasks. 
-3. **move to Actionable**. After you put your cursor in the brief description of a task, or you select the timestamp & brief description, you can click this menu to add the task to the "Actionable" queue. 
-4. **move to Waiting For**. Move a task to "Waiting For" queue.
-5. **move to Done**. Move a task to "Done" queue.
-6. **show task sidebar**. It will show a sidebar that displays all the tasks and their timestamps. If you want to navigate to a task, just search the timestamp (by pressing Ctrl+f). You can hide/unhide tasks by clicking the 'Actionable', 'Waiting For' and 'Done'. If your document body has a table of content, it will also be displayed in the side bar to faciliate navigation.
+1. **insert task**. There will be a popup asking you the name of the
+task. After you click okay button, it will insert a table showing the
+information related to this task. Right now, the first cell display the
+timestamp you create this task, the second cell is a short description,
+the third cell is the status, the last cell is the # of subtasks (the
+functionality of subtasks will be implemented later). 
+2. **insert comment** You can put any information (context) related to
+this task as a comment. The left part of the comment display your user
+id and the timestamp you create this comment, and you can write your
+comment in the right part.
+3. **create task table**. It will create a table with three columns. The first column stores all the "Actionable" tasks, the second column stores all the "Waiting For" tasks, the third column stores all the "Done" tasks. 
+4. **move to Actionable**. After you put your cursor in the brief description of a task, or you select the timestamp & brief description, you can click this menu to add the task to the "Actionable" queue. 
+5. **move to Waiting For**. Move a task to "Waiting For" queue.
+6. **move to Done**. Move a task to "Done" queue.
+7. **show task sidebar**. It will show a sidebar that displays all the tasks and their timestamps. If you want to navigate to a task, just search the timestamp (by pressing Ctrl+f). You can hide/unhide tasks by clicking the 'Actionable', 'Waiting For' and 'Done'. If your document body has a table of content, it will also be displayed in the side bar to faciliate navigation.
 
 Another useful trick is that when you document becomes very long, you can press Ctrl+f and then input the timestamp to switch conveniently between the task table and the context of the task. 
 
@@ -47,7 +56,7 @@ If you want to configure by yourself, here are the steps:
 
 Screen Shot
 ------------
-![screen shot gtd-docs](https://cloud.githubusercontent.com/assets/522201/6548740/046c06cc-c5c0-11e4-8d8a-ceea787e1cf8.png)
+![image](https://cloud.githubusercontent.com/assets/522201/6998601/6fccba50-db9c-11e4-8f6d-ea1a1ef71377.png)
 
 
 

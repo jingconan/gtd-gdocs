@@ -2,7 +2,7 @@ function onOpen() {
   var ui = DocumentApp.getUi();
   // Or DocumentApp or FormApp.
   ui.createMenu('GTD')
-      .addItem('insert date', 'insertDate')
+      // .addItem('insert date', 'insertDate')
       .addItem('insert task', 'insertTask')
       .addItem('insert comment', 'insertComment')
       .addItem('create task table', 'initTaskFunction')
