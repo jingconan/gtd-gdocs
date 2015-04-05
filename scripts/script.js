@@ -6,6 +6,9 @@
 //
 // This code is under GPL license. 
 
+
+// FIXME need to factor the script.js to several smaller files
+
 GTD.initTaskTable = function() {
     var tables = this.body.getTables();
     var taskTable;
