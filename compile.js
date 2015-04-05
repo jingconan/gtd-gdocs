@@ -35,7 +35,7 @@ function concat_template() {
         key = path.basename(filepath, '.html');
         var templateCode = fs.readFileSync(filepath).toString();
         template = templateCode.replace(/\n/g, '').replace(/\"/g, '\'');
-        code += ("app.templates." + key + " = \"" + template + "\";\n\n");
+        code += ("GTD.templates." + key + " = \"" + template + "\";\n\n");
     }
 
     filepath = 'build/compiled_script.js';

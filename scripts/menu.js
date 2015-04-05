@@ -20,42 +20,42 @@ function insertDate() {
 }
 
 function initTaskFunction() {
-  app.initTaskTable();
+  GTD.initTaskTable();
 }
 
 function createActionableTask() {
-  var task = app.getSelectedTask();
+  var task = GTD.getSelectedTask();
   if (!task) {
     DocumentApp.getUi().alert('cannot find task name');
     return;
   }
   //debug('task name: ' + task);
-  app.cleanTask('All', task);
-  app.addTask('Actionable', task);
+  GTD.cleanTask('All', task);
+  GTD.addTask('Actionable', task);
 }
 
 function moveTaskToWaitingFor() {
-  var task = app.getSelectedTask();
+  var task = GTD.getSelectedTask();
   if (!task) {
     DocumentApp.getUi().alert('cannot find task name');
     return;
   }
-  app.cleanTask('All', task);
-  app.addTask('Waiting For', task);
+  GTD.cleanTask('All', task);
+  GTD.addTask('Waiting For', task);
 }
 
 function moveTaskToDone() {
-  var task = app.getSelectedTask();
+  var task = GTD.getSelectedTask();
   if (!task) {
     DocumentApp.getUi().alert('cannot find task name');
     return;
   }
-  app.cleanTask('All', task);
-  app.addTask('Done', task);
+  GTD.cleanTask('All', task);
+  GTD.addTask('Done', task);
 }
 
 function showSidebar() {
-  var html = HtmlService.createHtmlOutput(app.templates.sidebar)
+  var html = HtmlService.createHtmlOutput(GTD.templates.sidebar)
       .setSandboxMode(HtmlService.SandboxMode.IFRAME)
       .setTitle('My task list')
       .setWidth(300);
