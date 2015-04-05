@@ -69,9 +69,21 @@ GTD.util.insertTableAtCursor = function(cells) {
     return body.insertTable(index, cells);
 };
 
-GTD.util.setCursorAfterTable = function(table) {
+GTD.util.setCursorAtTable = function(table, offset) {
     var doc = DocumentApp.getActiveDocument();
-    var position = doc.newPosition(table, table.getNumChildren());
+
+    var position;
+    if (offset !== undefined && offset.length !== undefined) {
+        assert(offset.length == 2, 'unknow offset');
+        var cell = table.getCell(offset[0], offset[1]);
+        position = doc.newPosition(cell, 0);
+    } else {
+        if (offset === 'end' || offset === undefined) {
+            offset = table.getNumChildren();
+        }
+        position = doc.newPosition(table, offset);
+
+    }
     doc.setCursor(position);
 
     // Change the text color back to default color
@@ -121,7 +133,7 @@ GTD.Task.addThreadHeader = function( name) {
 
     this.setBackgroundColor(headerTable, '#dde4e6');
 
-    GTD.util.setCursorAfterTable(headerTable);
+    GTD.util.setCursorAtTable(headerTable);
 
 };
 
@@ -152,7 +164,7 @@ GTD.Task.insertComment = function() {
         .setBackgroundColor('#dde4e6');
     table.getCell(0, 1)
         .setBackgroundColor('#f7f7f7');
-    GTD.util.setCursorAfterTable(table);
+    GTD.util.setCursorAtTable(table, [0, 1]);
 }
 
 // getTaskThreadHeader returns the task thread header under the cursor

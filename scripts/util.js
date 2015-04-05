@@ -59,9 +59,21 @@ GTD.util.insertTableAtCursor = function(cells) {
     return body.insertTable(index, cells);
 };
 
-GTD.util.setCursorAfterTable = function(table) {
+GTD.util.setCursorAtTable = function(table, offset) {
     var doc = DocumentApp.getActiveDocument();
-    var position = doc.newPosition(table, table.getNumChildren());
+
+    var position;
+    if (offset !== undefined && offset.length !== undefined) {
+        assert(offset.length == 2, 'unknow offset');
+        var cell = table.getCell(offset[0], offset[1]);
+        position = doc.newPosition(cell, 0);
+    } else {
+        if (offset === 'end' || offset === undefined) {
+            offset = table.getNumChildren();
+        }
+        position = doc.newPosition(table, offset);
+
+    }
     doc.setCursor(position);
 
     // Change the text color back to default color
