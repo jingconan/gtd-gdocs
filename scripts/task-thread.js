@@ -1,6 +1,7 @@
 GTD.Task = {
     CONTENT_ROW: 1,
-    SIZE: [2, 4]
+    SIZE: [2, 4],
+    THREAD_HEADER_WIDTH: [100, 350, 70, 60]
 };
 
 GTD.Task.createNewTask = function(name) {
@@ -24,6 +25,9 @@ GTD.Task.addThreadHeader = function( name) {
         [currentTime, name, taskStatus, subTaskStatus],
     ]);
 
+    // set table column width
+    this.setColumnWidth(headerTable);
+
     // set table color
     var taskColor = GTD.headerColor[this.status];
     headerTable.editAsText().setForegroundColor(taskColor);
@@ -32,6 +36,13 @@ GTD.Task.addThreadHeader = function( name) {
 
     GTD.util.setCursorAfterTable(headerTable);
 
+};
+
+GTD.Task.setColumnWidth = function(table) {
+    var i;
+    for (i = 0; i < this.THREAD_HEADER_WIDTH.length; ++i) {
+        table.setColumnWidth(i, this.THREAD_HEADER_WIDTH[i]);
+    }
 };
 
 // GTD.Task.addBody = function(cell) {
