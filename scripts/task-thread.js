@@ -54,7 +54,7 @@ GTD.Task.setColumnWidth = function(table) {
 GTD.Task.insertComment = function() {
     var user = Session.getActiveUser().getEmail().split("@")[0];
     var currentTime = GTD.util.toISO(new Date());
-    var table = GTD.insertTableAtCursor([[user + '\n' + currentTime, '']]);
+    var table = GTD.util.insertTableAtCursor([[user + '\n' + currentTime, '']]);
 
     var text = table.getCell(0, 0).editAsText();
     text.setFontSize(user.length+1, text.getText().length-1, 7);
@@ -65,7 +65,7 @@ GTD.Task.insertComment = function() {
         .setBackgroundColor('#dde4e6');
     table.getCell(0, 1)
         .setBackgroundColor('#f7f7f7');
-    GTD.setCursorAfterTable(table);
+    GTD.util.setCursorAfterTable(table);
 }
 
 // getTaskThreadHeader returns the task thread header under the cursor

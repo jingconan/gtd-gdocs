@@ -19,20 +19,18 @@ function insertComment() {
 
 function insertTask() {
     var ui = DocumentApp.getUi();
-    GTD.insertTask('test2');
+    var result = ui.prompt(
+        'Let\'s start!',
+        'Please enter a short task description:',
+    ui.ButtonSet.OK_CANCEL);
 
-    // var result = ui.prompt(
-    //     'Let\'s start!',
-    //     'Please enter a short task description:',
-    // ui.ButtonSet.OK_CANCEL);
-
-    // var button = result.getSelectedButton();
-    // var text = result.getResponseText();
-    // if (button == ui.Button.OK) {
-    //     GTD.insertTask(text);
-    // } else {
-    //     return;
-    // }
+    var button = result.getSelectedButton();
+    var text = result.getResponseText();
+    if (button == ui.Button.OK) {
+        GTD.insertTask(text);
+    } else {
+        return;
+    }
 
 
 }
