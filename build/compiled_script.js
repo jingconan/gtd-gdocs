@@ -58,6 +58,22 @@ GTD.appendTableInTableCell = function(cell, subCells) {
     }
 };
 
+GTD.insertTableAtCursor = function(cells) {
+    var document = DocumentApp.getActiveDocument();
+    var body = document.getBody();
+
+    var cursor = document.getCursor();
+    var ele = cursor.getElement();
+    var index = body.getChildIndex(ele); 
+    return body.insertTable(index, cells);
+};
+
+GTD.setCursorAfterTable = function(table) {
+    var doc = DocumentApp.getActiveDocument();
+    var position = doc.newPosition(table, table.getNumChildren());
+    doc.setCursor(position);
+};
+
 
 // This is a google app scripts that implements a GTD work flow using
 // Google Docs. 
@@ -390,48 +406,33 @@ GTD.Task.createNewTask = function(name) {
     this.subTasksTotal = 0;
     this.subTasksDone = 0;
     
-    var headerCell = taskEle.appendTableRow().appendTableCell();
-    this.addHeader(headerCell, name);
-    var bodyCell = taskEle.appendTableRow().appendTableCell();
-    this.addBody(bodyCell);
+    this.addHeader(name);
+    // this.addBody(bodyCell);
 };
 
-GTD.Task.addHeader = function(cell, name) {
+GTD.Task.addHeader = function( name) {
     var currentTime = GTD.toISO(new Date());
     var taskStatus = GTD.header[this.status];
     var subTaskStatus = this.subTasksDone + '/' + this.subTasksTotal;
 
-    var headerTable = GTD.appendTableInTableCell(cell, [
+    var headerTable = GTD.insertTableAtCursor([
         [currentTime, name, taskStatus, subTaskStatus],
     ]);
 
     var taskColor = GTD.headerColor[this.status];
     headerTable.getCell(0, 2).editAsText().setForegroundColor(taskColor);
+    GTD.setCursorAfterTable(headerTable);
 };
 
-GTD.Task.addBody = function(cell) {
-    var doc = DocumentApp.getActiveDocument();
-    var position = doc.newPosition(cell, 0);
-    doc.setCursor(position);
-};
+// GTD.Task.addBody = function(cell) {
+//     var doc = DocumentApp.getActiveDocument();
+//     var position = doc.newPosition(cell, 0);
+//     doc.setCursor(position);
+// };
 
 GTD.Task.insertComment = function() {
-    var document = DocumentApp.getActiveDocument();
-    var body = document.getBody();
-
-    var cursor = document.getCursor();
-    var ele = cursor.getElement();
-    debug('ele:' + ele);
-    var index = body.getChildIndex(ele); 
-    debug('index:' + index);
-    body.insertTable(index, [['JW', '']]);
-
-    // if (!ele || ele.getType() !== DocumentApp.ElementType.TABLE_CELL) {
-    //     debug('ele.type: ' + ele.getType());
-    //     return;
-    // }
-    // var cell = ele.asTableCell();
-    // GTD.appendTableInTableCell(cell, [['JW', '']]);
+    var table = GTD.insertTableAtCursor([['JW', '']]);
+    GTD.setCursorAfterTable(table);
 }
 
 GTD.insertTask = function(name) {

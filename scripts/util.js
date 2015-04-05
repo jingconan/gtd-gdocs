@@ -47,3 +47,19 @@ GTD.appendTableInTableCell = function(cell, subCells) {
         return cell.insertTable(1);
     }
 };
+
+GTD.insertTableAtCursor = function(cells) {
+    var document = DocumentApp.getActiveDocument();
+    var body = document.getBody();
+
+    var cursor = document.getCursor();
+    var ele = cursor.getElement();
+    var index = body.getChildIndex(ele); 
+    return body.insertTable(index, cells);
+};
+
+GTD.setCursorAfterTable = function(table) {
+    var doc = DocumentApp.getActiveDocument();
+    var position = doc.newPosition(table, table.getNumChildren());
+    doc.setCursor(position);
+};
