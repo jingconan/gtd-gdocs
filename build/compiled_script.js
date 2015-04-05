@@ -94,11 +94,11 @@ GTD.Task.createNewTask = function(name) {
     this.subTasksTotal = 0;
     this.subTasksDone = 0;
     
-    this.addHeader(name);
+    this.addThreadHeader(name);
     // this.addBody(bodyCell);
 };
 
-GTD.Task.addHeader = function( name) {
+GTD.Task.addThreadHeader = function( name) {
     var currentTime = GTD.util.toISO(new Date());
     var taskStatus = GTD.header[this.status];
     var subTaskStatus = this.subTasksDone + '/' + this.subTasksTotal;
@@ -141,6 +141,33 @@ GTD.Task.insertComment = function() {
     table.getCell(0, 1)
         .setBackgroundColor('#f7f7f7');
     GTD.setCursorAfterTable(table);
+}
+
+// getTaskThreadHeader returns the task thread header under the cursor
+GTD.Task.getTaskThreadHeader = function() {
+ var cursor = DocumentApp.getActiveDocument().getCursor();
+ if (!cursor) {
+    debug('no cursor');
+    return;
+ }
+ var ele = cursor.getElement();
+ if (ele.getType() === DocumentApp.ElementType.TEXT) {
+    ele = ele.getParent();
+ }
+ if (ele.getType() === DocumentApp.ElementType.PARAGRAPH) {
+    ele = ele.getParent();
+ }
+ if (ele.getType() === DocumentApp.ElementType.TABLE_CELL) {
+    ele = ele.getParent();
+ }
+ if (ele.getType() === DocumentApp.ElementType.TABLE_ROW) {
+    ele = ele.getParent();
+ }
+ if (!ele || ele.getType() != DocumentApp.ElementType.TABLE) {
+    DocumentApp.getUi().alert('Cannot find task header under cursor! ele.type: ' + ele.getType());
+    return;
+ }
+ return ele;
 }
 
 
@@ -335,36 +362,10 @@ GTD.getTimeStamp = function(s) {
     return s.split(']')[0].split('[')[1];
 };
 
-GTD.getTaskHeader = function() {
- var cursor = DocumentApp.getActiveDocument().getCursor();
- if (!cursor) {
-    debug('no cursor');
-    return;
- }
- var ele = cursor.getElement();
- if (ele.getType() === DocumentApp.ElementType.TEXT) {
-    ele = ele.getParent();
- }
- if (ele.getType() === DocumentApp.ElementType.PARAGRAPH) {
-    ele = ele.getParent();
- }
- if (ele.getType() === DocumentApp.ElementType.TABLE_CELL) {
-    ele = ele.getParent();
- }
- if (ele.getType() === DocumentApp.ElementType.TABLE_ROW) {
-    ele = ele.getParent();
- }
- if (!ele || ele.getType() != DocumentApp.ElementType.TABLE) {
-    DocumentApp.getUi().alert('Cannot find task header under cursor! ele.type: ' + ele.getType());
-    return;
- }
- return ele;
-}
-
 
 // this function returns the task under cursor
 GTD.getSelectedTask = function(type) {
-    var taskHeader = this.getTaskHeader();
+    var taskHeader = GTD.Task.getTaskThreadHeader();
     var colIdx = this.getColIdx(type);
     taskHeader.editAsText().setForegroundColor(this.headerColor[colIdx]);
     taskHeader.getCell(0, 2).setText(type);

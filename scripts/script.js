@@ -189,36 +189,10 @@ GTD.getTimeStamp = function(s) {
     return s.split(']')[0].split('[')[1];
 };
 
-GTD.getTaskHeader = function() {
- var cursor = DocumentApp.getActiveDocument().getCursor();
- if (!cursor) {
-    debug('no cursor');
-    return;
- }
- var ele = cursor.getElement();
- if (ele.getType() === DocumentApp.ElementType.TEXT) {
-    ele = ele.getParent();
- }
- if (ele.getType() === DocumentApp.ElementType.PARAGRAPH) {
-    ele = ele.getParent();
- }
- if (ele.getType() === DocumentApp.ElementType.TABLE_CELL) {
-    ele = ele.getParent();
- }
- if (ele.getType() === DocumentApp.ElementType.TABLE_ROW) {
-    ele = ele.getParent();
- }
- if (!ele || ele.getType() != DocumentApp.ElementType.TABLE) {
-    DocumentApp.getUi().alert('Cannot find task header under cursor! ele.type: ' + ele.getType());
-    return;
- }
- return ele;
-}
-
 
 // this function returns the task under cursor
 GTD.getSelectedTask = function(type) {
-    var taskHeader = this.getTaskHeader();
+    var taskHeader = GTD.Task.getTaskThreadHeader();
     var colIdx = this.getColIdx(type);
     taskHeader.editAsText().setForegroundColor(this.headerColor[colIdx]);
     taskHeader.getCell(0, 2).setText(type);
