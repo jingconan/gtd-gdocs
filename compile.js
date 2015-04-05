@@ -9,6 +9,7 @@ fs = require('fs');
 var scriptFilePaths = [
     "scripts/namespace.js",
     "scripts/util.js",
+    "scripts/task-thread.js",
     "scripts/script.js",
     "scripts/menu.js"
 ];
