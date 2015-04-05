@@ -297,27 +297,69 @@ GTD._createDefaultGTDTable = function (body) {
  
 
 GTD.TOC.pullHeaders = function () {
-  var doc = DocumentApp.getActiveDocument();
-  headers = [];
-  for (var i = 0; i < doc.getNumChildren(); i++) {
-    var p = doc.getChild(i);
-    if (p.getType() == DocumentApp.ElementType.TABLE_OF_CONTENTS) {
-      var toc = p.asTableOfContents();
-      for (var ti = 0; ti < toc.getNumChildren(); ti++) {
-        var itemToc = toc.getChild(ti).asParagraph().getChild(0).asText();
-        var itemText = itemToc.getText();
-        var itemUrl = itemToc.getLinkUrl();
-	headers.push({
-	  toc: itemToc,
-	  text: itemText,
-	  url: itemUrl
-	});
-      }
-      break;
+    var doc = DocumentApp.getActiveDocument();
+    headers = [];
+    for (var i = 0; i < doc.getNumChildren(); i++) {
+        var p = doc.getChild(i);
+        if (p.getType() == DocumentApp.ElementType.TABLE_OF_CONTENTS) {
+            var toc = p.asTableOfContents();
+            for (var ti = 0; ti < toc.getNumChildren(); ti++) {
+                var itemToc = toc.getChild(ti).asParagraph().getChild(0).asText();
+                var itemText = itemToc.getText();
+                var itemUrl = itemToc.getLinkUrl();
+                headers.push({
+                    toc: itemToc,
+                    text: itemText,
+                    url: itemUrl
+                });
+            }
+            break;
+        }
     }
-  }
-  return {headers: headers};
-  
+    return {headers: headers};
+
+};
+
+GTD.Task = {};
+
+GTD.Task.createNewTask = function(name) {
+    var body = DocumentApp.getActiveDocument().getBody(),
+        taskEle = body.appendTable();
+    this.status = 0;
+    this.subTasksTotal = 0;
+    this.subTasksDone = 0;
+    
+    var headerCell = taskEle.appendTableRow().appendTableCell();
+    this.addHeader(headerCell, name);
+    var bodyCell = taskEle.appendTableRow().appendTableCell();
+    this.addBody(bodyCell);
+};
+
+GTD.Task.addHeader = function(cell, name) {
+    var currentTime = GTD.toISO(new Date());
+    var taskStatus = GTD.header[this.status];
+    var subTaskStatus = this.subTasksDone + '/' + this.subTasksTotal;
+
+    //add a blank paragraph. Required because of a bug in app script.
+    //See
+    //https://code.google.com/p/google-apps-script-issues/issues/detail?id=894
+    cell.appendParagraph(""); 
+    var headerTable = cell.insertTable(1, [
+    [currentTime, name, taskStatus, subTaskStatus],
+    ]);
+
+    var taskColor = GTD.headerColor[this.status];
+    headerTable.getCell(0, 2).editAsText().setForegroundColor(taskColor);
+};
+
+GTD.Task.addBody = function(cell) {
+    var doc = DocumentApp.getActiveDocument();
+    var position = doc.newPosition(cell, 0);
+    doc.setCursor(position);
+};
+
+GTD.insertTask = function(name) {
+    GTD.Task.createNewTask(name);
 };
 
 GTD.initTaskTable();
@@ -329,5 +371,3 @@ function getTOCString() {
 function getTasksString() {
     return JSON.stringify(GTD.getSideBarTableContent());
 }
-
-

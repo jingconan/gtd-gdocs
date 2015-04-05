@@ -14,19 +14,19 @@ function debug(s) {
   DocumentApp.getActiveDocument().getBody().appendParagraph(s);
 }
 
-Date.prototype.toISO = function (key) {
+GTD.toISO = function(date) {
   function f(n) {
     // Format integers to have at least two digits.
     return n < 10 ? '0' + n : n;
   }
-  return '[' + this.getFullYear()   + '-' +
-       f(this.getMonth() + 1) + '-' +
-       f(this.getDate())      + ' ' +
-       f(this.getHours())     + ':' +
-       f(this.getMinutes())   + ':' +
-       f(this.getSeconds())   + '' + 
+  return '[' + date.getFullYear()   + '-' +
+       f(date.getMonth() + 1) + '-' +
+       f(date.getDate())      + ' ' +
+       f(date.getHours())     + ':' +
+       f(date.getMinutes())   + ':' +
+       f(date.getSeconds())   + '' + 
        ']';
-};
+}
 
 if (typeof String.prototype.startsWith != 'function') {
   // see below for better implementation!

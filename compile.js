@@ -5,11 +5,19 @@
 glob = require('glob');
 path = require('path');
 fs = require('fs');
+
+var scriptFilePaths = [
+    "scripts/namespace.js",
+    "scripts/util.js",
+    "scripts/script.js",
+    "scripts/menu.js"
+];
+
 function concat_template() {
     var filepath;
     // var code = fs.readFileSync("script.js").toString();
     var code = "";
-    var scriptFilePaths = glob.sync("scripts/*.js");
+    // var scriptFilePaths = glob.sync("scripts/*.js");
     for(var i = 0; i < scriptFilePaths.length; ++i) {
         filepath = scriptFilePaths[i]
         console.log("Compile script: " + filepath);
