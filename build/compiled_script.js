@@ -218,7 +218,7 @@ GTD.Task.setThreadHeaderStatus = function(threadHeader, status) {
 };
 
 GTD.Task.getTaskDesc = function(threadHeader) {
-    return threadHeader.getCell(this.CONTENT_ROW, 0).getText() + '\n' + threadHeader.getCell(0, 1).getText();
+    return threadHeader.getCell(this.CONTENT_ROW, 0).getText() + '\n' + threadHeader.getCell(this.CONTENT_ROW, 1).getText();
 }
 
 
