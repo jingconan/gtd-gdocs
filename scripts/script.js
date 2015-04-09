@@ -272,7 +272,7 @@ GTD.TOC.pullHeaders = function () {
 };
 
 GTD.insertTask = function(name) {
-    GTD.Task.createNewTask(name);
+    return GTD.Task.createNewTask(name);
 };
 
 GTD.insertComment = function() {

@@ -18,6 +18,7 @@ function insertComment() {
 }
 
 function insertTask() {
+    var task;
     var ui = DocumentApp.getUi();
     var result = ui.prompt(
         'Let\'s start!',
@@ -27,7 +28,10 @@ function insertTask() {
     var button = result.getSelectedButton();
     var text = result.getResponseText();
     if (button == ui.Button.OK) {
-        GTD.insertTask(text);
+        task = GTD.insertTask(text);
+        // By default, mark this task as Actionable task
+        GTD.cleanTask('All', task);
+        GTD.addTask('Actionable', task);
     } else {
         return;
     }

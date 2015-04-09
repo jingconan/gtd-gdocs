@@ -11,7 +11,7 @@ GTD.Task.createNewTask = function(name) {
     this.subTasksTotal = 0;
     this.subTasksDone = 0;
     
-    this.addThreadHeader(name);
+    return this.addThreadHeader(name);
     // this.addBody(bodyCell);
 };
 
@@ -35,6 +35,9 @@ GTD.Task.addThreadHeader = function( name) {
     this.setBackgroundColor(headerTable, '#dde4e6');
 
     GTD.util.setCursorAtTable(headerTable);
+
+    // return task description here
+    return currentTime + '\n' + name;
 
 };
 

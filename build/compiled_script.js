@@ -110,7 +110,7 @@ GTD.Task.createNewTask = function(name) {
     this.subTasksTotal = 0;
     this.subTasksDone = 0;
     
-    this.addThreadHeader(name);
+    return this.addThreadHeader(name);
     // this.addBody(bodyCell);
 };
 
@@ -134,6 +134,9 @@ GTD.Task.addThreadHeader = function( name) {
     this.setBackgroundColor(headerTable, '#dde4e6');
 
     GTD.util.setCursorAtTable(headerTable);
+
+    // return task description here
+    return currentTime + '\n' + name;
 
 };
 
@@ -496,7 +499,7 @@ GTD.TOC.pullHeaders = function () {
 };
 
 GTD.insertTask = function(name) {
-    GTD.Task.createNewTask(name);
+    return GTD.Task.createNewTask(name);
 };
 
 GTD.insertComment = function() {
@@ -534,6 +537,7 @@ function insertComment() {
 }
 
 function insertTask() {
+    var task;
     var ui = DocumentApp.getUi();
     var result = ui.prompt(
         'Let\'s start!',
@@ -543,7 +547,10 @@ function insertTask() {
     var button = result.getSelectedButton();
     var text = result.getResponseText();
     if (button == ui.Button.OK) {
-        GTD.insertTask(text);
+        task = GTD.insertTask(text);
+        // By default, mark this task as Actionable task
+        GTD.cleanTask('All', task);
+        GTD.addTask('Actionable', task);
     } else {
         return;
     }
