@@ -18,13 +18,13 @@ task. After you click okay button, it will insert a table showing the
 information related to this task. Right now, the first cell display the
 timestamp you create this task, the second cell is a short description,
 the third cell is the status, the last cell is the # of subtasks (the
-functionality of subtasks will be implemented later). 
+functionality of subtasks will be implemented later). By default, a new task is "Actionable".
 2. **insert comment** You can put any information (context) related to
 this task as a comment. The left part of the comment display your user
 id and the timestamp you create this comment, and you can write your
 comment in the right part.
 3. **create task table**. It will create a table with three columns. The first column stores all the "Actionable" tasks, the second column stores all the "Waiting For" tasks, the third column stores all the "Done" tasks. 
-4. **move to Actionable**. After you put your cursor in the brief description of a task, or you select the timestamp & brief description, you can click this menu to add the task to the "Actionable" queue. 
+4. **move to Actionable**. If you put your cursor in the table with task description, you can click this menu to add the task to the "Actionable" queue. 
 5. **move to Waiting For**. Move a task to "Waiting For" queue.
 6. **move to Done**. Move a task to "Done" queue.
 7. **show task sidebar**. It will show a sidebar that displays all the tasks and their timestamps. If you want to navigate to a task, just search the timestamp (by pressing Ctrl+f). You can hide/unhide tasks by clicking the 'Actionable', 'Waiting For' and 'Done'. If your document body has a table of content, it will also be displayed in the side bar to faciliate navigation.
