@@ -45,12 +45,12 @@ If you want to configure by yourself, here are the steps:
  3. Click Blank Project.
  4. Paste the code in *build/compiled_script.js* to the window.
  5. Choose and *onOpen* function and click run in the toolbar.
- 6. You can click *GTD->insert date* to insert a timestamp
- 7. Add you description of task just after the timestamp (there is no empty line between timestamp and the description. )
- 8. Click *GTD->move to Actionable* to mark itas an 'Actionable' task. It will turn red and the task table will be updated, accordingly.
- 9. Put all related information of this task after the description (seperate them with description using one empty line). 
- 9. Click *GTD->move to Waiting For* to mark as a 'Waiting For' task if you have done what you can do and waiting for something, e.g., you collegues' review. The timestamp and the task description will turn yellow. 
+ 6. You can click *GTD->insert task* to insert a task.
+ 7. Type a short description of the task in the popup dialog. After clicking "okay", a table with the task description will be inserted under your cursor. By default the text in the table is red, and it is "Actionable". The task will also be displayed in the summary table in the beginning part of the document.
+ 8. You can click *GTD->insert comment* to insert some context information related to this task. 
+ 9. Put you cursor in the table with short description of a task, and click *GTD->move to Waiting For* to mark as a 'Waiting For' task if you have done what you can do and waiting for something, e.g., you collegues' review. The timestamp and the task description will turn yellow. 
  10. Click *GTD->move to Done* to mark as a 'Done' task if you are done with this task. The timestamp and the task description will turn green.
+ 11. You can also click *GTD->move to Actionable* to mark itas an 'Actionable' task again. 
  11. Click 'GTD->show sideBar* to open a sidebar that diplays all tasks (it will be useful if your log becomes very log.
  12. Enjoy your trip!
 
