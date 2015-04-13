@@ -16,6 +16,9 @@
 .collapse+ input:checked + *{
   display:block;
 }
+.task:hover {
+    color: #4d90fe;
+}
 </style>
 
 <div align='right'>
@@ -30,7 +33,7 @@
     <div>
         <ul>
         {{#tasks}}
-            <li>{{name}}</li>
+            <li class='task'>{{name}}</li>
         {{/tasks}}
         </ul>
     </div>
