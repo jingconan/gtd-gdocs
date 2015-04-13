@@ -62,7 +62,7 @@ GTD.Task.insertComment = function() {
     var text = table.getCell(0, 0).editAsText();
     text.setFontSize(user.length+1, text.getText().length-1, 7);
 
-    var width = Math.max(11 * user.length, 80);
+    var width = Math.max(7 * user.length, 60);
     table.getCell(0, 0)
         .setWidth(width)
         .setBackgroundColor('#dde4e6');
