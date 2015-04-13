@@ -18,6 +18,8 @@
 }
 .task:hover {
     color: #4d90fe;
+    cursor: pointer; 
+    cursor: hand;
 }
 </style>
 
@@ -58,14 +60,32 @@ Please insert a table of content in the document using insert->table of content
 <script>
 SB = {};
 
+
+SB.findTaskHandler = function (result) {
+    console.log('findTaskHandler res: ' + result);
+};
+
+SB.addClickHandler = function () {
+    $('.task').click(function (e) {
+        var task = $(this).parents('li').add(this).map(function () {
+            return $.trim(this.firstChild.nodeValue)
+        }).get();
+        console.log('test run here task: ' + task);
+
+        google.script.run.withSuccessHandler(SB.findTaskHandler)
+            .findAndFocusOnTask(task[0]);
+    });
+};
+
 SB.buildTaskQueue = function (result) {
     var taskQueue = document.getElementById('task_queue');
     var content = JSON.parse(result);
     taskQueue.innerHTML = Mustache.to_html(taskQueue.innerHTML, content);
     taskQueue.style.display = 'block';
+    SB.addClickHandler();
 };
 
-SB.buildToC = function (result){
+SB.buildToC = function (result) {
   var content = JSON.parse(result);
   var list = document.getElementById('table_of_content');
   list.innerHTML = Mustache.to_html(list.innerHTML, content);
@@ -74,4 +94,6 @@ SB.buildToC = function (result){
 
 google.script.run.withSuccessHandler(SB.buildTaskQueue).getTasksString();
 google.script.run.withSuccessHandler(SB.buildToC).getTOCString();
+
+
 </script>

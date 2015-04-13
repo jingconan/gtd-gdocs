@@ -187,9 +187,11 @@ GTD.appendRow = function(rowContent) {
 };
 
 
-GTD.getTimeStamp = function(s) {
-    //FIXME now it only checks brackets
-    return s.split(']')[0].split('[')[1];
+GTD.getTimeStamp = function(taskName) {
+    //timestamp is at the begining and has the format YYYY-mm-DD
+    //HH:MM:SS. It is seperated by other content by \n;
+    var tokens = taskName.split('\n');
+    return tokens[0];
 };
 
 
@@ -287,4 +289,24 @@ function getTOCString() {
 
 function getTasksString() {
     return JSON.stringify(GTD.getSideBarTableContent());
+}
+
+function findAndFocusOnTask(taskName) {
+    var timeStamp = GTD.getTimeStamp(taskName);
+    var body = DocumentApp.getActiveDocument().getBody();
+    var re = body.findText(timeStamp);
+    var position;
+    debug('timeStamp: ' + timeStamp);
+    var doc = DocumentApp.getActiveDocument();
+    if (!re) {
+        DocumentApp.getUi().alert('cannot find task name: ' + taskName);
+    }
+
+    // The second appearance is the task in the body
+    re = body.findText(timeStamp, re);
+    if (!re) {
+        DocumentApp.getUi().alert('cannot find task name: ' + taskName);
+    }
+    position = doc.newPosition(re.getElement(), 0);
+    doc.setCursor(position);
 }
