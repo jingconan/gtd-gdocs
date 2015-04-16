@@ -523,7 +523,7 @@ function findAndFocusOnTask(taskName) {
     var body = DocumentApp.getActiveDocument().getBody();
     var re = body.findText(timeStamp);
     var position;
-    debug('timeStamp: ' + timeStamp);
+    //debug('timeStamp: ' + timeStamp);
     var doc = DocumentApp.getActiveDocument();
     if (!re) {
         DocumentApp.getUi().alert('cannot find task name: ' + taskName);
