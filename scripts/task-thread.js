@@ -1,7 +1,8 @@
 GTD.Task = {
     CONTENT_ROW: 1,
-    SIZE: [2, 4],
-    THREAD_HEADER_WIDTH: [100, 350, 70, 60]
+    SIZE: [2, 3],
+    // THREAD_HEADER_WIDTH: [100, 350, 70, 60]
+    THREAD_HEADER_WIDTH: [100, 350, 70]
 };
 
 GTD.Task.createNewTask = function(name) {
@@ -21,8 +22,8 @@ GTD.Task.addThreadHeader = function( name) {
     var subTaskStatus = this.subTasksDone + '/' + this.subTasksTotal;
 
     var headerTable = GTD.util.insertTableAtCursor([
-        ['Timestamp', 'Name', 'Status', 'Subtasks'],
-        [currentTime, name, taskStatus, subTaskStatus],
+        ['Timestamp', 'Name', 'Status'],
+        [currentTime, name, taskStatus],
     ]);
 
     // set table column width

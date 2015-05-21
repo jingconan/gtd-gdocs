@@ -99,8 +99,9 @@ GTD.util.setCursorAtTable = function(table, offset) {
 
 GTD.Task = {
     CONTENT_ROW: 1,
-    SIZE: [2, 4],
-    THREAD_HEADER_WIDTH: [100, 350, 70, 60]
+    SIZE: [2, 3],
+    // THREAD_HEADER_WIDTH: [100, 350, 70, 60]
+    THREAD_HEADER_WIDTH: [100, 350, 70]
 };
 
 GTD.Task.createNewTask = function(name) {
@@ -120,8 +121,8 @@ GTD.Task.addThreadHeader = function( name) {
     var subTaskStatus = this.subTasksDone + '/' + this.subTasksTotal;
 
     var headerTable = GTD.util.insertTableAtCursor([
-        ['Timestamp', 'Name', 'Status', 'Subtasks'],
-        [currentTime, name, taskStatus, subTaskStatus],
+        ['Timestamp', 'Name', 'Status'],
+        [currentTime, name, taskStatus],
     ]);
 
     // set table column width
@@ -161,7 +162,7 @@ GTD.Task.insertComment = function() {
     var text = table.getCell(0, 0).editAsText();
     text.setFontSize(user.length+1, text.getText().length-1, 7);
 
-    var width = Math.max(11 * user.length, 80);
+    var width = Math.max(7 * user.length, 60);
     table.getCell(0, 0)
         .setWidth(width)
         .setBackgroundColor('#dde4e6');
