@@ -19,7 +19,8 @@ GTD.Task.createNewTask = function(name) {
 GTD.Task.addThreadSeparator = function() {
     var table = GTD.util.insertTableAtCursor([['Task Separator']]);
     table.editAsText().setForegroundColor('#ffffff');
-    this.setBackgroundColor(table, '#000000', [1, 1]);
+    this.setBackgroundColor(table, '#4285F4', [1, 1]);
+    table.setBorderWidth(0);
     GTD.util.setCursorAtTable(table);
 };
 
