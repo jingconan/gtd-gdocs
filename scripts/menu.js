@@ -5,12 +5,17 @@ function onOpen() {
       // .addItem('insert date', 'insertDate')
       .addItem('insert task', 'insertTask')
       .addItem('insert comment', 'insertComment')
+      .addItem('insert separator', 'insertSeparator')
       .addItem('create task table', 'initTaskFunction')
       .addItem('move to Actionable', 'createActionableTask')
       .addItem('move to WaitingFor', 'moveTaskToWaitingFor')
       .addItem('move to Done', 'moveTaskToDone')
       .addItem('show task sidebar', 'showSidebar')
       .addToUi();
+}
+
+function insertSeparator() {
+    GTD.Task.addThreadSeparator();
 }
 
 function insertComment() {

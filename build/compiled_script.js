@@ -115,6 +115,13 @@ GTD.Task.createNewTask = function(name) {
     // this.addBody(bodyCell);
 };
 
+GTD.Task.addThreadSeparator = function() {
+    var table = GTD.util.insertTableAtCursor([['Task Separator']]);
+    table.editAsText().setForegroundColor('#ffffff');
+    this.setBackgroundColor(table, '#000000', [1, 1]);
+    GTD.util.setCursorAtTable(table);
+};
+
 GTD.Task.addThreadHeader = function( name) {
     var currentTime = GTD.util.toISO(new Date());
     var taskStatus = GTD.header[this.status];
@@ -132,7 +139,7 @@ GTD.Task.addThreadHeader = function( name) {
     var taskColor = GTD.headerColor[this.status];
     headerTable.editAsText().setForegroundColor(taskColor);
 
-    this.setBackgroundColor(headerTable, '#dde4e6');
+    this.setBackgroundColor(headerTable, '#dde4e6', this.SIZE);
 
     GTD.util.setCursorAtTable(headerTable);
 
@@ -199,10 +206,10 @@ GTD.Task.getTaskThreadHeader = function() {
 };
 
 
-GTD.Task.setBackgroundColor = function(headerTable, color) {
+GTD.Task.setBackgroundColor = function(headerTable, color, tableSize) {
     var i, j;
-    for (i = 0; i < this.SIZE[0]; ++i) {
-        for (j = 0; j < this.SIZE[1]; ++j) {
+    for (i = 0; i < tableSize[0]; ++i) {
+        for (j = 0; j < tableSize[1]; ++j) {
             // headerTable.getCell(0, i).setBackgroundColor('#dde4e6');
             headerTable.getCell(i, j).setBackgroundColor(color);
         }
@@ -547,12 +554,17 @@ function onOpen() {
       // .addItem('insert date', 'insertDate')
       .addItem('insert task', 'insertTask')
       .addItem('insert comment', 'insertComment')
+      .addItem('insert separator', 'insertSeparator')
       .addItem('create task table', 'initTaskFunction')
       .addItem('move to Actionable', 'createActionableTask')
       .addItem('move to WaitingFor', 'moveTaskToWaitingFor')
       .addItem('move to Done', 'moveTaskToDone')
       .addItem('show task sidebar', 'showSidebar')
       .addToUi();
+}
+
+function insertSeparator() {
+    GTD.Task.addThreadSeparator();
 }
 
 function insertComment() {
