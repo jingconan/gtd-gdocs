@@ -206,6 +206,9 @@ GTD.appendLogEntry = function() {
 };
 
 GTD._isTaskTable = function(table) {
+    if (!GTD.util.isEmptyObject(table)) {
+        return false;
+    }
     var i;
     for (i = 0; i < this.header.length; ++i) {
         if (table.getCell(0, i).getText() != this.header[i]) {

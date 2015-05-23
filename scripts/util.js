@@ -82,6 +82,8 @@ GTD.util.setCursorAtTable = function(table, offset) {
     if (text) {
         text.setForegroundColor('#000000');
     }
+};
 
-
+GTD.util.isEmptyObject = function(obj) {
+    return Object.keys(obj).length === 0;
 };
