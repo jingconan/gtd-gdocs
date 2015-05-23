@@ -92,10 +92,8 @@ GTD.util.setCursorAtTable = function(table, offset) {
     if (text) {
         text.setForegroundColor('#000000');
     }
-};
 
-GTD.util.isEmptyObject = function(obj) {
-    return Object.keys(obj).length === 0;
+
 };
 
 
@@ -444,9 +442,6 @@ GTD.appendLogEntry = function() {
 };
 
 GTD._isTaskTable = function(table) {
-    if (!GTD.util.isEmptyObject(table)) {
-        return false;
-    }
     var i;
     for (i = 0; i < this.header.length; ++i) {
         if (table.getCell(0, i).getText() != this.header[i]) {
