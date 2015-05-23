@@ -107,6 +107,16 @@ GTD.Task.getTaskThreadHeader = function() {
  return ele;
 };
 
+GTD.Task.isValidTaskThreadHeader = function(table) {
+    if (table.getNumRows() !== 2) {
+        return false;
+    }
+
+    if (table.getCell(0, 0).editAsText().getText() !== 'Timestamp') {
+        return false;
+    }
+    return true;
+};
 
 GTD.Task.setBackgroundColor = function(headerTable, color, tableSize) {
     var i, j;

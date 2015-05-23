@@ -206,6 +206,16 @@ GTD.Task.getTaskThreadHeader = function() {
  return ele;
 };
 
+GTD.Task.isValidTaskThreadHeader = function(table) {
+    if (table.getNumRows() !== 2) {
+        return false;
+    }
+
+    if (table.getCell(0, 0).editAsText().getText() !== 'Timestamp') {
+        return false;
+    }
+    return true;
+};
 
 GTD.Task.setBackgroundColor = function(headerTable, color, tableSize) {
     var i, j;
@@ -434,8 +444,23 @@ GTD.getTimeStamp = function(taskName) {
 // this function returns the task under cursor
 GTD.getSelectedTask = function(type) {
     var taskHeader = GTD.Task.getTaskThreadHeader();
+    if (!GTD.Task.isValidTaskThreadHeader(taskHeader)) {
+        return {
+            error: 'To change status of a task, please ' +
+                   'put cursor in the task description ' +
+                   'table in the main body.'
+        };
+    }
     GTD.Task.setThreadHeaderStatus(taskHeader, type);
-    return GTD.Task.getTaskDesc(taskHeader);
+    var taskDesc = GTD.Task.getTaskDesc(taskHeader);
+    if (!taskDesc) {
+        return {
+            error: 'cannot find task name'
+        }
+    }
+    return {
+        taskDesc: taskDesc
+    }
 };
 
 GTD.appendLogEntry = function() {
@@ -607,33 +632,33 @@ function initTaskFunction() {
 }
 
 function createActionableTask() {
-  var task = GTD.getSelectedTask('Actionable');
-  if (!task) {
-    DocumentApp.getUi().alert('cannot find task name');
-    return;
-  }
-  GTD.cleanTask('All', task);
-  GTD.addTask('Actionable', task);
+    var ret = GTD.getSelectedTask('Actionable');
+    if (ret.error) {
+        DocumentApp.getUi().alert(ret.error);
+        return;
+    }
+    GTD.cleanTask('All', ret.taskDesc);
+    GTD.addTask('Actionable', ret.taskDesc);
 }
 
 function moveTaskToWaitingFor() {
-  var task = GTD.getSelectedTask('Waiting For');
-  if (!task) {
-    DocumentApp.getUi().alert('cannot find task name');
-    return;
-  }
-  GTD.cleanTask('All', task);
-  GTD.addTask('Waiting For', task);
+    var ret = GTD.getSelectedTask('Waiting For');
+    if (ret .error) {
+        DocumentApp.getUi().alert(ret.error);
+        return;
+    }
+    GTD.cleanTask('All', ret.taskDesc);
+    GTD.addTask('Waiting For', ret.taskDesc);
 }
 
 function moveTaskToDone() {
-  var task = GTD.getSelectedTask('Done');
-  if (!task) {
-    DocumentApp.getUi().alert('cannot find task name');
+  var ret = GTD.getSelectedTask('Done');
+  if (ret .error) {
+    DocumentApp.getUi().alert(ret.error);
     return;
   }
-  GTD.cleanTask('All', task);
-  GTD.addTask('Done', task);
+  GTD.cleanTask('All', ret.taskDesc);
+  GTD.addTask('Done', ret.taskDesc);
 }
 
 function showSidebar() {

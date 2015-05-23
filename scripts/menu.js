@@ -57,33 +57,33 @@ function initTaskFunction() {
 }
 
 function createActionableTask() {
-  var task = GTD.getSelectedTask('Actionable');
-  if (!task) {
-    DocumentApp.getUi().alert('cannot find task name');
-    return;
-  }
-  GTD.cleanTask('All', task);
-  GTD.addTask('Actionable', task);
+    var ret = GTD.getSelectedTask('Actionable');
+    if (ret.error) {
+        DocumentApp.getUi().alert(ret.error);
+        return;
+    }
+    GTD.cleanTask('All', ret.taskDesc);
+    GTD.addTask('Actionable', ret.taskDesc);
 }
 
 function moveTaskToWaitingFor() {
-  var task = GTD.getSelectedTask('Waiting For');
-  if (!task) {
-    DocumentApp.getUi().alert('cannot find task name');
-    return;
-  }
-  GTD.cleanTask('All', task);
-  GTD.addTask('Waiting For', task);
+    var ret = GTD.getSelectedTask('Waiting For');
+    if (ret .error) {
+        DocumentApp.getUi().alert(ret.error);
+        return;
+    }
+    GTD.cleanTask('All', ret.taskDesc);
+    GTD.addTask('Waiting For', ret.taskDesc);
 }
 
 function moveTaskToDone() {
-  var task = GTD.getSelectedTask('Done');
-  if (!task) {
-    DocumentApp.getUi().alert('cannot find task name');
+  var ret = GTD.getSelectedTask('Done');
+  if (ret .error) {
+    DocumentApp.getUi().alert(ret.error);
     return;
   }
-  GTD.cleanTask('All', task);
-  GTD.addTask('Done', task);
+  GTD.cleanTask('All', ret.taskDesc);
+  GTD.addTask('Done', ret.taskDesc);
 }
 
 function showSidebar() {

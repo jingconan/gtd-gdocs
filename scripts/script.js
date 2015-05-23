@@ -198,8 +198,23 @@ GTD.getTimeStamp = function(taskName) {
 // this function returns the task under cursor
 GTD.getSelectedTask = function(type) {
     var taskHeader = GTD.Task.getTaskThreadHeader();
+    if (!GTD.Task.isValidTaskThreadHeader(taskHeader)) {
+        return {
+            error: 'To change status of a task, please ' +
+                   'put cursor in the task description ' +
+                   'table in the main body.'
+        };
+    }
     GTD.Task.setThreadHeaderStatus(taskHeader, type);
-    return GTD.Task.getTaskDesc(taskHeader);
+    var taskDesc = GTD.Task.getTaskDesc(taskHeader);
+    if (!taskDesc) {
+        return {
+            error: 'cannot find task name'
+        }
+    }
+    return {
+        taskDesc: taskDesc
+    }
 };
 
 GTD.appendLogEntry = function() {
