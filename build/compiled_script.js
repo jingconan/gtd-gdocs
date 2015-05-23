@@ -101,7 +101,7 @@ GTD.Task = {
     CONTENT_ROW: 1,
     SIZE: [2, 3],
     // THREAD_HEADER_WIDTH: [100, 350, 70, 60]
-    THREAD_HEADER_WIDTH: [100, 350, 70]
+    THREAD_HEADER_WIDTH: [70, 450, 70]
 };
 
 GTD.Task.createNewTask = function(name) {
