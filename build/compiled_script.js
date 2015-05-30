@@ -574,8 +574,14 @@ function findAndFocusOnTask(taskName) {
     if (!re) {
         DocumentApp.getUi().alert('cannot find task name: ' + taskName);
     }
-    position = doc.newPosition(re.getElement(), 0);
+    position = doc.newPosition(re.getElement(), re.getStartOffset());
     doc.setCursor(position);
+
+    // Make the timestamp of the task to be selected. This gives user a
+    // visual indicator of the start of the task.
+    var rangeBuilder = doc.newRange();
+    rangeBuilder.addElement(re.getElement());
+    doc.setSelection(rangeBuilder.build());
 }
 
 
