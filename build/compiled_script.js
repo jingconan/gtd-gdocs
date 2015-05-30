@@ -65,7 +65,13 @@ GTD.util.insertTableAtCursor = function(cells) {
 
     var cursor = document.getCursor();
     var ele = cursor.getElement();
-    var index = body.getChildIndex(ele); 
+    try {
+        var index = body.getChildIndex(ele); 
+    } catch(err) {
+        DocumentApp.getUi().alert('Please make sure your cursor is not in ' +
+                                  'any table when inserting comment');
+        return;
+    }
     return body.insertTable(index, cells);
 };
 
