@@ -1,9 +1,10 @@
-# gtd-gdocs
+# Google Task Document
+This project turns google docs to a full-fledge task management system. 
 
-GTD using Google Docs
+GTD using GTD (Get Things Done using Google Task Document)
 ---------------------
 
-[Get Things Done](http://gettingthingsdone.com/) is a time-management method that significantly boost your efficiency, particularly when you need to handle multiple projects at the same time. 
+[Get Things Done](http://gettingthingsdone.com/) is a task-management method that significantly boost your efficiency, particularly when you need to handle multiple projects at the same time. 
 
 The idea of GTD is to store all your tasks in some external tools rather than you brain.  Each task is associated with a label that can be either "Actionable", "Waiting For", or "Done". 
 
