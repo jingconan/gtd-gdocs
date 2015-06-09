@@ -1,10 +1,9 @@
 #!/usr/bin/env node
-// console.log('good');
-//
-//
-glob = require('glob');
-path = require('path');
-fs = require('fs');
+var glob = require('glob'),
+    path = require('path'),
+    sys = require('sys'),
+    fs = require('fs'),
+    exec = require('child_process').exec;
 
 var scriptFilePaths = [
     "scripts/namespace.js",
@@ -14,18 +13,13 @@ var scriptFilePaths = [
     "scripts/menu.js"
 ];
 
-function concat_template() {
+function concat_template(code) {
     var filepath;
-    // var code = fs.readFileSync("script.js").toString();
-    var code = "";
-    // var scriptFilePaths = glob.sync("scripts/*.js");
     for(var i = 0; i < scriptFilePaths.length; ++i) {
         filepath = scriptFilePaths[i]
         console.log("Compile script: " + filepath);
         code += (fs.readFileSync(filepath).toString() + '\n\n');
     }
-
-
     code += "\n\n";
 
     // Compile frameworks
@@ -49,10 +43,14 @@ function concat_template() {
 
     filepath = 'build/compiled_script.js';
     fs.writeFileSync(filepath, code);
-
-
-
-
 }
 
-concat_template();
+var git_cmd = "git rev-parse HEAD";
+child = exec(git_cmd, function (error, stdout, stderr) {
+    if (error !== null) {
+        console.log('exec ' + git_cmd + ' error: ' + error);
+        return;
+    }
+    var code = "// compiled from git commit version: " + stdout;
+    concat_template(code);
+});
