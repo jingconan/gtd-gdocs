@@ -55,6 +55,8 @@ GTD.util.insertTableAtCursor = function(cells) {
 
     var cursor = document.getCursor();
     var ele = cursor.getElement();
+    // If cursor is in a table, body.insertTable will fail to find the
+    // element.
     try {
         var index = body.getChildIndex(ele); 
         return body.insertTable(index, cells);

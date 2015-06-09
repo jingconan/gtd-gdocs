@@ -67,6 +67,11 @@ GTD.Task.insertComment = function() {
     var user = Session.getActiveUser().getEmail().split("@")[0];
     var currentTime = GTD.util.toISO(new Date());
     var table = GTD.util.insertTableAtCursor([[user + '\n' + currentTime, '']]);
+    if (!table) {
+        Logger.log('Fail to insert comment table!');
+        return;
+    }
+    table.editAsText().setForegroundColor(GTD.commentStyle.foregroundColor);
 
     var text = table.getCell(0, 0).editAsText();
     text.setFontSize(user.length+1, text.getText().length-1, 7);

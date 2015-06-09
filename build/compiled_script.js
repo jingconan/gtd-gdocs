@@ -2,6 +2,9 @@ var GTD = {
   body: DocumentApp.getActiveDocument().getBody(),
   header: ['Actionable', 'Waiting For', 'Done'], //FIXME change to taskStatus
   headerColor: ['#ff0000', '#9d922e', '#16a031'], //FIXME change to taskStatusColor 
+  commentStyle: {
+      foregroundColor: '#000000'
+  },
   defaultRows: 1,
   templates: {},
   TOC: {},
@@ -37,7 +40,7 @@ GTD.util.toISO = function(date) {
        f(date.getHours())     + ':' +
        f(date.getMinutes())   + ':' +
        f(date.getSeconds());
-}
+};
 
 if (typeof String.prototype.startsWith != 'function') {
   // see below for better implementation!
@@ -65,14 +68,17 @@ GTD.util.insertTableAtCursor = function(cells) {
 
     var cursor = document.getCursor();
     var ele = cursor.getElement();
+    // If cursor is in a table, body.insertTable will fail to find the
+    // element.
     try {
         var index = body.getChildIndex(ele); 
+        return body.insertTable(index, cells);
     } catch(err) {
         DocumentApp.getUi().alert('Please make sure your cursor is not in ' +
                                   'any table when inserting comment');
         return;
     }
-    return body.insertTable(index, cells);
+
 };
 
 GTD.util.setCursorAtTable = function(table, offset) {
@@ -172,6 +178,11 @@ GTD.Task.insertComment = function() {
     var user = Session.getActiveUser().getEmail().split("@")[0];
     var currentTime = GTD.util.toISO(new Date());
     var table = GTD.util.insertTableAtCursor([[user + '\n' + currentTime, '']]);
+    if (!table) {
+        Logger.log('Fail to insert comment table!');
+        return;
+    }
+    table.editAsText().setForegroundColor(GTD.commentStyle.foregroundColor);
 
     var text = table.getCell(0, 0).editAsText();
     text.setFontSize(user.length+1, text.getText().length-1, 7);
@@ -183,7 +194,7 @@ GTD.Task.insertComment = function() {
     table.getCell(0, 1)
         .setBackgroundColor('#f7f7f7');
     GTD.util.setCursorAtTable(table, [0, 1]);
-}
+};
 
 // getTaskThreadHeader returns the task thread header under the cursor
 GTD.Task.getTaskThreadHeader = function() {
@@ -232,7 +243,7 @@ GTD.Task.setBackgroundColor = function(headerTable, color, tableSize) {
         }
     }
 
-}
+};
 
 GTD.Task.setThreadHeaderStatus = function(threadHeader, status) {
 
@@ -247,7 +258,7 @@ GTD.Task.setThreadHeaderStatus = function(threadHeader, status) {
 
 GTD.Task.getTaskDesc = function(threadHeader) {
     return threadHeader.getCell(this.CONTENT_ROW, 0).getText() + '\n' + threadHeader.getCell(this.CONTENT_ROW, 1).getText();
-}
+};
 
 
 // This is a google app scripts that implements a GTD work flow using
@@ -264,7 +275,7 @@ GTD.Task.getTaskDesc = function(threadHeader) {
 GTD.initTaskTable = function() {
     var tables = this.body.getTables();
     var taskTable;
-    if (tables.length == 0 || !this._isTaskTable(tables[0])) {
+    if (tables.length === 0 || !this._isTaskTable(tables[0])) {
         taskTable = this._createDefaultGTDTable(this.body);
     } else {
         taskTable = tables[0];
@@ -307,7 +318,7 @@ GTD.getSideBarTableContent = function() {
         });
     }
     return res;
-}
+};
  
 
 GTD.getColIdx = function(name) {
@@ -386,7 +397,7 @@ GTD.cleanTask = function(type, taskName, alert) {
 GTD.setTaskColor = function(type, taskName) {
     setColor = (function (type, ele) {
         if (!ele) return;
-        ele.asText().editAsText().setForegroundColor(this.headerColor[this.getColIdx(type)])
+        ele.asText().editAsText().setForegroundColor(this.headerColor[this.getColIdx(type)]);
     }).bind(this, type);
     // Change the color of the task in the task table
     var timeStamp = this.getTimeStamp(taskName);
@@ -431,11 +442,11 @@ GTD.appendRow = function(rowContent) {
         for (i = 0; i < rowContent; ++i) {
             this.appendRow(rc);
         }
-        return this
+        return this;
     }
     var row = this.taskTable.appendTableRow();
     this.mutateRow(row, rowContent);
-    return this
+    return this;
 };
 
 
@@ -462,11 +473,11 @@ GTD.getSelectedTask = function(type) {
     if (!taskDesc) {
         return {
             error: 'cannot find task name'
-        }
+        };
     }
     return {
         taskDesc: taskDesc
-    }
+    };
 };
 
 GTD.appendLogEntry = function() {
@@ -546,7 +557,7 @@ GTD.insertTask = function(name) {
 
 GTD.insertComment = function() {
     GTD.Task.insertComment();
-}
+};
 
 GTD.initTaskTable();
 
