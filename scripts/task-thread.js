@@ -78,7 +78,7 @@ GTD.Task.insertComment = function() {
     table.getCell(0, 1)
         .setBackgroundColor('#f7f7f7');
     GTD.util.setCursorAtTable(table, [0, 1]);
-}
+};
 
 // getTaskThreadHeader returns the task thread header under the cursor
 GTD.Task.getTaskThreadHeader = function() {
@@ -127,7 +127,7 @@ GTD.Task.setBackgroundColor = function(headerTable, color, tableSize) {
         }
     }
 
-}
+};
 
 GTD.Task.setThreadHeaderStatus = function(threadHeader, status) {
 
@@ -142,4 +142,4 @@ GTD.Task.setThreadHeaderStatus = function(threadHeader, status) {
 
 GTD.Task.getTaskDesc = function(threadHeader) {
     return threadHeader.getCell(this.CONTENT_ROW, 0).getText() + '\n' + threadHeader.getCell(this.CONTENT_ROW, 1).getText();
-}
+};

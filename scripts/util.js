@@ -27,7 +27,7 @@ GTD.util.toISO = function(date) {
        f(date.getHours())     + ':' +
        f(date.getMinutes())   + ':' +
        f(date.getSeconds());
-}
+};
 
 if (typeof String.prototype.startsWith != 'function') {
   // see below for better implementation!
@@ -57,12 +57,13 @@ GTD.util.insertTableAtCursor = function(cells) {
     var ele = cursor.getElement();
     try {
         var index = body.getChildIndex(ele); 
+        return body.insertTable(index, cells);
     } catch(err) {
         DocumentApp.getUi().alert('Please make sure your cursor is not in ' +
                                   'any table when inserting comment');
         return;
     }
-    return body.insertTable(index, cells);
+
 };
 
 GTD.util.setCursorAtTable = function(table, offset) {

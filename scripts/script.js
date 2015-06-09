@@ -12,7 +12,7 @@
 GTD.initTaskTable = function() {
     var tables = this.body.getTables();
     var taskTable;
-    if (tables.length == 0 || !this._isTaskTable(tables[0])) {
+    if (tables.length === 0 || !this._isTaskTable(tables[0])) {
         taskTable = this._createDefaultGTDTable(this.body);
     } else {
         taskTable = tables[0];
@@ -55,7 +55,7 @@ GTD.getSideBarTableContent = function() {
         });
     }
     return res;
-}
+};
  
 
 GTD.getColIdx = function(name) {
@@ -134,7 +134,7 @@ GTD.cleanTask = function(type, taskName, alert) {
 GTD.setTaskColor = function(type, taskName) {
     setColor = (function (type, ele) {
         if (!ele) return;
-        ele.asText().editAsText().setForegroundColor(this.headerColor[this.getColIdx(type)])
+        ele.asText().editAsText().setForegroundColor(this.headerColor[this.getColIdx(type)]);
     }).bind(this, type);
     // Change the color of the task in the task table
     var timeStamp = this.getTimeStamp(taskName);
@@ -179,11 +179,11 @@ GTD.appendRow = function(rowContent) {
         for (i = 0; i < rowContent; ++i) {
             this.appendRow(rc);
         }
-        return this
+        return this;
     }
     var row = this.taskTable.appendTableRow();
     this.mutateRow(row, rowContent);
-    return this
+    return this;
 };
 
 
@@ -210,11 +210,11 @@ GTD.getSelectedTask = function(type) {
     if (!taskDesc) {
         return {
             error: 'cannot find task name'
-        }
+        };
     }
     return {
         taskDesc: taskDesc
-    }
+    };
 };
 
 GTD.appendLogEntry = function() {
@@ -294,7 +294,7 @@ GTD.insertTask = function(name) {
 
 GTD.insertComment = function() {
     GTD.Task.insertComment();
-}
+};
 
 GTD.initTaskTable();
 
