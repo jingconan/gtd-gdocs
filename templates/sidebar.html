@@ -29,13 +29,14 @@
 
 <div id='task_queue' style='display:none'>
 {{#task_queues}}
-<div>
-    <label class='collapse' style='color: {{color}}' for='_{{index}}'>{{type}}</label>
+<div id={{type}}>
+    <label class='collapse' ondrop='SB.onDrop(event)' ondragover='SB.allowDrop(event)', ondragleave='SB.dragLeave(event)' style='color: {{color}}' for='_{{index}}'>{{type}}</label>
     <input id='_{{index}}' type='checkbox' checked='checked'>
-    <div>
+    <div class='task_list' ondragover=''>
         <ul>
         {{#tasks}}
-            <li class='task'>{{name}}</li>
+            <li class='task' draggable='true' id={{name}}
+            ondragstart='SB.onDrag(event)'>{{name}}</li>
         {{/tasks}}
         </ul>
     </div>
@@ -77,6 +78,41 @@ SB.addClickHandler = function () {
     });
 };
 
+SB.onDrag = function (ev) {
+    console.log('onDrag called');
+    ev.dataTransfer.setData("task", ev.target.id);
+};
+
+SB.onDrop = function (ev) {
+    ev.preventDefault();
+    var data = ev.dataTransfer.getData("task");
+    var ele = document.getElementById(data);
+    ev.target.parentNode.getElementsByTagName('ul')[0].appendChild(ele);
+
+    $('#task_queue label').css({
+        "background-color": 'white'
+    });
+
+    google.script.run.withSuccessHandler(SB.changeStatusSuccess)
+        .changeTaskStatus(ele.textContent, ev.target.textContent);
+};
+
+SB.allowDrop = function (ev) {
+    ev.preventDefault();
+    $(ev.target).css({
+        "background-color": '#4d90fe'
+    });
+};
+
+SB.dragLeave = function (ev) {
+    console.log('dragleave: ');
+    console.dir(ev);
+    debugger;
+    $('#task_queue label').css({
+        "background-color": 'white'
+    });
+};
+
 SB.buildTaskQueue = function (result) {
     var taskQueue = document.getElementById('task_queue');
     var content = JSON.parse(result);
@@ -90,6 +126,10 @@ SB.buildToC = function (result) {
   var list = document.getElementById('table_of_content');
   list.innerHTML = Mustache.to_html(list.innerHTML, content);
   list.style.display = 'block';
+};
+
+SB.changeStatusSuccess = function () {
+    console.log('status changed');
 };
 
 google.script.run.withSuccessHandler(SB.buildTaskQueue).getTasksString();

@@ -288,6 +288,12 @@ GTD.TOC.pullHeaders = function () {
 
 };
 
+GTD.changeTaskStatus = function(task, status) {
+    GTD.cleanTask('All', task);
+    GTD.addTask(status, task);
+    GTD.setTaskColor(status, task);
+};
+
 GTD.insertTask = function(name) {
     return GTD.Task.createNewTask(name);
 };
@@ -304,6 +310,10 @@ function getTOCString() {
 
 function getTasksString() {
     return JSON.stringify(GTD.getSideBarTableContent());
+}
+
+function changeTaskStatus(task, status) {
+    return GTD.changeTaskStatus(task, status);
 }
 
 function findAndFocusOnTask(taskName) {
