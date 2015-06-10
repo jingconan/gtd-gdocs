@@ -132,22 +132,33 @@ GTD.cleanTask = function(type, taskName, alert) {
 
 // Change the color of a task according to its current type
 GTD.setTaskColor = function(type, taskName) {
-    setColor = (function (type, ele) {
-        if (!ele) return;
-        ele.asText().editAsText().setForegroundColor(this.headerColor[this.getColIdx(type)]);
-    }).bind(this, type);
+    // setColor = (function (type, ele) {
+    //     if (!ele) return;
+    //     ele.asText().editAsText().setForegroundColor(this.headerColor[this.getColIdx(type)]);
+    // }).bind(this, type);
     // Change the color of the task in the task table
     var timeStamp = this.getTimeStamp(taskName);
-    var body = DocumentApp.getActiveDocument().getBody();
+    var doc = DocumentApp.getActiveDocument();
+    var body = doc.getBody();
+    // the first element is in the document header table.
     var re = body.findText(timeStamp);
-    setColor(re.getElement());
+    // setColor(re.getElement());
 
     // If the task exists in the main body, change its color, too. 
     re = body.findText(timeStamp, re);
-    if (re) {
-        setColor(re.getElement());
+    if (!re) {
+        DocumentApp.getUi().alert('cannot find tash thread table for task: ' + taskName);
+        return;
     }
 
+    // setColor(re.getElement());
+    // change color of the task header.
+    var taskThreadHeader = GTD.Task.getTaskThreadHeader(re.getElement());
+    if (!GTD.Task.isValidTaskThreadHeader(taskThreadHeader)) {
+        DocumentApp.getUi().alert('find invalid table thread header when changing color of task: ' + taskName);
+        return;
+    }
+    GTD.Task.setThreadHeaderStatus(taskThreadHeader, type);
 };
 
 GTD.addTask = function(type, taskName) {
@@ -288,10 +299,12 @@ GTD.TOC.pullHeaders = function () {
 
 };
 
-GTD.changeTaskStatus = function(task, status) {
-    GTD.cleanTask('All', task);
-    GTD.addTask(status, task);
-    GTD.setTaskColor(status, task);
+GTD.changeTaskStatus = function(options) {
+    GTD.cleanTask('All', options.task);
+    GTD.addTask(options.status, options.task);
+    if (options.setTaskColor) {
+        GTD.setTaskColor(options.status, options.task);
+    }
 };
 
 GTD.insertTask = function(name) {
@@ -304,6 +317,10 @@ GTD.insertComment = function() {
 
 GTD.initTaskTable();
 
+/////////////////////////////////////////////////////////////
+// These functions are used by javascript for sidebar view.
+/////////////////////////////////////////////////////////////
+
 function getTOCString() {
   return JSON.stringify(GTD.TOC.pullHeaders());
 }
@@ -313,7 +330,11 @@ function getTasksString() {
 }
 
 function changeTaskStatus(task, status) {
-    return GTD.changeTaskStatus(task, status);
+    return GTD.changeTaskStatus({
+        task: task, 
+        status: status, 
+        setTaskColor: true
+    });
 }
 
 function findAndFocusOnTask(taskName) {

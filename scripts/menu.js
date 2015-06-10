@@ -62,7 +62,7 @@ function createActionableTask() {
         DocumentApp.getUi().alert(ret.error);
         return;
     }
-    GTD.changeTaskStatus(ret.taskDesc, 'Actionable');
+    GTD.changeTaskStatus({task: ret.taskDesc, status: 'Actionable'});
 }
 
 function moveTaskToWaitingFor() {
@@ -71,7 +71,7 @@ function moveTaskToWaitingFor() {
         DocumentApp.getUi().alert(ret.error);
         return;
     }
-    GTD.changeTaskStatus(ret.taskDesc, 'Waiting For');
+    GTD.changeTaskStatus({task: ret.taskDesc, status: 'Waiting For'});
 }
 
 function moveTaskToDone() {
@@ -80,7 +80,7 @@ function moveTaskToDone() {
         DocumentApp.getUi().alert(ret.error);
         return;
     }
-    GTD.changeTaskStatus(ret.taskDesc, 'Done');
+    GTD.changeTaskStatus({task: ret.taskDesc, status: 'Done'});
 }
 
 function showSidebar() {

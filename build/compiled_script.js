@@ -1,4 +1,4 @@
-// compiled from git commit version: c07bd8d09eb825e83a0b21e74c01d78831793cae
+// compiled from git commit version: bd91900dec07ea08a12142fc17c483aeee24122c
 var GTD = {
   body: DocumentApp.getActiveDocument().getBody(),
   header: ['Actionable', 'Waiting For', 'Done'], //FIXME change to taskStatus
@@ -198,30 +198,33 @@ GTD.Task.insertComment = function() {
 };
 
 // getTaskThreadHeader returns the task thread header under the cursor
-GTD.Task.getTaskThreadHeader = function() {
- var cursor = DocumentApp.getActiveDocument().getCursor();
- if (!cursor) {
-    debug('no cursor');
-    return;
- }
- var ele = cursor.getElement();
- if (ele.getType() === DocumentApp.ElementType.TEXT) {
-    ele = ele.getParent();
- }
- if (ele.getType() === DocumentApp.ElementType.PARAGRAPH) {
-    ele = ele.getParent();
- }
- if (ele.getType() === DocumentApp.ElementType.TABLE_CELL) {
-    ele = ele.getParent();
- }
- if (ele.getType() === DocumentApp.ElementType.TABLE_ROW) {
-    ele = ele.getParent();
- }
- if (!ele || ele.getType() != DocumentApp.ElementType.TABLE) {
-    DocumentApp.getUi().alert('Cannot find task header under cursor! ele.type: ' + ele.getType());
-    return;
- }
- return ele;
+GTD.Task.getTaskThreadHeader = function(ele) {
+    if (typeof ele === 'undefined') {
+        var cursor = DocumentApp.getActiveDocument().getCursor();
+        if (!cursor) {
+            debug('no cursor');
+            return;
+        }
+        ele = cursor.getElement();
+    }
+
+    if (ele.getType() === DocumentApp.ElementType.TEXT) {
+        ele = ele.getParent();
+    }
+    if (ele.getType() === DocumentApp.ElementType.PARAGRAPH) {
+        ele = ele.getParent();
+    }
+    if (ele.getType() === DocumentApp.ElementType.TABLE_CELL) {
+        ele = ele.getParent();
+    }
+    if (ele.getType() === DocumentApp.ElementType.TABLE_ROW) {
+        ele = ele.getParent();
+    }
+    if (!ele || ele.getType() != DocumentApp.ElementType.TABLE) {
+        DocumentApp.getUi().alert('Cannot find task header under cursor! ele.type: ' + ele.getType());
+        return;
+    }
+    return ele;
 };
 
 GTD.Task.isValidTaskThreadHeader = function(table) {
@@ -396,22 +399,33 @@ GTD.cleanTask = function(type, taskName, alert) {
 
 // Change the color of a task according to its current type
 GTD.setTaskColor = function(type, taskName) {
-    setColor = (function (type, ele) {
-        if (!ele) return;
-        ele.asText().editAsText().setForegroundColor(this.headerColor[this.getColIdx(type)]);
-    }).bind(this, type);
+    // setColor = (function (type, ele) {
+    //     if (!ele) return;
+    //     ele.asText().editAsText().setForegroundColor(this.headerColor[this.getColIdx(type)]);
+    // }).bind(this, type);
     // Change the color of the task in the task table
     var timeStamp = this.getTimeStamp(taskName);
-    var body = DocumentApp.getActiveDocument().getBody();
+    var doc = DocumentApp.getActiveDocument();
+    var body = doc.getBody();
+    // the first element is in the document header table.
     var re = body.findText(timeStamp);
-    setColor(re.getElement());
+    // setColor(re.getElement());
 
     // If the task exists in the main body, change its color, too. 
     re = body.findText(timeStamp, re);
-    if (re) {
-        setColor(re.getElement());
+    if (!re) {
+        DocumentApp.getUi().alert('cannot find tash thread table for task: ' + taskName);
+        return;
     }
 
+    // setColor(re.getElement());
+    // change color of the task header.
+    var taskThreadHeader = GTD.Task.getTaskThreadHeader(re.getElement());
+    if (!GTD.Task.isValidTaskThreadHeader(taskThreadHeader)) {
+        DocumentApp.getUi().alert('find invalid table thread header when changing color of task: ' + taskName);
+        return;
+    }
+    GTD.Task.setThreadHeaderStatus(taskThreadHeader, type);
 };
 
 GTD.addTask = function(type, taskName) {
@@ -552,10 +566,12 @@ GTD.TOC.pullHeaders = function () {
 
 };
 
-GTD.changeTaskStatus = function(task, status) {
-    GTD.cleanTask('All', task);
-    GTD.addTask(status, task);
-    GTD.setTaskColor(status, task);
+GTD.changeTaskStatus = function(options) {
+    GTD.cleanTask('All', options.task);
+    GTD.addTask(options.status, options.task);
+    if (options.setTaskColor) {
+        GTD.setTaskColor(options.status, options.task);
+    }
 };
 
 GTD.insertTask = function(name) {
@@ -568,6 +584,10 @@ GTD.insertComment = function() {
 
 GTD.initTaskTable();
 
+/////////////////////////////////////////////////////////////
+// These functions are used by javascript for sidebar view.
+/////////////////////////////////////////////////////////////
+
 function getTOCString() {
   return JSON.stringify(GTD.TOC.pullHeaders());
 }
@@ -577,7 +597,11 @@ function getTasksString() {
 }
 
 function changeTaskStatus(task, status) {
-    return GTD.changeTaskStatus(task, status);
+    return GTD.changeTaskStatus({
+        task: task, 
+        status: status, 
+        setTaskColor: true
+    });
 }
 
 function findAndFocusOnTask(taskName) {
@@ -671,7 +695,7 @@ function createActionableTask() {
         DocumentApp.getUi().alert(ret.error);
         return;
     }
-    GTD.changeTaskStatus(ret.taskDesc, 'Actionable');
+    GTD.changeTaskStatus({task: ret.taskDesc, status: 'Actionable'});
 }
 
 function moveTaskToWaitingFor() {
@@ -680,7 +704,7 @@ function moveTaskToWaitingFor() {
         DocumentApp.getUi().alert(ret.error);
         return;
     }
-    GTD.changeTaskStatus(ret.taskDesc, 'Waiting For');
+    GTD.changeTaskStatus({task: ret.taskDesc, status: 'Waiting For'});
 }
 
 function moveTaskToDone() {
@@ -689,7 +713,7 @@ function moveTaskToDone() {
         DocumentApp.getUi().alert(ret.error);
         return;
     }
-    GTD.changeTaskStatus(ret.taskDesc, 'Done');
+    GTD.changeTaskStatus({task: ret.taskDesc, status: 'Done'});
 }
 
 function showSidebar() {
