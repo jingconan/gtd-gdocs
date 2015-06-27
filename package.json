@@ -1,0 +1,28 @@
+{
+  "name": "gtd-gdocs",
+  "version": "1.0.0",
+  "description": "Google Task Document",
+  "main": "compile.js",
+  "dependencies": {
+    "glob": "^5.0.9",
+    "recursive-readdir": "^1.2.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hbhzwj/gtd-gdocs.git"
+  },
+  "keywords": [
+    "Task",
+    "Management"
+  ],
+  "author": "Jing Conan Wang",
+  "license": "GPL",
+  "bugs": {
+    "url": "https://github.com/hbhzwj/gtd-gdocs/issues"
+  },
+  "homepage": "https://github.com/hbhzwj/gtd-gdocs"
+}
