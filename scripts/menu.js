@@ -23,7 +23,7 @@ function insertComment() {
 }
 
 function insertTask() {
-    GTD.initTaskTable();
+    GTD.initialize();
 
     var task;
     var ui = DocumentApp.getUi();
@@ -55,12 +55,11 @@ function insertDate() {
 }
 
 function initTaskFunction() {
-    GTD.initTaskTable();
-    GTD.initPageMargin();
+    GTD.initialize();
 }
 
 function createActionableTask() {
-    GTD.initTaskTable();
+    GTD.initialize();
     var ret = GTD.getSelectedTask('Actionable');
     if (ret.error) {
         DocumentApp.getUi().alert(ret.error);
@@ -70,7 +69,7 @@ function createActionableTask() {
 }
 
 function moveTaskToWaitingFor() {
-    GTD.initTaskTable();
+    GTD.initialize();
     var ret = GTD.getSelectedTask('Waiting For');
     if (ret .error) {
         DocumentApp.getUi().alert(ret.error);
@@ -80,7 +79,7 @@ function moveTaskToWaitingFor() {
 }
 
 function moveTaskToDone() {
-    GTD.initTaskTable();
+    GTD.initialize();
     var ret = GTD.getSelectedTask('Done');
     if (ret .error) {
         DocumentApp.getUi().alert(ret.error);

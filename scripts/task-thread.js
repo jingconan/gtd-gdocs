@@ -6,14 +6,11 @@ GTD.Task = {
 };
 
 GTD.Task.createNewTask = function(name) {
-    var body = DocumentApp.getActiveDocument().getBody(),
-        taskEle = body.appendTable();
     this.status = 0;
     this.subTasksTotal = 0;
     this.subTasksDone = 0;
     
-    return this.addThreadHeader(name);
-    // this.addBody(bodyCell);
+    return this.insertThreadHeader(name);
 };
 
 GTD.Task.addThreadSeparator = function() {
@@ -21,13 +18,12 @@ GTD.Task.addThreadSeparator = function() {
     table.editAsText().setForegroundColor('#ffffff');
     this.setBackgroundColor(table, '#4285F4', [1, 1]);
     table.setBorderWidth(0);
-    GTD.util.setCursorAtTable(table);
 };
 
-GTD.Task.addThreadHeader = function( name) {
+GTD.Task.insertThreadHeader = function( name) {
     var currentTime = GTD.util.toISO(new Date());
     var taskStatus = GTD.header[this.status];
-    var subTaskStatus = this.subTasksDone + '/' + this.subTasksTotal;
+    // var subTaskStatus = this.subTasksDone + '/' + this.subTasksTotal;
 
     var headerTable = GTD.util.insertTableAtCursor([
         ['Timestamp', 'Name', 'Status'],
@@ -42,8 +38,6 @@ GTD.Task.addThreadHeader = function( name) {
     headerTable.editAsText().setForegroundColor(taskColor);
 
     this.setBackgroundColor(headerTable, '#dde4e6', this.SIZE);
-
-    GTD.util.setCursorAtTable(headerTable);
 
     // return task description here
     return currentTime + '\n' + name;
@@ -69,6 +63,8 @@ GTD.Task.insertComment = function() {
     var table = GTD.util.insertTableAtCursor([[user + '\n' + currentTime, '']]);
     if (!table) {
         Logger.log('Fail to insert comment table!');
+        DocumentApp.getUi().alert('Please make sure your cursor is not in ' +
+                                  'any table when inserting comment');
         return;
     }
     table.editAsText().setForegroundColor(GTD.commentStyle.foregroundColor);

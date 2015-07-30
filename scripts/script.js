@@ -277,14 +277,14 @@ GTD._createDefaultTableContent = function () {
 };
 
 GTD._createDefaultGTDTable = function (body) {
-    assert(this.header.length === this.headerColor.length, 'wrong number of color');
-    // Build a table from the header.
-    var table;
-    if (body.getNumChildren() === 0) { // empty document
-        table = body.appendTable(this._createDefaultTableContent());
-    } else {
-        table = body.insertTable(0, this._createDefaultTableContent());
+    GTD.util.setCursorAtStart()
+    var table = GTD.util.insertTableAtCursor(this._createDefaultTableContent());
+    if (!table) {
+        DocumentApp.getUi().alert('Cannot create task summary table!');
+        return;
     }
+
+    assert(this.header.length === this.headerColor.length, 'wrong number of color');
     for (i = 0; i < this.header.length; ++i) {
         table.getCell(0, i)
         .editAsText()
@@ -333,6 +333,15 @@ GTD.insertTask = function(name) {
 GTD.insertComment = function() {
     GTD.Task.insertComment();
 };
+
+GTD.initialize = function() {
+    if (GTD.initialized === true) {
+        return;
+    }
+    GTD.initTaskTable();
+    GTD.initPageMargin();
+    GTD.initialized = true;
+}
 
 // GTD.initTaskTable();
 

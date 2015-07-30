@@ -9,4 +9,5 @@ var GTD = {
   defaultRows: 1,
   templates: {},
   TOC: {},
+  initialized: false
 };
