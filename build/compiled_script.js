@@ -1,9 +1,9 @@
-// compiled from git commit version: 68a7be66b54cefdefae4b8871b780051e5d3738d
+// compiled from git commit version: 1550e8b461c5f8dcd6d4d13ebc20f8c075f54885
 var GTD = {
   body: DocumentApp.getActiveDocument().getBody(),
   header: ['Actionable', 'Waiting For', 'Done'], //FIXME change to taskStatus
   headerColor: ['#ff0000', '#9d922e', '#16a031'], //FIXME change to taskStatusColor 
-  bodyMargins: [0.1, 1, 0.1, 1], // L, T, R, D
+  bodyMargins: [7.2, 7.2, 7.2, 7.2], // L, T, R, D unit is point
   commentStyle: {
       foregroundColor: '#000000'
   },
@@ -276,7 +276,7 @@ GTD.initPageMargin = function() {
     this.body.setMarginLeft(this.bodyMargins[0]);
     this.body.setMarginTop(this.bodyMargins[1]);
     this.body.setMarginRight(this.bodyMargins[2]);
-    this.body.setMarginRight(this.bodyMargins[3]);
+    this.body.setMarginBottom(this.bodyMargins[3]);
 }
 
 GTD.getTaskTable = function() {
@@ -590,6 +590,7 @@ GTD.initialize = function() {
     if (GTD.initialized === true) {
         return;
     }
+    DocumentApp.Attribute.BACKGROUND_COLOR = '#a452ff'
     GTD.initTaskTable();
     GTD.initPageMargin();
     GTD.initialized = true;
