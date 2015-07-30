@@ -315,7 +315,7 @@ GTD.insertComment = function() {
     GTD.Task.insertComment();
 };
 
-GTD.initTaskTable();
+// GTD.initTaskTable();
 
 /////////////////////////////////////////////////////////////
 // These functions are used by javascript for sidebar view.

@@ -1,4 +1,4 @@
-// compiled from git commit version: bd91900dec07ea08a12142fc17c483aeee24122c
+// compiled from git commit version: 2c846dfac726fe856fd0943eea7b04bff068f1c8
 var GTD = {
   body: DocumentApp.getActiveDocument().getBody(),
   header: ['Actionable', 'Waiting For', 'Done'], //FIXME change to taskStatus
@@ -582,7 +582,7 @@ GTD.insertComment = function() {
     GTD.Task.insertComment();
 };
 
-GTD.initTaskTable();
+// GTD.initTaskTable();
 
 /////////////////////////////////////////////////////////////
 // These functions are used by javascript for sidebar view.
