@@ -1,4 +1,4 @@
-// compiled from git commit version: 2f135ff2c46cef589d065f42d2bdd8695cb1496a
+// compiled from git commit version: 6c6ed27c54ee5e01cd278f2108dd032ccf7e518d
 var GTD = {
   body: DocumentApp.getActiveDocument().getBody(),
   header: ['Actionable', 'Waiting For', 'Done'], //FIXME change to taskStatus
@@ -613,6 +613,7 @@ function getTOCString() {
 }
 
 function getTasksString() {
+    GTD.initialize();
     return JSON.stringify(GTD.getSideBarTableContent());
 }
 

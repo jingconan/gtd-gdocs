@@ -361,6 +361,7 @@ function getTOCString() {
 }
 
 function getTasksString() {
+    GTD.initialize();
     return JSON.stringify(GTD.getSideBarTableContent());
 }
 
