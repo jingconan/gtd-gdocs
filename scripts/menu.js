@@ -3,7 +3,7 @@ function onOpen() {
   // Or DocumentApp or FormApp.
   ui.createMenu('GTD')
       // .addItem('insert date', 'insertDate')
-      .addItem('Create task table', 'initTaskFunction')
+      .addItem('Initialize', 'initTaskFunction')
       .addItem('Insert task', 'insertTask')
       .addItem('Insert comment', 'insertComment')
       .addItem('Mark as Actionable', 'createActionableTask')
@@ -23,6 +23,8 @@ function insertComment() {
 }
 
 function insertTask() {
+    GTD.initTaskTable();
+
     var task;
     var ui = DocumentApp.getUi();
     var result = ui.prompt(
@@ -53,10 +55,12 @@ function insertDate() {
 }
 
 function initTaskFunction() {
-  GTD.initTaskTable();
+    GTD.initTaskTable();
+    GTD.initPageMargin();
 }
 
 function createActionableTask() {
+    GTD.initTaskTable();
     var ret = GTD.getSelectedTask('Actionable');
     if (ret.error) {
         DocumentApp.getUi().alert(ret.error);
@@ -66,6 +70,7 @@ function createActionableTask() {
 }
 
 function moveTaskToWaitingFor() {
+    GTD.initTaskTable();
     var ret = GTD.getSelectedTask('Waiting For');
     if (ret .error) {
         DocumentApp.getUi().alert(ret.error);
@@ -75,6 +80,7 @@ function moveTaskToWaitingFor() {
 }
 
 function moveTaskToDone() {
+    GTD.initTaskTable();
     var ret = GTD.getSelectedTask('Done');
     if (ret .error) {
         DocumentApp.getUi().alert(ret.error);
@@ -84,11 +90,11 @@ function moveTaskToDone() {
 }
 
 function showSidebar() {
-  var html = HtmlService.createHtmlOutput(GTD.templates.sidebar)
-      .setSandboxMode(HtmlService.SandboxMode.IFRAME)
-      .setTitle('My task list')
-      .setWidth(300);
-      
-  DocumentApp.getUi() // Or DocumentApp or FormApp.
-      .showSidebar(html);
+    var html = HtmlService.createHtmlOutput(GTD.templates.sidebar)
+        .setSandboxMode(HtmlService.SandboxMode.IFRAME)
+        .setTitle('My task list')
+        .setWidth(300);
+
+    DocumentApp.getUi() // Or DocumentApp or FormApp.
+        .showSidebar(html);
 }

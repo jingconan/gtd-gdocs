@@ -20,6 +20,13 @@ GTD.initTaskTable = function() {
     this.taskTable = taskTable;
 };
 
+GTD.initPageMargin = function() {
+    this.body.setMarginLeft(this.bodyMargins[0]);
+    this.body.setMarginTop(this.bodyMargins[1]);
+    this.body.setMarginRight(this.bodyMargins[2]);
+    this.body.setMarginRight(this.bodyMargins[3]);
+}
+
 GTD.getTaskTable = function() {
     return this.taskTable;
 };
