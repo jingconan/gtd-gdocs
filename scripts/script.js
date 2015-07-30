@@ -357,6 +357,7 @@ GTD.initialize = function() {
 /////////////////////////////////////////////////////////////
 
 function getTOCString() {
+  GTD.initialize();
   return JSON.stringify(GTD.TOC.pullHeaders());
 }
 
@@ -366,6 +367,7 @@ function getTasksString() {
 }
 
 function changeTaskStatus(task, status) {
+    GTD.initialize();
     return GTD.changeTaskStatus({
         task: task, 
         status: status, 
@@ -374,6 +376,7 @@ function changeTaskStatus(task, status) {
 }
 
 function findAndFocusOnTask(taskName) {
+    GTD.initialize();
     var timeStamp = GTD.getTimeStamp(taskName);
     var body = DocumentApp.getActiveDocument().getBody();
     var re = body.findText(timeStamp);

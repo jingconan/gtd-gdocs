@@ -1,4 +1,4 @@
-// compiled from git commit version: 6c6ed27c54ee5e01cd278f2108dd032ccf7e518d
+// compiled from git commit version: bf4d65c198d0bd6063e311b527356c1e53755462
 var GTD = {
   body: DocumentApp.getActiveDocument().getBody(),
   header: ['Actionable', 'Waiting For', 'Done'], //FIXME change to taskStatus
@@ -609,6 +609,7 @@ GTD.initialize = function() {
 /////////////////////////////////////////////////////////////
 
 function getTOCString() {
+  GTD.initialize();
   return JSON.stringify(GTD.TOC.pullHeaders());
 }
 
@@ -618,6 +619,7 @@ function getTasksString() {
 }
 
 function changeTaskStatus(task, status) {
+    GTD.initialize();
     return GTD.changeTaskStatus({
         task: task, 
         status: status, 
@@ -626,6 +628,7 @@ function changeTaskStatus(task, status) {
 }
 
 function findAndFocusOnTask(taskName) {
+    GTD.initialize();
     var timeStamp = GTD.getTimeStamp(taskName);
     var body = DocumentApp.getActiveDocument().getBody();
     var re = body.findText(timeStamp);
