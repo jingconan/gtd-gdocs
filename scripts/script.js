@@ -232,9 +232,16 @@ GTD.appendLogEntry = function() {
 };
 
 GTD._isTaskTable = function(table) {
+    if (table.getNumRows() == 0) {
+        return false;
+    }
+    var headerRow = table.getRow(0);
+    if (headerRow.getNumChildren() !== this.header.length) {
+        return false;
+    }
     var i;
     for (i = 0; i < this.header.length; ++i) {
-        if (table.getCell(0, i).getText() != this.header[i]) {
+        if (headerRow.getCell(i).getText() != this.header[i]) {
             return false;
         }
     }
@@ -263,9 +270,14 @@ GTD._createDefaultTableContent = function () {
 };
 
 GTD._createDefaultGTDTable = function (body) {
-    // Build a table from the header.
-    var table = body.insertTable(0, this._createDefaultTableContent());
     assert(this.header.length === this.headerColor.length, 'wrong number of color');
+    // Build a table from the header.
+    var table;
+    if (body.getNumChildren() === 0) { // empty document
+        table = body.appendTable(this._createDefaultTableContent());
+    } else {
+        table = body.insertTable(0, this._createDefaultTableContent());
+    }
     for (i = 0; i < this.header.length; ++i) {
         table.getCell(0, i)
         .editAsText()

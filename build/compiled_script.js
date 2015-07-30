@@ -1,4 +1,4 @@
-// compiled from git commit version: 2c846dfac726fe856fd0943eea7b04bff068f1c8
+// compiled from git commit version: 5c8ad6f11fcecb5939d181fc7162e22747022161
 var GTD = {
   body: DocumentApp.getActiveDocument().getBody(),
   header: ['Actionable', 'Waiting For', 'Done'], //FIXME change to taskStatus
@@ -499,9 +499,16 @@ GTD.appendLogEntry = function() {
 };
 
 GTD._isTaskTable = function(table) {
+    if (table.getNumRows() == 0) {
+        return false;
+    }
+    var headerRow = table.getRow(0);
+    if (headerRow.getNumChildren() !== this.header.length) {
+        return false;
+    }
     var i;
     for (i = 0; i < this.header.length; ++i) {
-        if (table.getCell(0, i).getText() != this.header[i]) {
+        if (headerRow.getCell(i).getText() != this.header[i]) {
             return false;
         }
     }
@@ -530,9 +537,14 @@ GTD._createDefaultTableContent = function () {
 };
 
 GTD._createDefaultGTDTable = function (body) {
-    // Build a table from the header.
-    var table = body.insertTable(0, this._createDefaultTableContent());
     assert(this.header.length === this.headerColor.length, 'wrong number of color');
+    // Build a table from the header.
+    var table;
+    if (body.getNumChildren() === 0) { // empty document
+        table = body.appendTable(this._createDefaultTableContent());
+    } else {
+        table = body.insertTable(0, this._createDefaultTableContent());
+    }
     for (i = 0; i < this.header.length; ++i) {
         table.getCell(0, i)
         .editAsText()
@@ -636,14 +648,14 @@ function onOpen() {
   // Or DocumentApp or FormApp.
   ui.createMenu('GTD')
       // .addItem('insert date', 'insertDate')
-      .addItem('insert task', 'insertTask')
-      .addItem('insert comment', 'insertComment')
-      .addItem('insert separator', 'insertSeparator')
-      .addItem('create task table', 'initTaskFunction')
-      .addItem('move to Actionable', 'createActionableTask')
-      .addItem('move to WaitingFor', 'moveTaskToWaitingFor')
-      .addItem('move to Done', 'moveTaskToDone')
-      .addItem('show task sidebar', 'showSidebar')
+      .addItem('Create task table', 'initTaskFunction')
+      .addItem('Insert task', 'insertTask')
+      .addItem('Insert comment', 'insertComment')
+      .addItem('Mark as Actionable', 'createActionableTask')
+      .addItem('Mark as WaitingFor', 'moveTaskToWaitingFor')
+      .addItem('Mark as Done', 'moveTaskToDone')
+      .addItem('Insert separator', 'insertSeparator')
+      .addItem('Show sidebar', 'showSidebar')
       .addToUi();
 }
 

@@ -3,14 +3,14 @@ function onOpen() {
   // Or DocumentApp or FormApp.
   ui.createMenu('GTD')
       // .addItem('insert date', 'insertDate')
-      .addItem('insert task', 'insertTask')
-      .addItem('insert comment', 'insertComment')
-      .addItem('insert separator', 'insertSeparator')
-      .addItem('create task table', 'initTaskFunction')
-      .addItem('move to Actionable', 'createActionableTask')
-      .addItem('move to WaitingFor', 'moveTaskToWaitingFor')
-      .addItem('move to Done', 'moveTaskToDone')
-      .addItem('show task sidebar', 'showSidebar')
+      .addItem('Create task table', 'initTaskFunction')
+      .addItem('Insert task', 'insertTask')
+      .addItem('Insert comment', 'insertComment')
+      .addItem('Mark as Actionable', 'createActionableTask')
+      .addItem('Mark as WaitingFor', 'moveTaskToWaitingFor')
+      .addItem('Mark as Done', 'moveTaskToDone')
+      .addItem('Insert separator', 'insertSeparator')
+      .addItem('Show sidebar', 'showSidebar')
       .addToUi();
 }
 
