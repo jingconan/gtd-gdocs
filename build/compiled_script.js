@@ -1,4 +1,4 @@
-// compiled from git commit version: 1550e8b461c5f8dcd6d4d13ebc20f8c075f54885
+// compiled from git commit version: 2f135ff2c46cef589d065f42d2bdd8695cb1496a
 var GTD = {
   body: DocumentApp.getActiveDocument().getBody(),
   header: ['Actionable', 'Waiting For', 'Done'], //FIXME change to taskStatus
@@ -590,7 +590,13 @@ GTD.initialize = function() {
     if (GTD.initialized === true) {
         return;
     }
-    DocumentApp.Attribute.BACKGROUND_COLOR = '#a452ff'
+
+    // Set background of document to be solarized light color
+    var style = {};
+    style[DocumentApp.Attribute.BACKGROUND_COLOR] = '#eee8d5';
+    var doc = DocumentApp.getActiveDocument().getBody();
+    doc.setAttributes(style);
+
     GTD.initTaskTable();
     GTD.initPageMargin();
     GTD.initialized = true;

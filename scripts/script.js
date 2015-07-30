@@ -338,6 +338,13 @@ GTD.initialize = function() {
     if (GTD.initialized === true) {
         return;
     }
+
+    // Set background of document to be solarized light color
+    var style = {};
+    style[DocumentApp.Attribute.BACKGROUND_COLOR] = '#eee8d5';
+    var doc = DocumentApp.getActiveDocument().getBody();
+    doc.setAttributes(style);
+
     GTD.initTaskTable();
     GTD.initPageMargin();
     GTD.initialized = true;
