@@ -60,7 +60,7 @@ GTD.Task.setColumnWidth = function(table) {
 GTD.Task.insertComment = function() {
     var user = Session.getActiveUser().getEmail().split("@")[0];
     var currentTime = GTD.util.toISO(new Date());
-    var table = GTD.util.insertTableAtCursor([[user + '\n' + currentTime, '']]);
+    var table = GTD.util.insertTableAtCursor([[user + ' ' + currentTime], ['']]);
     if (!table) {
         Logger.log('Fail to insert comment table!');
         DocumentApp.getUi().alert('Please make sure your cursor is not in ' +
@@ -72,13 +72,11 @@ GTD.Task.insertComment = function() {
     var text = table.getCell(0, 0).editAsText();
     text.setFontSize(user.length+1, text.getText().length-1, 7);
 
-    var width = Math.max(7 * user.length, 60);
     table.getCell(0, 0)
-        .setWidth(width)
         .setBackgroundColor('#dde4e6');
-    table.getCell(0, 1)
+    table.getCell(1, 0)
         .setBackgroundColor('#f7f7f7');
-    GTD.util.setCursorAtTable(table, [0, 1]);
+    GTD.util.setCursorAtTable(table, [1, 0]);
 };
 
 // getTaskThreadHeader returns the task thread header under the cursor
