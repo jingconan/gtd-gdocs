@@ -123,7 +123,7 @@ GTD.cleanTask = function(type, task, alert) {
     }
     if (type === 'All') {
         for (i = 0; i < this.header.length; ++i) {
-            this.cleanTask(this.header[i], taskName);
+            this.cleanTask(this.header[i], {taskDesc: taskName});
         }
         return;
     }
@@ -317,7 +317,7 @@ GTD.TOC.pullHeaders = function () {
 
 GTD.changeTaskStatus = function(options) {
     var task = options.task;
-    task = GTD.cleanTask('All', task);
+    GTD.cleanTask('All', task);
     GTD.addTask(options.status, task);
     if (options.setTaskColor) {
         GTD.setTaskColor(options.status, task);

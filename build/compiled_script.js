@@ -1,4 +1,4 @@
-// compiled from git commit version: 7a105a32976743edeab3b6b8891147e480d333e3
+// compiled from git commit version: 9c9d3683a04034bb3303a3eb7acbe0d0015595ba
 function onOpen() {
   var ui = DocumentApp.getUi();
   // Or DocumentApp or FormApp.
@@ -263,7 +263,7 @@ GTD.cleanTask = function(type, task, alert) {
     }
     if (type === 'All') {
         for (i = 0; i < this.header.length; ++i) {
-            this.cleanTask(this.header[i], taskName);
+            this.cleanTask(this.header[i], {taskDesc: taskName});
         }
         return;
     }
@@ -457,7 +457,7 @@ GTD.TOC.pullHeaders = function () {
 
 GTD.changeTaskStatus = function(options) {
     var task = options.task;
-    task = GTD.cleanTask('All', task);
+    GTD.cleanTask('All', task);
     GTD.addTask(options.status, task);
     if (options.setTaskColor) {
         GTD.setTaskColor(options.status, task);
