@@ -1,10 +1,10 @@
 // This is a google app scripts that implements a GTD work flow using
-// Google Docs. 
+// Google Docs.
 //
-// Author: Jing Conan Wang 
+// Author: Jing Conan Wang
 // Email: hbhzwj@gmail.com
 //
-// This code is under GPL license. 
+// This code is under GPL license.
 
 
 // FIXME need to factor the script.js to several smaller files
@@ -41,7 +41,7 @@ GTD.getAllTasksFromCol = function(col) {
     }
     return res;
 };
-  
+
 
 GTD.getSideBarTableContent = function() {
     var i, j, tasks, thisTasks;
@@ -63,7 +63,7 @@ GTD.getSideBarTableContent = function() {
     }
     return res;
 };
- 
+
 
 GTD.getColIdx = function(name) {
     var i;
@@ -87,7 +87,7 @@ GTD.getID = function(s) {
 
 };
 
-// this function returns the first empty cell in a column. 
+// this function returns the first empty cell in a column.
 GTD.findFirstEmptyCell = function(col) {
     return this.findFirstCell(col, '', false);
 };
@@ -103,7 +103,7 @@ GTD.findFirstCell = function(col, target, useID) {
     for (i = 0; i < rowNum; ++i) {
         cell = this.taskTable.getCell(i, col);
         if (useID && (this.getID(cell.getText()) === this.getID(target))) {
-            // compare using ID 
+            // compare using ID
             return cell;
         } else if (cell.getText() === target) {
             // compare the full string
@@ -114,7 +114,8 @@ GTD.findFirstCell = function(col, target, useID) {
 };
 
 
-GTD.cleanTask = function(type, taskName, alert) {
+GTD.cleanTask = function(type, task, alert) {
+    var taskName = task.taskDesc;
     //debug('from: ' + type);
     var i;
     if (typeof type === 'undefined') {
@@ -127,7 +128,7 @@ GTD.cleanTask = function(type, taskName, alert) {
         return;
     }
 
-    var cell = this.findFirstCell(type, taskName);   
+    var cell = this.findFirstCell(type, taskName);
     if (typeof cell === 'undefined') {
         if (alert) {
             DocumentApp.getUi().alert('cannot find task name: ' + taskName);
@@ -151,7 +152,7 @@ GTD.setTaskColor = function(type, taskName) {
     var re = body.findText(timeStamp);
     // setColor(re.getElement());
 
-    // If the task exists in the main body, change its color, too. 
+    // If the task exists in the main body, change its color, too.
     re = body.findText(timeStamp, re);
     if (!re) {
         DocumentApp.getUi().alert('cannot find tash thread table for task: ' + taskName);
@@ -168,7 +169,8 @@ GTD.setTaskColor = function(type, taskName) {
     GTD.Task.setThreadHeaderStatus(taskThreadHeader, type);
 };
 
-GTD.addTask = function(type, taskName) {
+GTD.addTask = function(type, task) {
+    var taskName = task.taskDesc;
     cell = this.findFirstEmptyCell(type);
     if (typeof cell === 'undefined') {
         this.appendRow(1);
@@ -176,11 +178,6 @@ GTD.addTask = function(type, taskName) {
     }
     cell.setText(taskName);
     // this.setTaskColor(type, taskName);
-};
-
-GTD.moveTask = function(from, to, taskName) {
-    this.cleanTask(from, taskName);
-    this.addTask(to, taskName);
 };
 
 GTD.mutateRow = function(row, rowContent) {
@@ -292,7 +289,7 @@ GTD._createDefaultGTDTable = function (body) {
     }
     return table;
 };
- 
+
 
 GTD.TOC.pullHeaders = function () {
     var doc = DocumentApp.getActiveDocument();
@@ -319,10 +316,11 @@ GTD.TOC.pullHeaders = function () {
 };
 
 GTD.changeTaskStatus = function(options) {
-    GTD.cleanTask('All', options.task);
-    GTD.addTask(options.status, options.task);
+    var task = options.task;
+    task = GTD.cleanTask('All', task);
+    GTD.addTask(options.status, task);
     if (options.setTaskColor) {
-        GTD.setTaskColor(options.status, options.task);
+        GTD.setTaskColor(options.status, task);
     }
 };
 
@@ -369,8 +367,8 @@ function getTasksString() {
 function changeTaskStatus(task, status) {
     GTD.initialize();
     return GTD.changeTaskStatus({
-        task: task, 
-        status: status, 
+        task: task,
+        status: status,
         setTaskColor: true
     });
 }

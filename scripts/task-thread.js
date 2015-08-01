@@ -9,7 +9,7 @@ GTD.Task.createNewTask = function(name) {
     this.status = 0;
     this.subTasksTotal = 0;
     this.subTasksDone = 0;
-    
+
     return this.insertThreadHeader(name);
 };
 
@@ -42,8 +42,19 @@ GTD.Task.insertThreadHeader = function( name) {
     GTD.Task.setForegroundColor(headerTable, '#ffffff', [0, 1, 0, this.SIZE[1]]);
     GTD.Task.setBackgroundColor(headerTable, '#dde4e6', [1, this.SIZE[0], 0, this.SIZE[1]]);
 
-    // return task description here
-    return currentTime + '\n' + name;
+    // Add a bookmark
+    var taskDesc = currentTime + '\n' + name
+    var position = DocumentApp.getActiveDocument().newPosition(headerTable, 0);
+    var bookmark = position.insertBookmark();
+
+    // Store the correspondence of taskDesc and bookmark Id.
+    var documentProperties = PropertiesService.getDocumentProperties();
+    documentProperties.setProperty(taskDesc, bookmark.getId());
+
+    // return task here
+    return {
+      taskDesc: taskDesc
+    };
 
 };
 

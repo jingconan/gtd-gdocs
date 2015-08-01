@@ -10,6 +10,7 @@ function onOpen() {
       .addItem('Mark as WaitingFor', 'moveTaskToWaitingFor')
       .addItem('Mark as Done', 'moveTaskToDone')
       .addItem('Insert separator', 'insertSeparator')
+      .addItem('Jump to task', 'jumpToTask')
       .addItem('Show sidebar', 'showSidebar')
       .addToUi();
 }
@@ -37,13 +38,37 @@ function insertTask() {
     if (button == ui.Button.OK) {
         task = GTD.insertTask(text);
         // By default, mark this task as Actionable task
-        GTD.cleanTask('All', task);
+        // task = GTD.cleanTask('All', task);
         GTD.addTask('Actionable', task);
     } else {
         return;
     }
+}
 
-
+function jumpToTask() {
+    var doc = DocumentApp.getActiveDocument();
+    var cursor = doc.getCursor();
+    if (!cursor) {
+        debug('no cursor');
+        return;
+    }
+    var ele = cursor.getElement();
+    if (ele.getType() === DocumentApp.ElementType.TEXT) {
+        ele = ele.getParent();
+    }
+    if (ele.getType() === DocumentApp.ElementType.PARAGRAPH) {
+        ele = ele.getParent();
+    }
+    if (!ele || ele.getType() != DocumentApp.ElementType.TABLE_CELL) {
+        DocumentApp.getUi().alert('Cannot find task under cursor!' );
+        return;
+    }
+    var documentProperties = PropertiesService.getDocumentProperties();
+    var bookmarkId = documentProperties.getProperty(ele.editAsText().getText());
+    var bookmark = doc.getBookmark(bookmarkId);
+    if (bookmark) {
+        doc.setCursor(bookmark.getPosition());
+    }
 }
 
 function insertDate() {
@@ -65,7 +90,7 @@ function createActionableTask() {
         DocumentApp.getUi().alert(ret.error);
         return;
     }
-    GTD.changeTaskStatus({task: ret.taskDesc, status: 'Actionable'});
+    GTD.changeTaskStatus({task: ret, status: 'Actionable'});
 }
 
 function moveTaskToWaitingFor() {
@@ -75,7 +100,7 @@ function moveTaskToWaitingFor() {
         DocumentApp.getUi().alert(ret.error);
         return;
     }
-    GTD.changeTaskStatus({task: ret.taskDesc, status: 'Waiting For'});
+    GTD.changeTaskStatus({task: ret, status: 'Waiting For'});
 }
 
 function moveTaskToDone() {
@@ -85,7 +110,7 @@ function moveTaskToDone() {
         DocumentApp.getUi().alert(ret.error);
         return;
     }
-    GTD.changeTaskStatus({task: ret.taskDesc, status: 'Done'});
+    GTD.changeTaskStatus({task: ret, status: 'Done'});
 }
 
 function showSidebar() {
