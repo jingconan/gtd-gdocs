@@ -17,16 +17,8 @@ function debug(s) {
 }
 
 GTD.util.toISO = function(date) {
-  function f(n) {
-    // Format integers to have at least two digits.
-    return n < 10 ? '0' + n : n;
-  }
-  return date.getFullYear()   + '-' +
-       f(date.getMonth() + 1) + '-' +
-       f(date.getDate())      + ' ' +
-       f(date.getHours())     + ':' +
-       f(date.getMinutes())   + ':' +
-       f(date.getSeconds());
+    var timeZone = Session.getScriptTimeZone();
+    return Utilities.formatDate(date, timeZone, "yyyy-MM-dd HH:mm:ss")
 };
 
 if (typeof String.prototype.startsWith != 'function') {

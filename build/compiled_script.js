@@ -1,4 +1,4 @@
-// compiled from git commit version: 5a00c711a997e7fdeb675137a809eb44c36981e5
+// compiled from git commit version: 7a105a32976743edeab3b6b8891147e480d333e3
 function onOpen() {
   var ui = DocumentApp.getUi();
   // Or DocumentApp or FormApp.
@@ -499,7 +499,6 @@ GTD.getTaskThreadPosition = function(task) {
 };
 
 GTD.jumpAndFocusOnTask = function(task) {
-    debug('task: '+ JSON.stringify(task));
     var doc = DocumentApp.getActiveDocument();
     var taskDesc = task.taskDesc;
     var position = GTD.getTaskThreadPosition(task);
@@ -743,16 +742,8 @@ function debug(s) {
 }
 
 GTD.util.toISO = function(date) {
-  function f(n) {
-    // Format integers to have at least two digits.
-    return n < 10 ? '0' + n : n;
-  }
-  return date.getFullYear()   + '-' +
-       f(date.getMonth() + 1) + '-' +
-       f(date.getDate())      + ' ' +
-       f(date.getHours())     + ':' +
-       f(date.getMinutes())   + ':' +
-       f(date.getSeconds());
+    var timeZone = Session.getScriptTimeZone();
+    return Utilities.formatDate(date, timeZone, "yyyy-MM-dd HH:mm:ss")
 };
 
 if (typeof String.prototype.startsWith != 'function') {
