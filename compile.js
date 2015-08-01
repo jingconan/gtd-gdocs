@@ -28,12 +28,12 @@ function concat_template(code) {
     code += "\n\n";
 
     // Compile frameworks
-    var frameworkFilePaths = walk('./frameworks');
-    for(var i = 0; i < frameworkFilePaths.length; ++i) {
-        filepath = frameworkFilePaths[i]
-        console.log("Compile framework: " + filepath);
-        code += (fs.readFileSync(filepath).toString() + '\n\n');
-    }
+    // var frameworkFilePaths = walk('./frameworks');
+    // for(var i = 0; i < frameworkFilePaths.length; ++i) {
+    //     filepath = frameworkFilePaths[i]
+    //     console.log("Compile framework: " + filepath);
+    //     code += (fs.readFileSync(filepath).toString() + '\n\n');
+    // }
 
     // Compile templates
     var templateFilepaths = walk("./templates");
