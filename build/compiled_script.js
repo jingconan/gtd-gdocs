@@ -1,4 +1,4 @@
-// compiled from git commit version: 375995523fbafd7fd41ce955c0ee3b02a12d40ca
+// compiled from git commit version: 5a00c711a997e7fdeb675137a809eb44c36981e5
 function onOpen() {
   var ui = DocumentApp.getUi();
   // Or DocumentApp or FormApp.
@@ -64,12 +64,10 @@ function jumpToTask() {
         DocumentApp.getUi().alert('Cannot find task under cursor!' );
         return;
     }
-    var documentProperties = PropertiesService.getDocumentProperties();
-    var bookmarkId = documentProperties.getProperty(ele.editAsText().getText());
-    var bookmark = doc.getBookmark(bookmarkId);
-    if (bookmark) {
-        doc.setCursor(bookmark.getPosition());
-    }
+
+    GTD.jumpAndFocusOnTask({
+        taskDesc: ele.editAsText().getText()
+    });
 }
 
 function insertDate() {
@@ -488,7 +486,36 @@ GTD.initialize = function() {
     GTD.initTaskTable();
     GTD.initPageMargin();
     GTD.initialized = true;
-}
+};
+
+GTD.getTaskThreadPosition = function(task) {
+    var doc = DocumentApp.getActiveDocument();
+    var documentProperties = PropertiesService.getDocumentProperties();
+    var bookmarkId = documentProperties.getProperty(task.taskDesc);
+    var bookmark = doc.getBookmark(bookmarkId);
+    if (bookmark) {
+        return bookmark.getPosition();
+    }
+};
+
+GTD.jumpAndFocusOnTask = function(task) {
+    debug('task: '+ JSON.stringify(task));
+    var doc = DocumentApp.getActiveDocument();
+    var taskDesc = task.taskDesc;
+    var position = GTD.getTaskThreadPosition(task);
+    if (!position) {
+        DocumentApp.getUi().alert('cannot find task : ' + task.taskDesc);
+        return;
+    }
+
+    doc.setCursor(position);
+
+    // Make the task to be selected. This gives user a visual indicator
+    // of the start of the task.
+    var rangeBuilder = doc.newRange();
+    rangeBuilder.addElement(position.getElement());
+    doc.setSelection(rangeBuilder.build());
+};
 
 // GTD.initTaskTable();
 
@@ -517,29 +544,8 @@ function changeTaskStatus(task, status) {
 
 function findAndFocusOnTask(taskName) {
     GTD.initialize();
-    var timeStamp = GTD.getTimeStamp(taskName);
-    var body = DocumentApp.getActiveDocument().getBody();
-    var re = body.findText(timeStamp);
-    var position;
-    //debug('timeStamp: ' + timeStamp);
-    var doc = DocumentApp.getActiveDocument();
-    if (!re) {
-        DocumentApp.getUi().alert('cannot find task name: ' + taskName);
-    }
-
-    // The second appearance is the task in the body
-    re = body.findText(timeStamp, re);
-    if (!re) {
-        DocumentApp.getUi().alert('cannot find task name: ' + taskName);
-    }
-    position = doc.newPosition(re.getElement(), re.getStartOffset());
-    doc.setCursor(position);
-
-    // Make the timestamp of the task to be selected. This gives user a
-    // visual indicator of the start of the task.
-    var rangeBuilder = doc.newRange();
-    rangeBuilder.addElement(re.getElement());
-    doc.setSelection(rangeBuilder.build());
+    debug('taskName: ' + taskName);
+    GTD.jumpAndFocusOnTask({taskDesc:taskName})
 }
 
 

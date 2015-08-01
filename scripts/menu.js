@@ -63,12 +63,10 @@ function jumpToTask() {
         DocumentApp.getUi().alert('Cannot find task under cursor!' );
         return;
     }
-    var documentProperties = PropertiesService.getDocumentProperties();
-    var bookmarkId = documentProperties.getProperty(ele.editAsText().getText());
-    var bookmark = doc.getBookmark(bookmarkId);
-    if (bookmark) {
-        doc.setCursor(bookmark.getPosition());
-    }
+
+    GTD.jumpAndFocusOnTask({
+        taskDesc: ele.editAsText().getText()
+    });
 }
 
 function insertDate() {
