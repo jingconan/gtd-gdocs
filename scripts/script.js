@@ -348,14 +348,37 @@ GTD.initialize = function() {
     GTD.initialized = true;
 };
 
+GTD.searchBookmarkIdBasedOnTaskDesc = function(taskDesc) {
+    var doc = DocumentApp.getActiveDocument();
+    var bookmarks = doc.getBookmarks();
+    var i, header, desc;
+    for (i = 0; i < bookmarks.length; ++i) {
+        header = GTD.Task.getTaskThreadHeader(bookmarks[i].getPosition().getElement());
+        desc = GTD.Task.getTaskDesc(header);
+        if (taskDesc === desc) {
+            return bookmarks[i].getId();
+        }
+    }
+}
+
 GTD.getTaskThreadPosition = function(task) {
     var doc = DocumentApp.getActiveDocument();
     var documentProperties = PropertiesService.getDocumentProperties();
     var bookmarkId = documentProperties.getProperty(task.taskDesc);
+    if (!bookmarkId) {
+        Logger.log('PropertiesService unsynced!');
+        bookmarkId =  GTD.searchBookmarkIdBasedOnTaskDesc(task.taskDesc);
+        if (bookmarkId) {
+            documentProperties.setProperty(task.taskDesc, bookmarkId);
+        } else {
+            DocumentApp.getUi().alert('Cannot find bookmark ID for task: ' + task.taskDesc);
+            return;
+        }
+    }
     var bookmark = doc.getBookmark(bookmarkId);
     if (bookmark) {
         return bookmark.getPosition();
-    }
+    } 
 };
 
 GTD.jumpAndFocusOnTask = function(task) {
@@ -363,7 +386,6 @@ GTD.jumpAndFocusOnTask = function(task) {
     var taskDesc = task.taskDesc;
     var position = GTD.getTaskThreadPosition(task);
     if (!position) {
-        DocumentApp.getUi().alert('cannot find task : ' + task.taskDesc);
         return;
     }
 
@@ -372,7 +394,8 @@ GTD.jumpAndFocusOnTask = function(task) {
     // Make the task to be selected. This gives user a visual indicator
     // of the start of the task.
     var rangeBuilder = doc.newRange();
-    rangeBuilder.addElement(position.getElement());
+    var header = GTD.Task.getTaskThreadHeader(position.getElement());
+    rangeBuilder.addElement(header);
     doc.setSelection(rangeBuilder.build());
 };
 
@@ -392,10 +415,10 @@ function getTasksString() {
     return JSON.stringify(GTD.getSideBarTableContent());
 }
 
-function changeTaskStatus(task, status) {
+function changeTaskStatus(taskDesc, status) {
     GTD.initialize();
     return GTD.changeTaskStatus({
-        task: task,
+        task: {taskDesc: taskDesc},
         status: status,
         setTaskColor: true
     });
@@ -403,6 +426,5 @@ function changeTaskStatus(task, status) {
 
 function findAndFocusOnTask(taskName) {
     GTD.initialize();
-    debug('taskName: ' + taskName);
     GTD.jumpAndFocusOnTask({taskDesc:taskName})
 }
