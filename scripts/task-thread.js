@@ -6,28 +6,24 @@ GTD.Task = {
 };
 
 GTD.Task.createNewTask = function(name) {
-    var body = DocumentApp.getActiveDocument().getBody(),
-        taskEle = body.appendTable();
     this.status = 0;
     this.subTasksTotal = 0;
     this.subTasksDone = 0;
     
-    return this.addThreadHeader(name);
-    // this.addBody(bodyCell);
+    return this.insertThreadHeader(name);
 };
 
 GTD.Task.addThreadSeparator = function() {
     var table = GTD.util.insertTableAtCursor([['Task Separator']]);
     table.editAsText().setForegroundColor('#ffffff');
-    this.setBackgroundColor(table, '#4285F4', [1, 1]);
+    GTD.Task.setBackgroundColor(table, '#4285F4', [0, 1, 0, 1]);
     table.setBorderWidth(0);
-    GTD.util.setCursorAtTable(table);
 };
 
-GTD.Task.addThreadHeader = function( name) {
+GTD.Task.insertThreadHeader = function( name) {
     var currentTime = GTD.util.toISO(new Date());
     var taskStatus = GTD.header[this.status];
-    var subTaskStatus = this.subTasksDone + '/' + this.subTasksTotal;
+    // var subTaskStatus = this.subTasksDone + '/' + this.subTasksTotal;
 
     var headerTable = GTD.util.insertTableAtCursor([
         ['Timestamp', 'Name', 'Status'],
@@ -40,10 +36,11 @@ GTD.Task.addThreadHeader = function( name) {
     // set table color
     var taskColor = GTD.headerColor[this.status];
     headerTable.editAsText().setForegroundColor(taskColor);
+    headerTable.setBorderWidth(0);
 
-    this.setBackgroundColor(headerTable, '#dde4e6', this.SIZE);
-
-    GTD.util.setCursorAtTable(headerTable);
+    GTD.Task.setBackgroundColor(headerTable, '#666666', [0, 1, 0, this.SIZE[1]]);
+    GTD.Task.setForegroundColor(headerTable, '#ffffff', [0, 1, 0, this.SIZE[1]]);
+    GTD.Task.setBackgroundColor(headerTable, '#dde4e6', [1, this.SIZE[0], 0, this.SIZE[1]]);
 
     // return task description here
     return currentTime + '\n' + name;
@@ -66,9 +63,11 @@ GTD.Task.setColumnWidth = function(table) {
 GTD.Task.insertComment = function() {
     var user = Session.getActiveUser().getEmail().split("@")[0];
     var currentTime = GTD.util.toISO(new Date());
-    var table = GTD.util.insertTableAtCursor([[user + '\n' + currentTime, '']]);
+    var table = GTD.util.insertTableAtCursor([[user + ' ' + currentTime], ['']]);
     if (!table) {
         Logger.log('Fail to insert comment table!');
+        DocumentApp.getUi().alert('Please make sure your cursor is not in ' +
+                                  'any table when inserting comment');
         return;
     }
     table.editAsText().setForegroundColor(GTD.commentStyle.foregroundColor);
@@ -76,13 +75,13 @@ GTD.Task.insertComment = function() {
     var text = table.getCell(0, 0).editAsText();
     text.setFontSize(user.length+1, text.getText().length-1, 7);
 
-    var width = Math.max(7 * user.length, 60);
     table.getCell(0, 0)
-        .setWidth(width)
         .setBackgroundColor('#dde4e6');
-    table.getCell(0, 1)
+    table.getCell(1, 0)
         .setBackgroundColor('#f7f7f7');
-    GTD.util.setCursorAtTable(table, [0, 1]);
+    table.setBorderWidth(0);
+
+    GTD.util.setCursorAtTable(table, [1, 0]);
 };
 
 // getTaskThreadHeader returns the task thread header under the cursor
@@ -126,23 +125,33 @@ GTD.Task.isValidTaskThreadHeader = function(table) {
     return true;
 };
 
-GTD.Task.setBackgroundColor = function(headerTable, color, tableSize) {
+GTD.Task.setBackgroundColor = function(headerTable, color, range) {
     var i, j;
-    for (i = 0; i < tableSize[0]; ++i) {
-        for (j = 0; j < tableSize[1]; ++j) {
-            // headerTable.getCell(0, i).setBackgroundColor('#dde4e6');
+    assert(range.length === 4, 'wrong format of range')
+    for (i = range[0]; i < range[1]; ++i) {
+        for (j = range[2]; j < range[3]; ++j) {
             headerTable.getCell(i, j).setBackgroundColor(color);
         }
     }
-
 };
+
+GTD.Task.setForegroundColor = function(headerTable, color, range) {
+    var i, j;
+    assert(range.length === 4, 'wrong format of range')
+    for (i = range[0]; i < range[1]; ++i) {
+        for (j = range[2]; j < range[3]; ++j) {
+            headerTable.getCell(i, j).editAsText().setForegroundColor(color);
+        }
+    }
+};
+
 
 GTD.Task.setThreadHeaderStatus = function(threadHeader, status) {
 
     // Change color
     var colIdx = GTD.getColIdx(status);
     var color = GTD.headerColor[colIdx];
-    threadHeader.editAsText().setForegroundColor(color);
+    GTD.Task.setForegroundColor(threadHeader, color, [1, this.SIZE[0], 0, this.SIZE[1]]);
 
     // Change text
     threadHeader.getCell(this.CONTENT_ROW, 2).setText(status);

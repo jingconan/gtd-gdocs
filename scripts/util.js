@@ -59,10 +59,10 @@ GTD.util.insertTableAtCursor = function(cells) {
     // element.
     try {
         var index = body.getChildIndex(ele); 
-        return body.insertTable(index, cells);
+        var table = body.insertTable(index+1, cells);
+        document.setCursor(document.newPosition(body, index+2));
+        return table;
     } catch(err) {
-        DocumentApp.getUi().alert('Please make sure your cursor is not in ' +
-                                  'any table when inserting comment');
         return;
     }
 
@@ -70,27 +70,14 @@ GTD.util.insertTableAtCursor = function(cells) {
 
 GTD.util.setCursorAtTable = function(table, offset) {
     var doc = DocumentApp.getActiveDocument();
-
-    var position;
-    if (offset !== undefined && offset.length !== undefined) {
-        assert(offset.length == 2, 'unknow offset');
-        var cell = table.getCell(offset[0], offset[1]);
-        position = doc.newPosition(cell, 0);
-    } else {
-        if (offset === 'end' || offset === undefined) {
-            offset = table.getNumChildren();
-        }
-        position = doc.newPosition(table, offset);
-
-    }
+    assert(offset.length == 2, 'unknow offset');
+    var cell = table.getCell(offset[0], offset[1]);
+    var position = doc.newPosition(cell, 0);
     doc.setCursor(position);
-
-    // Change the text color back to default color
-    var cursor = DocumentApp.getActiveDocument().getCursor();
-    var text = cursor.insertText('\n');
-    if (text) {
-        text.setForegroundColor('#000000');
-    }
-
-
 };
+
+GTD.util.setCursorAtStart = function() {
+    var doc = DocumentApp.getActiveDocument();
+    var position = doc.newPosition(doc.getBody(), 0);
+    doc.setCursor(position);
+}

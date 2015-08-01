@@ -1,110 +1,16 @@
-// compiled from git commit version: 2c846dfac726fe856fd0943eea7b04bff068f1c8
-function onOpen() {
-  var ui = DocumentApp.getUi();
-  // Or DocumentApp or FormApp.
-  ui.createMenu('GTD')
-      // .addItem('insert date', 'insertDate')
-      .addItem('insert task', 'insertTask')
-      .addItem('insert comment', 'insertComment')
-      .addItem('insert separator', 'insertSeparator')
-      .addItem('create task table', 'initTaskFunction')
-      .addItem('move to Actionable', 'createActionableTask')
-      .addItem('move to WaitingFor', 'moveTaskToWaitingFor')
-      .addItem('move to Done', 'moveTaskToDone')
-      .addItem('show task sidebar', 'showSidebar')
-      .addToUi();
-}
-
-function insertSeparator() {
-    GTD.Task.addThreadSeparator();
-}
-
-function insertComment() {
-    GTD.insertComment();
-}
-
-function insertTask() {
-    var task;
-    var ui = DocumentApp.getUi();
-    var result = ui.prompt(
-        'Let\'s start!',
-        'Please enter a short task description:',
-    ui.ButtonSet.OK_CANCEL);
-
-    var button = result.getSelectedButton();
-    var text = result.getResponseText();
-    if (button == ui.Button.OK) {
-        task = GTD.insertTask(text);
-        // By default, mark this task as Actionable task
-        GTD.cleanTask('All', task);
-        GTD.addTask('Actionable', task);
-    } else {
-        return;
-    }
-
-
-}
-
-function insertDate() {
-  var doc = DocumentApp.getActiveDocument();
-  var cursor = doc.getCursor();
-  var text = '\n' + GTD.toISO(new Date()) + '\n';
-  var element = cursor.insertText(text);
-  doc.setCursor(doc.newPosition(element, text.length));
-}
-
-function initTaskFunction() {
-  GTD.initTaskTable();
-}
-
-function createActionableTask() {
-    var ret = GTD.getSelectedTask('Actionable');
-    if (ret.error) {
-        DocumentApp.getUi().alert(ret.error);
-        return;
-    }
-    GTD.changeTaskStatus({task: ret.taskDesc, status: 'Actionable'});
-}
-
-function moveTaskToWaitingFor() {
-    var ret = GTD.getSelectedTask('Waiting For');
-    if (ret .error) {
-        DocumentApp.getUi().alert(ret.error);
-        return;
-    }
-    GTD.changeTaskStatus({task: ret.taskDesc, status: 'Waiting For'});
-}
-
-function moveTaskToDone() {
-    var ret = GTD.getSelectedTask('Done');
-    if (ret .error) {
-        DocumentApp.getUi().alert(ret.error);
-        return;
-    }
-    GTD.changeTaskStatus({task: ret.taskDesc, status: 'Done'});
-}
-
-function showSidebar() {
-  var html = HtmlService.createHtmlOutput(GTD.templates.sidebar)
-      .setSandboxMode(HtmlService.SandboxMode.IFRAME)
-      .setTitle('My task list')
-      .setWidth(300);
-      
-  DocumentApp.getUi() // Or DocumentApp or FormApp.
-      .showSidebar(html);
-}
-
-
+// compiled from git commit version: 415751cc56cc04da0e7d31156902f5990f786c9c
 var GTD = {
   body: DocumentApp.getActiveDocument().getBody(),
   header: ['Actionable', 'Waiting For', 'Done'], //FIXME change to taskStatus
-  headerColor: ['#ff0000', '#9d922e', '#16a031'], //FIXME change to taskStatusColor
+  headerColor: ['#ff0000', '#9d922e', '#16a031'], //FIXME change to taskStatusColor 
+  bodyMargins: [7.2, 7.2, 7.2, 7.2], // L, T, R, D unit is point
   commentStyle: {
       foregroundColor: '#000000'
   },
   defaultRows: 1,
   templates: {},
   TOC: {},
+  initialized: false
 };
 
 
@@ -254,18 +160,16 @@ GTD.setTaskColor = function(type, taskName) {
     var re = body.findText(timeStamp);
     // setColor(re.getElement());
 
-    // If the task exists in the main body, change its color, too. 
-    re = body.findText(timeStamp, re);
-    if (!re) {
-        DocumentApp.getUi().alert('cannot find tash thread table for task: ' + taskName);
-        return;
-    }
-
-    // setColor(re.getElement());
-    // change color of the task header.
-    var taskThreadHeader = GTD.Task.getTaskThreadHeader(re.getElement());
-    if (!GTD.Task.isValidTaskThreadHeader(taskThreadHeader)) {
-        DocumentApp.getUi().alert('find invalid table thread header when changing color of task: ' + taskName);
+    var cursor = document.getCursor();
+    var ele = cursor.getElement();
+    // If cursor is in a table, body.insertTable will fail to find the
+    // element.
+    try {
+        var index = body.getChildIndex(ele); 
+        var table = body.insertTable(index+1, cells);
+        document.setCursor(document.newPosition(body, index+2));
+        return table;
+    } catch(err) {
         return;
     }
     GTD.Task.setThreadHeaderStatus(taskThreadHeader, type);
@@ -425,52 +329,18 @@ GTD.insertComment = function() {
     GTD.Task.insertComment();
 };
 
-GTD.initTaskTable();
-
-/////////////////////////////////////////////////////////////
-// These functions are used by javascript for sidebar view.
-/////////////////////////////////////////////////////////////
-
-function getTOCString() {
-  return JSON.stringify(GTD.TOC.pullHeaders());
-}
-
-function getTasksString() {
-    return JSON.stringify(GTD.getSideBarTableContent());
-}
-
-function changeTaskStatus(task, status) {
-    return GTD.changeTaskStatus({
-        task: task, 
-        status: status, 
-        setTaskColor: true
-    });
-}
-
-function findAndFocusOnTask(taskName) {
-    var timeStamp = GTD.getTimeStamp(taskName);
-    var body = DocumentApp.getActiveDocument().getBody();
-    var re = body.findText(timeStamp);
-    var position;
-    //debug('timeStamp: ' + timeStamp);
+GTD.util.setCursorAtTable = function(table, offset) {
     var doc = DocumentApp.getActiveDocument();
-    if (!re) {
-        DocumentApp.getUi().alert('cannot find task name: ' + taskName);
-    }
-
-    // The second appearance is the task in the body
-    re = body.findText(timeStamp, re);
-    if (!re) {
-        DocumentApp.getUi().alert('cannot find task name: ' + taskName);
-    }
-    position = doc.newPosition(re.getElement(), re.getStartOffset());
+    assert(offset.length == 2, 'unknow offset');
+    var cell = table.getCell(offset[0], offset[1]);
+    var position = doc.newPosition(cell, 0);
     doc.setCursor(position);
+};
 
-    // Make the timestamp of the task to be selected. This gives user a
-    // visual indicator of the start of the task.
-    var rangeBuilder = doc.newRange();
-    rangeBuilder.addElement(re.getElement());
-    doc.setSelection(rangeBuilder.build());
+GTD.util.setCursorAtStart = function() {
+    var doc = DocumentApp.getActiveDocument();
+    var position = doc.newPosition(doc.getBody(), 0);
+    doc.setCursor(position);
 }
 
 
@@ -482,28 +352,24 @@ GTD.Task = {
 };
 
 GTD.Task.createNewTask = function(name) {
-    var body = DocumentApp.getActiveDocument().getBody(),
-        taskEle = body.appendTable();
     this.status = 0;
     this.subTasksTotal = 0;
     this.subTasksDone = 0;
     
-    return this.addThreadHeader(name);
-    // this.addBody(bodyCell);
+    return this.insertThreadHeader(name);
 };
 
 GTD.Task.addThreadSeparator = function() {
     var table = GTD.util.insertTableAtCursor([['Task Separator']]);
     table.editAsText().setForegroundColor('#ffffff');
-    this.setBackgroundColor(table, '#4285F4', [1, 1]);
+    GTD.Task.setBackgroundColor(table, '#4285F4', [0, 1, 0, 1]);
     table.setBorderWidth(0);
-    GTD.util.setCursorAtTable(table);
 };
 
-GTD.Task.addThreadHeader = function( name) {
+GTD.Task.insertThreadHeader = function( name) {
     var currentTime = GTD.util.toISO(new Date());
     var taskStatus = GTD.header[this.status];
-    var subTaskStatus = this.subTasksDone + '/' + this.subTasksTotal;
+    // var subTaskStatus = this.subTasksDone + '/' + this.subTasksTotal;
 
     var headerTable = GTD.util.insertTableAtCursor([
         ['Timestamp', 'Name', 'Status'],
@@ -516,10 +382,11 @@ GTD.Task.addThreadHeader = function( name) {
     // set table color
     var taskColor = GTD.headerColor[this.status];
     headerTable.editAsText().setForegroundColor(taskColor);
+    headerTable.setBorderWidth(0);
 
-    this.setBackgroundColor(headerTable, '#dde4e6', this.SIZE);
-
-    GTD.util.setCursorAtTable(headerTable);
+    GTD.Task.setBackgroundColor(headerTable, '#666666', [0, 1, 0, this.SIZE[1]]);
+    GTD.Task.setForegroundColor(headerTable, '#ffffff', [0, 1, 0, this.SIZE[1]]);
+    GTD.Task.setBackgroundColor(headerTable, '#dde4e6', [1, this.SIZE[0], 0, this.SIZE[1]]);
 
     // return task description here
     return currentTime + '\n' + name;
@@ -542,9 +409,11 @@ GTD.Task.setColumnWidth = function(table) {
 GTD.Task.insertComment = function() {
     var user = Session.getActiveUser().getEmail().split("@")[0];
     var currentTime = GTD.util.toISO(new Date());
-    var table = GTD.util.insertTableAtCursor([[user + '\n' + currentTime, '']]);
+    var table = GTD.util.insertTableAtCursor([[user + ' ' + currentTime], ['']]);
     if (!table) {
         Logger.log('Fail to insert comment table!');
+        DocumentApp.getUi().alert('Please make sure your cursor is not in ' +
+                                  'any table when inserting comment');
         return;
     }
     table.editAsText().setForegroundColor(GTD.commentStyle.foregroundColor);
@@ -552,13 +421,13 @@ GTD.Task.insertComment = function() {
     var text = table.getCell(0, 0).editAsText();
     text.setFontSize(user.length+1, text.getText().length-1, 7);
 
-    var width = Math.max(7 * user.length, 60);
     table.getCell(0, 0)
-        .setWidth(width)
         .setBackgroundColor('#dde4e6');
-    table.getCell(0, 1)
+    table.getCell(1, 0)
         .setBackgroundColor('#f7f7f7');
-    GTD.util.setCursorAtTable(table, [0, 1]);
+    table.setBorderWidth(0);
+
+    GTD.util.setCursorAtTable(table, [1, 0]);
 };
 
 // getTaskThreadHeader returns the task thread header under the cursor
@@ -602,23 +471,33 @@ GTD.Task.isValidTaskThreadHeader = function(table) {
     return true;
 };
 
-GTD.Task.setBackgroundColor = function(headerTable, color, tableSize) {
+GTD.Task.setBackgroundColor = function(headerTable, color, range) {
     var i, j;
-    for (i = 0; i < tableSize[0]; ++i) {
-        for (j = 0; j < tableSize[1]; ++j) {
-            // headerTable.getCell(0, i).setBackgroundColor('#dde4e6');
+    assert(range.length === 4, 'wrong format of range')
+    for (i = range[0]; i < range[1]; ++i) {
+        for (j = range[2]; j < range[3]; ++j) {
             headerTable.getCell(i, j).setBackgroundColor(color);
         }
     }
-
 };
+
+GTD.Task.setForegroundColor = function(headerTable, color, range) {
+    var i, j;
+    assert(range.length === 4, 'wrong format of range')
+    for (i = range[0]; i < range[1]; ++i) {
+        for (j = range[2]; j < range[3]; ++j) {
+            headerTable.getCell(i, j).editAsText().setForegroundColor(color);
+        }
+    }
+};
+
 
 GTD.Task.setThreadHeaderStatus = function(threadHeader, status) {
 
     // Change color
     var colIdx = GTD.getColIdx(status);
     var color = GTD.headerColor[colIdx];
-    threadHeader.editAsText().setForegroundColor(color);
+    GTD.Task.setForegroundColor(threadHeader, color, [1, this.SIZE[0], 0, this.SIZE[1]]);
 
     // Change text
     threadHeader.getCell(this.CONTENT_ROW, 2).setText(status);
@@ -749,6 +628,13 @@ GTD.initTaskTable = function() {
     this.taskTable = taskTable;
 };
 
+GTD.initPageMargin = function() {
+    this.body.setMarginLeft(this.bodyMargins[0]);
+    this.body.setMarginTop(this.bodyMargins[1]);
+    this.body.setMarginRight(this.bodyMargins[2]);
+    this.body.setMarginBottom(this.bodyMargins[3]);
+}
+
 GTD.getTaskTable = function() {
     return this.taskTable;
 };
@@ -961,9 +847,16 @@ GTD.appendLogEntry = function() {
 };
 
 GTD._isTaskTable = function(table) {
+    if (table.getNumRows() == 0) {
+        return false;
+    }
+    var headerRow = table.getRow(0);
+    if (headerRow.getNumChildren() !== this.header.length) {
+        return false;
+    }
     var i;
     for (i = 0; i < this.header.length; ++i) {
-        if (table.getCell(0, i).getText() != this.header[i]) {
+        if (headerRow.getCell(i).getText() != this.header[i]) {
             return false;
         }
     }
@@ -992,8 +885,13 @@ GTD._createDefaultTableContent = function () {
 };
 
 GTD._createDefaultGTDTable = function (body) {
-    // Build a table from the header.
-    var table = body.insertTable(0, this._createDefaultTableContent());
+    GTD.util.setCursorAtStart()
+    var table = GTD.util.insertTableAtCursor(this._createDefaultTableContent());
+    if (!table) {
+        DocumentApp.getUi().alert('Cannot create task summary table!');
+        return;
+    }
+
     assert(this.header.length === this.headerColor.length, 'wrong number of color');
     for (i = 0; i < this.header.length; ++i) {
         table.getCell(0, i)
@@ -1044,21 +942,40 @@ GTD.insertComment = function() {
     GTD.Task.insertComment();
 };
 
-GTD.initTaskTable();
+GTD.initialize = function() {
+    if (GTD.initialized === true) {
+        return;
+    }
+
+    // Set background of document to be solarized light color
+    var style = {};
+    style[DocumentApp.Attribute.BACKGROUND_COLOR] = '#eee8d5';
+    var doc = DocumentApp.getActiveDocument().getBody();
+    doc.setAttributes(style);
+
+    GTD.initTaskTable();
+    GTD.initPageMargin();
+    GTD.initialized = true;
+}
+
+// GTD.initTaskTable();
 
 /////////////////////////////////////////////////////////////
 // These functions are used by javascript for sidebar view.
 /////////////////////////////////////////////////////////////
 
 function getTOCString() {
+  GTD.initialize();
   return JSON.stringify(GTD.TOC.pullHeaders());
 }
 
 function getTasksString() {
+    GTD.initialize();
     return JSON.stringify(GTD.getSideBarTableContent());
 }
 
 function changeTaskStatus(task, status) {
+    GTD.initialize();
     return GTD.changeTaskStatus({
         task: task, 
         status: status, 
@@ -1067,6 +984,7 @@ function changeTaskStatus(task, status) {
 }
 
 function findAndFocusOnTask(taskName) {
+    GTD.initialize();
     var timeStamp = GTD.getTimeStamp(taskName);
     var body = DocumentApp.getActiveDocument().getBody();
     var re = body.findText(timeStamp);
@@ -1093,6 +1011,105 @@ function findAndFocusOnTask(taskName) {
 }
 
 
+function onOpen() {
+  var ui = DocumentApp.getUi();
+  // Or DocumentApp or FormApp.
+  ui.createMenu('GTD')
+      // .addItem('insert date', 'insertDate')
+      .addItem('Initialize', 'initTaskFunction')
+      .addItem('Insert task', 'insertTask')
+      .addItem('Insert comment', 'insertComment')
+      .addItem('Mark as Actionable', 'createActionableTask')
+      .addItem('Mark as WaitingFor', 'moveTaskToWaitingFor')
+      .addItem('Mark as Done', 'moveTaskToDone')
+      .addItem('Insert separator', 'insertSeparator')
+      .addItem('Show sidebar', 'showSidebar')
+      .addToUi();
+}
+
+function insertSeparator() {
+    GTD.Task.addThreadSeparator();
+}
+
+function insertComment() {
+    GTD.insertComment();
+}
+
+function insertTask() {
+    GTD.initialize();
+
+    var task;
+    var ui = DocumentApp.getUi();
+    var result = ui.prompt(
+        'Let\'s start!',
+        'Please enter a short task description:',
+    ui.ButtonSet.OK_CANCEL);
+
+    var button = result.getSelectedButton();
+    var text = result.getResponseText();
+    if (button == ui.Button.OK) {
+        task = GTD.insertTask(text);
+        // By default, mark this task as Actionable task
+        GTD.cleanTask('All', task);
+        GTD.addTask('Actionable', task);
+    } else {
+        return;
+    }
+
+
+}
+
+function insertDate() {
+  var doc = DocumentApp.getActiveDocument();
+  var cursor = doc.getCursor();
+  var text = '\n' + GTD.toISO(new Date()) + '\n';
+  var element = cursor.insertText(text);
+  doc.setCursor(doc.newPosition(element, text.length));
+}
+
+function initTaskFunction() {
+    GTD.initialize();
+}
+
+function createActionableTask() {
+    GTD.initialize();
+    var ret = GTD.getSelectedTask('Actionable');
+    if (ret.error) {
+        DocumentApp.getUi().alert(ret.error);
+        return;
+    }
+    GTD.changeTaskStatus({task: ret.taskDesc, status: 'Actionable'});
+}
+
+function moveTaskToWaitingFor() {
+    GTD.initialize();
+    var ret = GTD.getSelectedTask('Waiting For');
+    if (ret .error) {
+        DocumentApp.getUi().alert(ret.error);
+        return;
+    }
+    GTD.changeTaskStatus({task: ret.taskDesc, status: 'Waiting For'});
+}
+
+function moveTaskToDone() {
+    GTD.initialize();
+    var ret = GTD.getSelectedTask('Done');
+    if (ret .error) {
+        DocumentApp.getUi().alert(ret.error);
+        return;
+    }
+    GTD.changeTaskStatus({task: ret.taskDesc, status: 'Done'});
+}
+
+function showSidebar() {
+    var html = HtmlService.createHtmlOutput(GTD.templates.sidebar)
+        .setSandboxMode(HtmlService.SandboxMode.IFRAME)
+        .setTitle('My task list')
+        .setWidth(300);
+
+    DocumentApp.getUi() // Or DocumentApp or FormApp.
+        .showSidebar(html);
+}
 
 
 

@@ -20,6 +20,13 @@ GTD.initTaskTable = function() {
     this.taskTable = taskTable;
 };
 
+GTD.initPageMargin = function() {
+    this.body.setMarginLeft(this.bodyMargins[0]);
+    this.body.setMarginTop(this.bodyMargins[1]);
+    this.body.setMarginRight(this.bodyMargins[2]);
+    this.body.setMarginBottom(this.bodyMargins[3]);
+}
+
 GTD.getTaskTable = function() {
     return this.taskTable;
 };
@@ -232,9 +239,16 @@ GTD.appendLogEntry = function() {
 };
 
 GTD._isTaskTable = function(table) {
+    if (table.getNumRows() == 0) {
+        return false;
+    }
+    var headerRow = table.getRow(0);
+    if (headerRow.getNumChildren() !== this.header.length) {
+        return false;
+    }
     var i;
     for (i = 0; i < this.header.length; ++i) {
-        if (table.getCell(0, i).getText() != this.header[i]) {
+        if (headerRow.getCell(i).getText() != this.header[i]) {
             return false;
         }
     }
@@ -263,8 +277,13 @@ GTD._createDefaultTableContent = function () {
 };
 
 GTD._createDefaultGTDTable = function (body) {
-    // Build a table from the header.
-    var table = body.insertTable(0, this._createDefaultTableContent());
+    GTD.util.setCursorAtStart()
+    var table = GTD.util.insertTableAtCursor(this._createDefaultTableContent());
+    if (!table) {
+        DocumentApp.getUi().alert('Cannot create task summary table!');
+        return;
+    }
+
     assert(this.header.length === this.headerColor.length, 'wrong number of color');
     for (i = 0; i < this.header.length; ++i) {
         table.getCell(0, i)
@@ -315,21 +334,40 @@ GTD.insertComment = function() {
     GTD.Task.insertComment();
 };
 
-GTD.initTaskTable();
+GTD.initialize = function() {
+    if (GTD.initialized === true) {
+        return;
+    }
+
+    // Set background of document to be solarized light color
+    var style = {};
+    style[DocumentApp.Attribute.BACKGROUND_COLOR] = '#eee8d5';
+    var doc = DocumentApp.getActiveDocument().getBody();
+    doc.setAttributes(style);
+
+    GTD.initTaskTable();
+    GTD.initPageMargin();
+    GTD.initialized = true;
+}
+
+// GTD.initTaskTable();
 
 /////////////////////////////////////////////////////////////
 // These functions are used by javascript for sidebar view.
 /////////////////////////////////////////////////////////////
 
 function getTOCString() {
+  GTD.initialize();
   return JSON.stringify(GTD.TOC.pullHeaders());
 }
 
 function getTasksString() {
+    GTD.initialize();
     return JSON.stringify(GTD.getSideBarTableContent());
 }
 
 function changeTaskStatus(task, status) {
+    GTD.initialize();
     return GTD.changeTaskStatus({
         task: task, 
         status: status, 
@@ -338,6 +376,7 @@ function changeTaskStatus(task, status) {
 }
 
 function findAndFocusOnTask(taskName) {
+    GTD.initialize();
     var timeStamp = GTD.getTimeStamp(taskName);
     var body = DocumentApp.getActiveDocument().getBody();
     var re = body.findText(timeStamp);

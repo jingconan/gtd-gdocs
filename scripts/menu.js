@@ -3,14 +3,14 @@ function onOpen() {
   // Or DocumentApp or FormApp.
   ui.createMenu('GTD')
       // .addItem('insert date', 'insertDate')
-      .addItem('insert task', 'insertTask')
-      .addItem('insert comment', 'insertComment')
-      .addItem('insert separator', 'insertSeparator')
-      .addItem('create task table', 'initTaskFunction')
-      .addItem('move to Actionable', 'createActionableTask')
-      .addItem('move to WaitingFor', 'moveTaskToWaitingFor')
-      .addItem('move to Done', 'moveTaskToDone')
-      .addItem('show task sidebar', 'showSidebar')
+      .addItem('Initialize', 'initTaskFunction')
+      .addItem('Insert task', 'insertTask')
+      .addItem('Insert comment', 'insertComment')
+      .addItem('Mark as Actionable', 'createActionableTask')
+      .addItem('Mark as WaitingFor', 'moveTaskToWaitingFor')
+      .addItem('Mark as Done', 'moveTaskToDone')
+      .addItem('Insert separator', 'insertSeparator')
+      .addItem('Show sidebar', 'showSidebar')
       .addToUi();
 }
 
@@ -23,6 +23,8 @@ function insertComment() {
 }
 
 function insertTask() {
+    GTD.initialize();
+
     var task;
     var ui = DocumentApp.getUi();
     var result = ui.prompt(
@@ -53,10 +55,11 @@ function insertDate() {
 }
 
 function initTaskFunction() {
-  GTD.initTaskTable();
+    GTD.initialize();
 }
 
 function createActionableTask() {
+    GTD.initialize();
     var ret = GTD.getSelectedTask('Actionable');
     if (ret.error) {
         DocumentApp.getUi().alert(ret.error);
@@ -66,6 +69,7 @@ function createActionableTask() {
 }
 
 function moveTaskToWaitingFor() {
+    GTD.initialize();
     var ret = GTD.getSelectedTask('Waiting For');
     if (ret .error) {
         DocumentApp.getUi().alert(ret.error);
@@ -75,6 +79,7 @@ function moveTaskToWaitingFor() {
 }
 
 function moveTaskToDone() {
+    GTD.initialize();
     var ret = GTD.getSelectedTask('Done');
     if (ret .error) {
         DocumentApp.getUi().alert(ret.error);
@@ -84,11 +89,11 @@ function moveTaskToDone() {
 }
 
 function showSidebar() {
-  var html = HtmlService.createHtmlOutput(GTD.templates.sidebar)
-      .setSandboxMode(HtmlService.SandboxMode.IFRAME)
-      .setTitle('My task list')
-      .setWidth(300);
-      
-  DocumentApp.getUi() // Or DocumentApp or FormApp.
-      .showSidebar(html);
+    var html = HtmlService.createHtmlOutput(GTD.templates.sidebar)
+        .setSandboxMode(HtmlService.SandboxMode.IFRAME)
+        .setTitle('My task list')
+        .setWidth(300);
+
+    DocumentApp.getUi() // Or DocumentApp or FormApp.
+        .showSidebar(html);
 }
