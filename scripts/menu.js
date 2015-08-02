@@ -15,6 +15,10 @@ function onOpen() {
       .addToUi();
 }
 
+function onInstall(e) {
+  onOpen();
+}
+
 function insertSeparator() {
     GTD.Task.addThreadSeparator();
 }

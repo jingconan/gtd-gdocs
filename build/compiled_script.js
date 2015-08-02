@@ -1,4 +1,4 @@
-// compiled from git commit version: c501a5351f6be7b5b1a142ea4a6410f093909dd2
+// compiled from git commit version: af27ee62cbfb1b78922a6cb119c70a4ddf8e5f48
 function onOpen() {
   var ui = DocumentApp.getUi();
   // Or DocumentApp or FormApp.
@@ -14,6 +14,10 @@ function onOpen() {
       .addItem('Jump to task', 'jumpToTask')
       .addItem('Show sidebar', 'showSidebar')
       .addToUi();
+}
+
+function onInstall(e) {
+  onOpen();
 }
 
 function insertSeparator() {
