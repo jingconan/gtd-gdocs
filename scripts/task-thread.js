@@ -43,7 +43,7 @@ GTD.Task.insertThreadHeader = function( name) {
     GTD.Task.setBackgroundColor(headerTable, '#dde4e6', [1, this.SIZE[0], 0, this.SIZE[1]]);
 
     // Add a bookmark
-    var taskDesc = currentTime + '\n' + name
+    var taskDesc = currentTime + '\n' + name;
     var position = DocumentApp.getActiveDocument().newPosition(headerTable, 0);
     var bookmark = position.insertBookmark();
 
@@ -138,7 +138,7 @@ GTD.Task.isValidTaskThreadHeader = function(table) {
 
 GTD.Task.setBackgroundColor = function(headerTable, color, range) {
     var i, j;
-    assert(range.length === 4, 'wrong format of range')
+    assert(range.length === 4, 'wrong format of range');
     for (i = range[0]; i < range[1]; ++i) {
         for (j = range[2]; j < range[3]; ++j) {
             headerTable.getCell(i, j).setBackgroundColor(color);
@@ -148,7 +148,7 @@ GTD.Task.setBackgroundColor = function(headerTable, color, range) {
 
 GTD.Task.setForegroundColor = function(headerTable, color, range) {
     var i, j;
-    assert(range.length === 4, 'wrong format of range')
+    assert(range.length === 4, 'wrong format of range');
     for (i = range[0]; i < range[1]; ++i) {
         for (j = range[2]; j < range[3]; ++j) {
             headerTable.getCell(i, j).editAsText().setForegroundColor(color);

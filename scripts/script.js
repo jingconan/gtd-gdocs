@@ -25,7 +25,7 @@ GTD.initPageMargin = function() {
     this.body.setMarginTop(this.bodyMargins[1]);
     this.body.setMarginRight(this.bodyMargins[2]);
     this.body.setMarginBottom(this.bodyMargins[3]);
-}
+};
 
 GTD.getTaskTable = function() {
     return this.taskTable;
@@ -236,7 +236,7 @@ GTD.appendLogEntry = function() {
 };
 
 GTD._isTaskTable = function(table) {
-    if (table.getNumRows() == 0) {
+    if (table.getNumRows() === 0) {
         return false;
     }
     var headerRow = table.getRow(0);
@@ -274,7 +274,7 @@ GTD._createDefaultTableContent = function () {
 };
 
 GTD._createDefaultGTDTable = function (body) {
-    GTD.util.setCursorAtStart()
+    GTD.util.setCursorAtStart();
     var table = GTD.util.insertTableAtCursor(this._createDefaultTableContent());
     if (!table) {
         DocumentApp.getUi().alert('Cannot create task summary table!');
@@ -359,7 +359,7 @@ GTD.searchBookmarkIdBasedOnTaskDesc = function(taskDesc) {
             return bookmarks[i].getId();
         }
     }
-}
+};
 
 GTD.getTaskThreadPosition = function(task) {
     var doc = DocumentApp.getActiveDocument();
@@ -426,5 +426,5 @@ function changeTaskStatus(taskDesc, status) {
 
 function findAndFocusOnTask(taskName) {
     GTD.initialize();
-    GTD.jumpAndFocusOnTask({taskDesc:taskName})
+    GTD.jumpAndFocusOnTask({taskDesc:taskName});
 }

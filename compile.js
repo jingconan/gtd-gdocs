@@ -6,22 +6,23 @@ var glob = require('glob'),
     exec = require('child_process').exec;
 
 var walk = function(dir) {
-    var results = []
-    var list = fs.readdirSync(dir)
+    var results = [];
+    var list = fs.readdirSync(dir);
     list.forEach(function(file) {
-        file = dir + '/' + file
-        var stat = fs.statSync(file)
-        if (stat && stat.isDirectory()) results = results.concat(walk(file))
-        else results.push(file)
-    })
-    return results
-}
+        file = dir + '/' + file;
+        var stat = fs.statSync(file);
+        if (stat && stat.isDirectory()) results = results.concat(walk(file));
+        else results.push(file);
+    });
+    return results;
+};
 
 function concat_template(code) {
     var filepath;
     var scriptFilePaths = walk('./scripts');
-    for(var i = 0; i < scriptFilePaths.length; ++i) {
-        filepath = scriptFilePaths[i]
+    var i;
+    for(i = 0; i < scriptFilePaths.length; ++i) {
+        filepath = scriptFilePaths[i];
         console.log("Compile script: " + filepath);
         code += (fs.readFileSync(filepath).toString() + '\n\n');
     }
@@ -37,7 +38,7 @@ function concat_template(code) {
 
     // Compile templates
     var templateFilepaths = walk("./templates");
-    for(var i = 0; i < templateFilepaths.length; ++i) {
+    for(i = 0; i < templateFilepaths.length; ++i) {
         filepath = templateFilepaths[i];
         console.log("Compile template: " + filepath);
         key = path.basename(filepath, '.html');

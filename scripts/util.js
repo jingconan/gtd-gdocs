@@ -18,13 +18,13 @@ function debug(s) {
 
 GTD.util.toISO = function(date) {
     var timeZone = Session.getScriptTimeZone();
-    return Utilities.formatDate(date, timeZone, "yyyy-MM-dd HH:mm:ss")
+    return Utilities.formatDate(date, timeZone, "yyyy-MM-dd HH:mm:ss");
 };
 
 if (typeof String.prototype.startsWith != 'function') {
   // see below for better implementation!
   String.prototype.startsWith = function (str){
-    return this.indexOf(str) == 0;
+    return this.indexOf(str) === 0;
   };
 }
 
@@ -72,4 +72,4 @@ GTD.util.setCursorAtStart = function() {
     var doc = DocumentApp.getActiveDocument();
     var position = doc.newPosition(doc.getBody(), 0);
     doc.setCursor(position);
-}
+};

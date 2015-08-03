@@ -1,4 +1,4 @@
-// compiled from git commit version: cf92bc14a85ac4dac744d2573b78dc47e391e58a
+// compiled from git commit version: 1b997ac36cdb75e83fea4a4b38936fa70f0918bf
 function onOpen() {
   var ui = DocumentApp.getUi();
   // Or DocumentApp or FormApp.
@@ -169,7 +169,7 @@ GTD.initPageMargin = function() {
     this.body.setMarginTop(this.bodyMargins[1]);
     this.body.setMarginRight(this.bodyMargins[2]);
     this.body.setMarginBottom(this.bodyMargins[3]);
-}
+};
 
 GTD.getTaskTable = function() {
     return this.taskTable;
@@ -380,7 +380,7 @@ GTD.appendLogEntry = function() {
 };
 
 GTD._isTaskTable = function(table) {
-    if (table.getNumRows() == 0) {
+    if (table.getNumRows() === 0) {
         return false;
     }
     var headerRow = table.getRow(0);
@@ -418,7 +418,7 @@ GTD._createDefaultTableContent = function () {
 };
 
 GTD._createDefaultGTDTable = function (body) {
-    GTD.util.setCursorAtStart()
+    GTD.util.setCursorAtStart();
     var table = GTD.util.insertTableAtCursor(this._createDefaultTableContent());
     if (!table) {
         DocumentApp.getUi().alert('Cannot create task summary table!');
@@ -503,7 +503,7 @@ GTD.searchBookmarkIdBasedOnTaskDesc = function(taskDesc) {
             return bookmarks[i].getId();
         }
     }
-}
+};
 
 GTD.getTaskThreadPosition = function(task) {
     var doc = DocumentApp.getActiveDocument();
@@ -570,7 +570,7 @@ function changeTaskStatus(taskDesc, status) {
 
 function findAndFocusOnTask(taskName) {
     GTD.initialize();
-    GTD.jumpAndFocusOnTask({taskDesc:taskName})
+    GTD.jumpAndFocusOnTask({taskDesc:taskName});
 }
 
 
@@ -619,7 +619,7 @@ GTD.Task.insertThreadHeader = function( name) {
     GTD.Task.setBackgroundColor(headerTable, '#dde4e6', [1, this.SIZE[0], 0, this.SIZE[1]]);
 
     // Add a bookmark
-    var taskDesc = currentTime + '\n' + name
+    var taskDesc = currentTime + '\n' + name;
     var position = DocumentApp.getActiveDocument().newPosition(headerTable, 0);
     var bookmark = position.insertBookmark();
 
@@ -714,7 +714,7 @@ GTD.Task.isValidTaskThreadHeader = function(table) {
 
 GTD.Task.setBackgroundColor = function(headerTable, color, range) {
     var i, j;
-    assert(range.length === 4, 'wrong format of range')
+    assert(range.length === 4, 'wrong format of range');
     for (i = range[0]; i < range[1]; ++i) {
         for (j = range[2]; j < range[3]; ++j) {
             headerTable.getCell(i, j).setBackgroundColor(color);
@@ -724,7 +724,7 @@ GTD.Task.setBackgroundColor = function(headerTable, color, range) {
 
 GTD.Task.setForegroundColor = function(headerTable, color, range) {
     var i, j;
-    assert(range.length === 4, 'wrong format of range')
+    assert(range.length === 4, 'wrong format of range');
     for (i = range[0]; i < range[1]; ++i) {
         for (j = range[2]; j < range[3]; ++j) {
             headerTable.getCell(i, j).editAsText().setForegroundColor(color);
@@ -769,13 +769,13 @@ function debug(s) {
 
 GTD.util.toISO = function(date) {
     var timeZone = Session.getScriptTimeZone();
-    return Utilities.formatDate(date, timeZone, "yyyy-MM-dd HH:mm:ss")
+    return Utilities.formatDate(date, timeZone, "yyyy-MM-dd HH:mm:ss");
 };
 
 if (typeof String.prototype.startsWith != 'function') {
   // see below for better implementation!
   String.prototype.startsWith = function (str){
-    return this.indexOf(str) == 0;
+    return this.indexOf(str) === 0;
   };
 }
 
@@ -823,8 +823,7 @@ GTD.util.setCursorAtStart = function() {
     var doc = DocumentApp.getActiveDocument();
     var position = doc.newPosition(doc.getBody(), 0);
     doc.setCursor(position);
-}
-
+};
 
 
 
