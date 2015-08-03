@@ -58,7 +58,7 @@ If you want to configure by yourself, here are the steps:
 
 Screen Shot
 ------------
-![image](https://cloud.githubusercontent.com/assets/522201/6998601/6fccba50-db9c-11e4-8f6d-ea1a1ef71377.png)
+![image](https://github.com/hbhzwj/gtd-gdocs/blob/master/resources/screenshot.png)
 
 
 
