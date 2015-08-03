@@ -1,4 +1,4 @@
-// compiled from git commit version: af27ee62cbfb1b78922a6cb119c70a4ddf8e5f48
+// compiled from git commit version: cf92bc14a85ac4dac744d2573b78dc47e391e58a
 function onOpen() {
   var ui = DocumentApp.getUi();
   // Or DocumentApp or FormApp.
