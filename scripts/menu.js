@@ -12,6 +12,11 @@ function onOpen() {
       .addItem('Insert separator', 'insertSeparator')
       .addItem('Jump to task', 'jumpToTask')
       .addItem('Show sidebar', 'showSidebar')
+      .addSeparator()
+      .addSubMenu(ui.createMenu('Note')
+        .addItem('Format as code', 'insertNoteCode')
+        .addItem('Format as email', 'insertNoteEmail')
+        .addItem('Format as checklist', 'insertNoteChecklist'))
       .addToUi();
 }
 
@@ -25,6 +30,18 @@ function insertSeparator() {
 
 function insertComment() {
     GTD.insertComment();
+}
+
+function insertNoteCode() {
+  GTD.Task.insertNote('code');
+}
+
+function insertNoteEmail() {
+  GTD.Task.insertNote('email');
+}
+
+function insertNoteChecklist() {
+  GTD.Task.insertNote('checklist');
 }
 
 function insertTask() {

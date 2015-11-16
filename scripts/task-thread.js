@@ -3,15 +3,21 @@ GTD.Task = {
     SIZE: [2, 3],
     // THREAD_HEADER_WIDTH: [100, 350, 70, 60]
     THREAD_HEADER_WIDTH: [70, 450, 70],
-    NOTE_FORMAT = {
+    NOTE_FORMAT: {
         'code': {
-            'color': '#CCFF90'
+            'color': '#CCFF90',
+            'font-family': 'Consolas',
+            'font-size': 12
         },
         'email': {
-            'color': '80D8FF'
+            'color': '#80D8FF',
+            'font-family': 'Times New Roman',
+            'font-size': 12
         },
         'checklist': {
-            'color': 'FFFF8D'
+            'color': '#FFFF8D',
+            'font-family': 'Arial',
+            'font-size': 12
         }
     }
 };
@@ -77,15 +83,16 @@ GTD.Task.setColumnWidth = function(table) {
 };
 
 GTD.Task.insertNote = function(noteType) {
-    var table = GTD.util.insertTableAtCursor([['']]);
-    if (!table) {
-        Logger.log('Fail to insert note!');
-        DocumentApp.getUi().alert('Please make sure your cursor is not in ' +
-                                  'any table when inserting comment');
-        return;
-    }
+    var document = DocumentApp.getActiveDocument();
+    var cursor = document.getCursor();
+    var ele = cursor.getElement();
+    var tableCell = ele.getParent();
+    // format the table cell.
+    tableCell.setBackgroundColor(GTD.Task.NOTE_FORMAT[noteType]['color']);
+    tableCell.editAsText().setFontFamily(GTD.Task.NOTE_FORMAT[noteType]['font-family']);
+    tableCell.editAsText().setFontSize(GTD.Task.NOTE_FORMAT[noteType]['font-size']);
+};
 
-}
 // GTD.Task.addBody = function(cell) {
 //     var doc = DocumentApp.getActiveDocument();
 //     var position = doc.newPosition(cell, 0);
