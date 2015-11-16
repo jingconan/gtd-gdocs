@@ -103,33 +103,21 @@ function initTaskFunction() {
 }
 
 function createActionableTask() {
-    GTD.initialize();
-    var ret = GTD.getSelectedTask('Actionable');
-    if (ret.error) {
-        DocumentApp.getUi().alert(ret.error);
-        return;
-    }
-    GTD.changeTaskStatus({task: ret, status: 'Actionable'});
+    GTD.changeTaskStatusMenuWrapper({
+      statusAfter: 'Actionable'
+    });
 }
 
 function moveTaskToWaitingFor() {
-    GTD.initialize();
-    var ret = GTD.getSelectedTask('Waiting For');
-    if (ret .error) {
-        DocumentApp.getUi().alert(ret.error);
-        return;
-    }
-    GTD.changeTaskStatus({task: ret, status: 'Waiting For'});
+    GTD.changeTaskStatusMenuWrapper({
+      statusAfter: 'Waiting For'
+    });
 }
 
 function moveTaskToDone() {
-    GTD.initialize();
-    var ret = GTD.getSelectedTask('Done');
-    if (ret .error) {
-        DocumentApp.getUi().alert(ret.error);
-        return;
-    }
-    GTD.changeTaskStatus({task: ret, status: 'Done'});
+    GTD.changeTaskStatusMenuWrapper({
+      statusAfter: 'Done'
+    });
 }
 
 function showSidebar() {

@@ -60,6 +60,12 @@ GTD.util.insertTableAtCursor = function(cells) {
 
 };
 
+GTD.util.insertTableAfterThreadHeader = function(options) {
+    var body = DocumentApp.getActiveDocument().getBody();
+    var index = body.getChildIndex(options.threadHeader); 
+    return body.insertTable(index+1, options.cells);
+};
+
 GTD.util.setCursorAtTable = function(table, offset) {
     var doc = DocumentApp.getActiveDocument();
     assert(offset.length == 2, 'unknow offset');

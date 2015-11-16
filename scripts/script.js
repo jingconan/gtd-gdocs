@@ -220,6 +220,7 @@ GTD.getSelectedTask = function(type) {
                    'table in the main body.'
         };
     }
+    var statusBefore = GTD.Task.getThreadHeaderStatus(taskHeader);
     GTD.Task.setThreadHeaderStatus(taskHeader, type);
     var taskDesc = GTD.Task.getTaskDesc(taskHeader);
     if (!taskDesc) {
@@ -228,7 +229,9 @@ GTD.getSelectedTask = function(type) {
         };
     }
     return {
-        taskDesc: taskDesc
+        taskDesc: taskDesc,
+        threadHeader: taskHeader,
+        statusBefore: statusBefore
     };
 };
 
@@ -397,6 +400,22 @@ GTD.jumpAndFocusOnTask = function(task) {
     var header = GTD.Task.getTaskThreadHeader(position.getElement());
     rangeBuilder.addElement(header);
     doc.setSelection(rangeBuilder.build());
+};
+
+GTD.changeTaskStatusMenuWrapper = function(options) {
+    GTD.initialize();
+    var statusAfter = options.statusAfter;
+    var ret = GTD.getSelectedTask(statusAfter);
+    if (ret.error) {
+        DocumentApp.getUi().alert(ret.error);
+        return;
+    }
+    GTD.changeTaskStatus({task: ret, status: statusAfter});
+    GTD.Task.insertComment({
+      threadHeader: ret.threadHeader,
+      message: 'Move from ' + ret.statusBefore + ' to ' + statusAfter,
+      location: 'thread'
+    });
 };
 
 // GTD.initTaskTable();

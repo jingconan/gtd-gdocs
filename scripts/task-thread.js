@@ -98,19 +98,30 @@ GTD.Task.insertNote = function(noteType) {
 //     var position = doc.newPosition(cell, 0);
 //     doc.setCursor(position);
 // };
+GTD.Task.insertComment = function(options) {
+    if (typeof options === 'undefined') {
+      options = {'location': 'cursor'};
+    }
 
-GTD.Task.insertComment = function() {
     var user = Session.getActiveUser().getEmail().split("@")[0];
     var currentTime = GTD.util.toISO(new Date());
-    var table = GTD.util.insertTableAtCursor([[user + ' ' + currentTime], ['']]);
-    if (!table) {
-        Logger.log('Fail to insert comment table!');
-        DocumentApp.getUi().alert('Please make sure your cursor is not in ' +
-                                  'any table when inserting comment');
-        return;
+    if (options.location === 'cursor') {
+      table = GTD.util.insertTableAtCursor([[user + ' ' + currentTime], ['']]);
+    } else if (options.location === 'thread') {
+      table = GTD.util.insertTableAfterThreadHeader({
+        threadHeader: options.threadHeader,
+        cells: [[user + ' ' + currentTime], [options.message]]
+      });
     }
-    table.editAsText().setForegroundColor(GTD.commentStyle.foregroundColor);
 
+    if (!table) {
+      Logger.log('Fail to insert comment table!');
+      DocumentApp.getUi().alert('Please make sure your cursor is not in ' +
+          'any table when inserting comment');
+      return;
+    }
+
+    table.editAsText().setForegroundColor(GTD.commentStyle.foregroundColor);
     var text = table.getCell(0, 0).editAsText();
     text.setFontSize(user.length+1, text.getText().length-1, 7);
 
@@ -195,6 +206,10 @@ GTD.Task.setThreadHeaderStatus = function(threadHeader, status) {
     // Change text
     threadHeader.getCell(this.CONTENT_ROW, 2).setText(status);
 };
+
+GTD.Task.getThreadHeaderStatus = function(threadHeader) {
+    return threadHeader.getCell(this.CONTENT_ROW, 2).getText();
+}
 
 GTD.Task.getTaskDesc = function(threadHeader) {
     return threadHeader.getCell(this.CONTENT_ROW, 0).getText() + '\n' + threadHeader.getCell(this.CONTENT_ROW, 1).getText();
