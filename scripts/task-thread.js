@@ -2,7 +2,18 @@ GTD.Task = {
     CONTENT_ROW: 1,
     SIZE: [2, 3],
     // THREAD_HEADER_WIDTH: [100, 350, 70, 60]
-    THREAD_HEADER_WIDTH: [70, 450, 70]
+    THREAD_HEADER_WIDTH: [70, 450, 70],
+    NOTE_FORMAT = {
+        'code': {
+            'color': '#CCFF90'
+        },
+        'email': {
+            'color': '80D8FF'
+        },
+        'checklist': {
+            'color': 'FFFF8D'
+        }
+    }
 };
 
 GTD.Task.createNewTask = function(name) {
@@ -65,6 +76,16 @@ GTD.Task.setColumnWidth = function(table) {
     }
 };
 
+GTD.Task.insertNote = function(noteType) {
+    var table = GTD.util.insertTableAtCursor([['']]);
+    if (!table) {
+        Logger.log('Fail to insert note!');
+        DocumentApp.getUi().alert('Please make sure your cursor is not in ' +
+                                  'any table when inserting comment');
+        return;
+    }
+
+}
 // GTD.Task.addBody = function(cell) {
 //     var doc = DocumentApp.getActiveDocument();
 //     var position = doc.newPosition(cell, 0);

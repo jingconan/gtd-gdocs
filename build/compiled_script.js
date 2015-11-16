@@ -1,4 +1,4 @@
-// compiled from git commit version: 1b997ac36cdb75e83fea4a4b38936fa70f0918bf
+// compiled from git commit version: ef527f8926beaf62a76fb1c9213ab39b312c7f57
 function onOpen() {
   var ui = DocumentApp.getUi();
   // Or DocumentApp or FormApp.
@@ -578,7 +578,18 @@ GTD.Task = {
     CONTENT_ROW: 1,
     SIZE: [2, 3],
     // THREAD_HEADER_WIDTH: [100, 350, 70, 60]
-    THREAD_HEADER_WIDTH: [70, 450, 70]
+    THREAD_HEADER_WIDTH: [70, 450, 70],
+    NOTE_FORMAT = {
+        'code': {
+            'color': '#CCFF90'
+        },
+        'email': {
+            'color': '80D8FF'
+        },
+        'checklist': {
+            'color': 'FFFF8D'
+        }
+    }
 };
 
 GTD.Task.createNewTask = function(name) {
@@ -641,6 +652,16 @@ GTD.Task.setColumnWidth = function(table) {
     }
 };
 
+GTD.Task.insertNote = function(noteType) {
+    var table = GTD.util.insertTableAtCursor([['']]);
+    if (!table) {
+        Logger.log('Fail to insert note!');
+        DocumentApp.getUi().alert('Please make sure your cursor is not in ' +
+                                  'any table when inserting comment');
+        return;
+    }
+
+}
 // GTD.Task.addBody = function(cell) {
 //     var doc = DocumentApp.getActiveDocument();
 //     var position = doc.newPosition(cell, 0);
