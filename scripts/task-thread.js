@@ -5,9 +5,9 @@ GTD.Task = {
     THREAD_HEADER_WIDTH: [70, 450, 70],
     NOTE_FORMAT: {
         'code': {
-            'color': '#CCFF90',
+            'color': '#D9EAD3',
             'font-family': 'Consolas',
-            'font-size': 12
+            'font-size': 9
         },
         'email': {
             'color': '#80D8FF',
