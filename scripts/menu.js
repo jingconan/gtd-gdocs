@@ -9,6 +9,7 @@ function onOpen() {
       .addItem('Mark as Actionable', 'createActionableTask')
       .addItem('Mark as WaitingFor', 'moveTaskToWaitingFor')
       .addItem('Mark as Done', 'moveTaskToDone')
+      .addItem('Mark as Someday', 'moveTaskToSomeday')
       .addItem('Insert separator', 'insertSeparator')
       .addItem('Jump to task', 'jumpToTask')
       .addItem('Show sidebar', 'showSidebar')
@@ -117,6 +118,12 @@ function moveTaskToWaitingFor() {
 function moveTaskToDone() {
     GTD.changeTaskStatusMenuWrapper({
       statusAfter: 'Done'
+    });
+}
+
+function moveTaskToSomeday() {
+    GTD.changeTaskStatusMenuWrapper({
+      statusAfter: 'Someday'
     });
 }
 

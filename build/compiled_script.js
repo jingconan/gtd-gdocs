@@ -1,4 +1,4 @@
-// compiled from git commit version: 83d3243d3372a526a54b8bd85f0b465795535dfc
+// compiled from git commit version: 2217fdac053e314c69dd7004fe1bd6d09c629c50
 function onOpen() {
   var ui = DocumentApp.getUi();
   // Or DocumentApp or FormApp.
@@ -10,6 +10,7 @@ function onOpen() {
       .addItem('Mark as Actionable', 'createActionableTask')
       .addItem('Mark as WaitingFor', 'moveTaskToWaitingFor')
       .addItem('Mark as Done', 'moveTaskToDone')
+      .addItem('Mark as Someday', 'moveTaskToSomeday')
       .addItem('Insert separator', 'insertSeparator')
       .addItem('Jump to task', 'jumpToTask')
       .addItem('Show sidebar', 'showSidebar')
@@ -121,6 +122,12 @@ function moveTaskToDone() {
     });
 }
 
+function moveTaskToSomeday() {
+    GTD.changeTaskStatusMenuWrapper({
+      statusAfter: 'Someday'
+    });
+}
+
 function showSidebar() {
     var html = HtmlService.createHtmlOutput(GTD.templates.sidebar)
         .setSandboxMode(HtmlService.SandboxMode.IFRAME)
@@ -134,8 +141,8 @@ function showSidebar() {
 
 var GTD = {
   body: DocumentApp.getActiveDocument().getBody(),
-  header: ['Actionable', 'Waiting For', 'Done'], //FIXME change to taskStatus
-  headerColor: ['#ff0000', '#9d922e', '#16a031'], //FIXME change to taskStatusColor 
+  header: ['Actionable', 'Waiting For', 'Done', 'Someday'], //FIXME change to taskStatus
+  headerColor: ['#ff0000', '#9d922e', '#16a031', '#808080'], //FIXME change to taskStatusColor 
   bodyMargins: [7.2, 7.2, 7.2, 7.2], // L, T, R, D unit is point
   commentStyle: {
       foregroundColor: '#000000'
@@ -530,7 +537,7 @@ GTD.getTaskThreadPosition = function(task) {
     var bookmark = doc.getBookmark(bookmarkId);
     if (bookmark) {
         return bookmark.getPosition();
-    } 
+    }
 };
 
 GTD.jumpAndFocusOnTask = function(task) {

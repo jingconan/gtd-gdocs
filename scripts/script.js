@@ -381,7 +381,7 @@ GTD.getTaskThreadPosition = function(task) {
     var bookmark = doc.getBookmark(bookmarkId);
     if (bookmark) {
         return bookmark.getPosition();
-    } 
+    }
 };
 
 GTD.jumpAndFocusOnTask = function(task) {
