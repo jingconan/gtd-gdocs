@@ -1,4 +1,4 @@
-// compiled from git commit version: abf4ebb03bb40ab2599cf67c27070d3ae77c804c
+// compiled from git commit version: 83d3243d3372a526a54b8bd85f0b465795535dfc
 function onOpen() {
   var ui = DocumentApp.getUi();
   // Or DocumentApp or FormApp.
@@ -686,9 +686,7 @@ GTD.Task.insertNote = function(noteType) {
     var document = DocumentApp.getActiveDocument();
     var cursor = document.getCursor();
     if (!cursor) {
-        DocumentApp.getUi().alert("Cannot find cursor, are you selecting " +
-                                  "texts? Please try without text " +
-                                  " selection.");
+        GTD.util.alertNoCursor();
         return;
     }
     var ele = cursor.getElement();
@@ -733,7 +731,10 @@ GTD.Task.insertComment = function(options) {
       });
     }
 
-    if (!table) {
+    if (table === 'cursor_not_found') {
+        return;
+    }
+    if (table === 'element_not_found') {
       Logger.log('Fail to insert comment table!');
       DocumentApp.getUi().alert('Please make sure your cursor is not in ' +
           'any table when inserting comment');
@@ -758,7 +759,7 @@ GTD.Task.getTaskThreadHeader = function(ele) {
     if (typeof ele === 'undefined') {
         var cursor = DocumentApp.getActiveDocument().getCursor();
         if (!cursor) {
-            debug('no cursor');
+            GTD.util.alertNoCursor();
             return;
         }
         ele = cursor.getElement();
@@ -870,7 +871,7 @@ GTD.util.appendTableInTableCell = function(cell, subCells) {
     //add a blank paragraph. Required because of a bug in app script.
     //See
     //https://code.google.com/p/google-apps-script-issues/issues/detail?id=894
-    cell.appendParagraph(""); 
+    cell.appendParagraph("");
     if (subCells) {
         return cell.insertTable(1, subCells);
     } else {
@@ -883,23 +884,27 @@ GTD.util.insertTableAtCursor = function(cells) {
     var body = document.getBody();
 
     var cursor = document.getCursor();
+    if (!cursor) {
+        GTD.util.alertNoCursor();
+        return 'cursor_not_found';
+    }
     var ele = cursor.getElement();
     // If cursor is in a table, body.insertTable will fail to find the
     // element.
     try {
-        var index = body.getChildIndex(ele); 
+        var index = body.getChildIndex(ele);
         var table = body.insertTable(index+1, cells);
         document.setCursor(document.newPosition(body, index+2));
         return table;
     } catch(err) {
-        return;
+        return 'element_not_found';
     }
 
 };
 
 GTD.util.insertTableAfterThreadHeader = function(options) {
     var body = DocumentApp.getActiveDocument().getBody();
-    var index = body.getChildIndex(options.threadHeader); 
+    var index = body.getChildIndex(options.threadHeader);
     return body.insertTable(index+1, options.cells);
 };
 
@@ -915,6 +920,12 @@ GTD.util.setCursorAtStart = function() {
     var doc = DocumentApp.getActiveDocument();
     var position = doc.newPosition(doc.getBody(), 0);
     doc.setCursor(position);
+};
+
+GTD.util.alertNoCursor = function() {
+    DocumentApp.getUi().alert("Cannot find cursor, are you selecting texts? " +
+                              "Please try without text selection.");
+
 };
 
 
