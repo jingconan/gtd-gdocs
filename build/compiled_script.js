@@ -1,4 +1,4 @@
-// compiled from git commit version: 4003765a0edabdd80ccd91f85f9bc7306559d10e
+// compiled from git commit version: 8292d6ea95ebc2d03c41dc3b924eb5dcd6107836
 function onOpen() {
   var ui = DocumentApp.getUi();
   // Or DocumentApp or FormApp.
@@ -686,11 +686,21 @@ GTD.Task.insertNote = function(noteType) {
     var document = DocumentApp.getActiveDocument();
     var cursor = document.getCursor();
     var ele = cursor.getElement();
-    var tableCell = ele.getParent();
+    var noteCell = ele;
+    // Search up until we find a table cell or return.
+    while (noteCell.getType() !== DocumentApp.ElementType.TABLE_CELL) {
+        noteCell = noteCell.getParent();
+        if (noteCell.getType() == DocumentApp.ElementType.DOCUMENT) {
+            // cannot find a Table cell. Probably because the current cursor is
+            // not inside a table.
+            return;
+        }
+    }
+    debug('noteCell + ' + noteCell);
     // format the table cell.
-    tableCell.setBackgroundColor(GTD.Task.NOTE_FORMAT[noteType]['color']);
-    tableCell.editAsText().setFontFamily(GTD.Task.NOTE_FORMAT[noteType]['font-family']);
-    tableCell.editAsText().setFontSize(GTD.Task.NOTE_FORMAT[noteType]['font-size']);
+    noteCell.setBackgroundColor(GTD.Task.NOTE_FORMAT[noteType]['color']);
+    noteCell.editAsText().setFontFamily(GTD.Task.NOTE_FORMAT[noteType]['font-family']);
+    noteCell.editAsText().setFontSize(GTD.Task.NOTE_FORMAT[noteType]['font-size']);
 };
 
 // GTD.Task.addBody = function(cell) {

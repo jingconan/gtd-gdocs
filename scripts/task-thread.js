@@ -86,11 +86,20 @@ GTD.Task.insertNote = function(noteType) {
     var document = DocumentApp.getActiveDocument();
     var cursor = document.getCursor();
     var ele = cursor.getElement();
-    var tableCell = ele.getParent();
+    var noteCell = ele;
+    // Search up until we find a table cell or return.
+    while (noteCell.getType() !== DocumentApp.ElementType.TABLE_CELL) {
+        noteCell = noteCell.getParent();
+        if (noteCell.getType() == DocumentApp.ElementType.DOCUMENT) {
+            // cannot find a Table cell. Probably because the current cursor is
+            // not inside a table.
+            return;
+        }
+    }
     // format the table cell.
-    tableCell.setBackgroundColor(GTD.Task.NOTE_FORMAT[noteType]['color']);
-    tableCell.editAsText().setFontFamily(GTD.Task.NOTE_FORMAT[noteType]['font-family']);
-    tableCell.editAsText().setFontSize(GTD.Task.NOTE_FORMAT[noteType]['font-size']);
+    noteCell.setBackgroundColor(GTD.Task.NOTE_FORMAT[noteType]['color']);
+    noteCell.editAsText().setFontFamily(GTD.Task.NOTE_FORMAT[noteType]['font-family']);
+    noteCell.editAsText().setFontSize(GTD.Task.NOTE_FORMAT[noteType]['font-size']);
 };
 
 // GTD.Task.addBody = function(cell) {
