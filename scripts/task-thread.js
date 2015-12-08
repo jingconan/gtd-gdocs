@@ -100,6 +100,10 @@ GTD.Task.insertNote = function(noteType) {
     noteCell.setBackgroundColor(GTD.Task.NOTE_FORMAT[noteType]['color']);
     noteCell.editAsText().setFontFamily(GTD.Task.NOTE_FORMAT[noteType]['font-family']);
     noteCell.editAsText().setFontSize(GTD.Task.NOTE_FORMAT[noteType]['font-size']);
+    // A workaround to make sure the format of the text is cleared.
+    var text = noteCell.getText();
+    noteCell.clear();
+    noteCell.setText(text);
 };
 
 // GTD.Task.addBody = function(cell) {

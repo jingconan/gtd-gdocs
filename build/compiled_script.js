@@ -1,4 +1,4 @@
-// compiled from git commit version: 8292d6ea95ebc2d03c41dc3b924eb5dcd6107836
+// compiled from git commit version: 8a01f26e50e75106717bb5d848e39745e1c9be4a
 function onOpen() {
   var ui = DocumentApp.getUi();
   // Or DocumentApp or FormApp.
@@ -696,11 +696,14 @@ GTD.Task.insertNote = function(noteType) {
             return;
         }
     }
-    debug('noteCell + ' + noteCell);
     // format the table cell.
     noteCell.setBackgroundColor(GTD.Task.NOTE_FORMAT[noteType]['color']);
     noteCell.editAsText().setFontFamily(GTD.Task.NOTE_FORMAT[noteType]['font-family']);
     noteCell.editAsText().setFontSize(GTD.Task.NOTE_FORMAT[noteType]['font-size']);
+    // A workaround to make sure the format of the text is cleared.
+    var text = noteCell.getText();
+    noteCell.clear();
+    noteCell.setText(text);
 };
 
 // GTD.Task.addBody = function(cell) {
