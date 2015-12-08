@@ -1,4 +1,4 @@
-// compiled from git commit version: 8a01f26e50e75106717bb5d848e39745e1c9be4a
+// compiled from git commit version: abf4ebb03bb40ab2599cf67c27070d3ae77c804c
 function onOpen() {
   var ui = DocumentApp.getUi();
   // Or DocumentApp or FormApp.
@@ -685,6 +685,12 @@ GTD.Task.setColumnWidth = function(table) {
 GTD.Task.insertNote = function(noteType) {
     var document = DocumentApp.getActiveDocument();
     var cursor = document.getCursor();
+    if (!cursor) {
+        DocumentApp.getUi().alert("Cannot find cursor, are you selecting " +
+                                  "texts? Please try without text " +
+                                  " selection.");
+        return;
+    }
     var ele = cursor.getElement();
     var noteCell = ele;
     // Search up until we find a table cell or return.

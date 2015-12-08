@@ -85,6 +85,12 @@ GTD.Task.setColumnWidth = function(table) {
 GTD.Task.insertNote = function(noteType) {
     var document = DocumentApp.getActiveDocument();
     var cursor = document.getCursor();
+    if (!cursor) {
+        DocumentApp.getUi().alert("Cannot find cursor, are you selecting " +
+                                  "texts? Please try without text " +
+                                  " selection.");
+        return;
+    }
     var ele = cursor.getElement();
     var noteCell = ele;
     // Search up until we find a table cell or return.
