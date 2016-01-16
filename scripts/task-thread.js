@@ -85,12 +85,29 @@ GTD.Task.setColumnWidth = function(table) {
 GTD.Task.insertNote = function(noteType) {
     var document = DocumentApp.getActiveDocument();
     var cursor = document.getCursor();
+    if (!cursor) {
+        GTD.util.alertNoCursor();
+        return;
+    }
     var ele = cursor.getElement();
-    var tableCell = ele.getParent();
+    var noteCell = ele;
+    // Search up until we find a table cell or return.
+    while (noteCell.getType() !== DocumentApp.ElementType.TABLE_CELL) {
+        noteCell = noteCell.getParent();
+        if (noteCell.getType() == DocumentApp.ElementType.DOCUMENT) {
+            // cannot find a Table cell. Probably because the current cursor is
+            // not inside a table.
+            return;
+        }
+    }
     // format the table cell.
-    tableCell.setBackgroundColor(GTD.Task.NOTE_FORMAT[noteType]['color']);
-    tableCell.editAsText().setFontFamily(GTD.Task.NOTE_FORMAT[noteType]['font-family']);
-    tableCell.editAsText().setFontSize(GTD.Task.NOTE_FORMAT[noteType]['font-size']);
+    noteCell.setBackgroundColor(GTD.Task.NOTE_FORMAT[noteType]['color']);
+    noteCell.editAsText().setFontFamily(GTD.Task.NOTE_FORMAT[noteType]['font-family']);
+    noteCell.editAsText().setFontSize(GTD.Task.NOTE_FORMAT[noteType]['font-size']);
+    // A workaround to make sure the format of the text is cleared.
+    var text = noteCell.getText();
+    noteCell.clear();
+    noteCell.setText(text);
 };
 
 // GTD.Task.addBody = function(cell) {
@@ -114,7 +131,10 @@ GTD.Task.insertComment = function(options) {
       });
     }
 
-    if (!table) {
+    if (table === 'cursor_not_found') {
+        return;
+    }
+    if (table === 'element_not_found') {
       Logger.log('Fail to insert comment table!');
       DocumentApp.getUi().alert('Please make sure your cursor is not in ' +
           'any table when inserting comment');
@@ -139,7 +159,7 @@ GTD.Task.getTaskThreadHeader = function(ele) {
     if (typeof ele === 'undefined') {
         var cursor = DocumentApp.getActiveDocument().getCursor();
         if (!cursor) {
-            debug('no cursor');
+            GTD.util.alertNoCursor();
             return;
         }
         ele = cursor.getElement();

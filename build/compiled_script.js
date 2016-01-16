@@ -1,4 +1,4 @@
-// compiled from git commit version: 4003765a0edabdd80ccd91f85f9bc7306559d10e
+// compiled from git commit version: 2217fdac053e314c69dd7004fe1bd6d09c629c50
 function onOpen() {
   var ui = DocumentApp.getUi();
   // Or DocumentApp or FormApp.
@@ -10,6 +10,7 @@ function onOpen() {
       .addItem('Mark as Actionable', 'createActionableTask')
       .addItem('Mark as WaitingFor', 'moveTaskToWaitingFor')
       .addItem('Mark as Done', 'moveTaskToDone')
+      .addItem('Mark as Someday', 'moveTaskToSomeday')
       .addItem('Insert separator', 'insertSeparator')
       .addItem('Jump to task', 'jumpToTask')
       .addItem('Show sidebar', 'showSidebar')
@@ -121,6 +122,12 @@ function moveTaskToDone() {
     });
 }
 
+function moveTaskToSomeday() {
+    GTD.changeTaskStatusMenuWrapper({
+      statusAfter: 'Someday'
+    });
+}
+
 function showSidebar() {
     var html = HtmlService.createHtmlOutput(GTD.templates.sidebar)
         .setSandboxMode(HtmlService.SandboxMode.IFRAME)
@@ -134,8 +141,8 @@ function showSidebar() {
 
 var GTD = {
   body: DocumentApp.getActiveDocument().getBody(),
-  header: ['Actionable', 'Waiting For', 'Done'], //FIXME change to taskStatus
-  headerColor: ['#ff0000', '#9d922e', '#16a031'], //FIXME change to taskStatusColor 
+  header: ['Actionable', 'Waiting For', 'Done', 'Someday'], //FIXME change to taskStatus
+  headerColor: ['#ff0000', '#9d922e', '#16a031', '#808080'], //FIXME change to taskStatusColor 
   bodyMargins: [7.2, 7.2, 7.2, 7.2], // L, T, R, D unit is point
   commentStyle: {
       foregroundColor: '#000000'
@@ -530,7 +537,7 @@ GTD.getTaskThreadPosition = function(task) {
     var bookmark = doc.getBookmark(bookmarkId);
     if (bookmark) {
         return bookmark.getPosition();
-    } 
+    }
 };
 
 GTD.jumpAndFocusOnTask = function(task) {
@@ -685,12 +692,29 @@ GTD.Task.setColumnWidth = function(table) {
 GTD.Task.insertNote = function(noteType) {
     var document = DocumentApp.getActiveDocument();
     var cursor = document.getCursor();
+    if (!cursor) {
+        GTD.util.alertNoCursor();
+        return;
+    }
     var ele = cursor.getElement();
-    var tableCell = ele.getParent();
+    var noteCell = ele;
+    // Search up until we find a table cell or return.
+    while (noteCell.getType() !== DocumentApp.ElementType.TABLE_CELL) {
+        noteCell = noteCell.getParent();
+        if (noteCell.getType() == DocumentApp.ElementType.DOCUMENT) {
+            // cannot find a Table cell. Probably because the current cursor is
+            // not inside a table.
+            return;
+        }
+    }
     // format the table cell.
-    tableCell.setBackgroundColor(GTD.Task.NOTE_FORMAT[noteType]['color']);
-    tableCell.editAsText().setFontFamily(GTD.Task.NOTE_FORMAT[noteType]['font-family']);
-    tableCell.editAsText().setFontSize(GTD.Task.NOTE_FORMAT[noteType]['font-size']);
+    noteCell.setBackgroundColor(GTD.Task.NOTE_FORMAT[noteType]['color']);
+    noteCell.editAsText().setFontFamily(GTD.Task.NOTE_FORMAT[noteType]['font-family']);
+    noteCell.editAsText().setFontSize(GTD.Task.NOTE_FORMAT[noteType]['font-size']);
+    // A workaround to make sure the format of the text is cleared.
+    var text = noteCell.getText();
+    noteCell.clear();
+    noteCell.setText(text);
 };
 
 // GTD.Task.addBody = function(cell) {
@@ -714,7 +738,10 @@ GTD.Task.insertComment = function(options) {
       });
     }
 
-    if (!table) {
+    if (table === 'cursor_not_found') {
+        return;
+    }
+    if (table === 'element_not_found') {
       Logger.log('Fail to insert comment table!');
       DocumentApp.getUi().alert('Please make sure your cursor is not in ' +
           'any table when inserting comment');
@@ -739,7 +766,7 @@ GTD.Task.getTaskThreadHeader = function(ele) {
     if (typeof ele === 'undefined') {
         var cursor = DocumentApp.getActiveDocument().getCursor();
         if (!cursor) {
-            debug('no cursor');
+            GTD.util.alertNoCursor();
             return;
         }
         ele = cursor.getElement();
@@ -851,7 +878,7 @@ GTD.util.appendTableInTableCell = function(cell, subCells) {
     //add a blank paragraph. Required because of a bug in app script.
     //See
     //https://code.google.com/p/google-apps-script-issues/issues/detail?id=894
-    cell.appendParagraph(""); 
+    cell.appendParagraph("");
     if (subCells) {
         return cell.insertTable(1, subCells);
     } else {
@@ -864,23 +891,27 @@ GTD.util.insertTableAtCursor = function(cells) {
     var body = document.getBody();
 
     var cursor = document.getCursor();
+    if (!cursor) {
+        GTD.util.alertNoCursor();
+        return 'cursor_not_found';
+    }
     var ele = cursor.getElement();
     // If cursor is in a table, body.insertTable will fail to find the
     // element.
     try {
-        var index = body.getChildIndex(ele); 
+        var index = body.getChildIndex(ele);
         var table = body.insertTable(index+1, cells);
         document.setCursor(document.newPosition(body, index+2));
         return table;
     } catch(err) {
-        return;
+        return 'element_not_found';
     }
 
 };
 
 GTD.util.insertTableAfterThreadHeader = function(options) {
     var body = DocumentApp.getActiveDocument().getBody();
-    var index = body.getChildIndex(options.threadHeader); 
+    var index = body.getChildIndex(options.threadHeader);
     return body.insertTable(index+1, options.cells);
 };
 
@@ -896,6 +927,12 @@ GTD.util.setCursorAtStart = function() {
     var doc = DocumentApp.getActiveDocument();
     var position = doc.newPosition(doc.getBody(), 0);
     doc.setCursor(position);
+};
+
+GTD.util.alertNoCursor = function() {
+    DocumentApp.getUi().alert("Cannot find cursor, are you selecting texts? " +
+                              "Please try without text selection.");
+
 };
 
 
