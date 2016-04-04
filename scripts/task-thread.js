@@ -154,13 +154,25 @@ GTD.Task.insertComment = function(options) {
     GTD.util.setCursorAtTable(table, [1, 0]);
 };
 
+// Get task header from its name
+GTD.getTaskHeader = function(task) {
+    var doc = DocumentApp.getActiveDocument();
+    var taskDesc = task.taskDesc;
+    var position = GTD.getTaskThreadPosition(task);
+    if (!position) {
+        return;
+    }
+    return GTD.Task.getTaskThreadHeader(position.getElement());
+}
+
 // getTaskThreadHeader returns the task thread header under the cursor
 GTD.Task.getTaskThreadHeader = function(ele) {
+    var cursor, task, res = {};
     if (typeof ele === 'undefined') {
-        var cursor = DocumentApp.getActiveDocument().getCursor();
+        cursor = DocumentApp.getActiveDocument().getCursor();
         if (!cursor) {
             GTD.util.alertNoCursor();
-            return;
+            return {};
         }
         ele = cursor.getElement();
     }
@@ -179,9 +191,27 @@ GTD.Task.getTaskThreadHeader = function(ele) {
     }
     if (!ele || ele.getType() != DocumentApp.ElementType.TABLE) {
         DocumentApp.getUi().alert('Cannot find task header under cursor! ele.type: ' + ele.getType());
-        return;
+        return res;
     }
-    return ele;
+    
+    if (!GTD._isTaskTable(ele)) {
+      res.header = ele;
+      res.status = 'cursor_in_header';
+      return res;
+    }
+
+    // If the cursor is in the summary table, then find the
+    // corresponding header by its name.
+    if (GTD._isTaskTable(ele)) {
+      // Get task name.
+      task = GTD.getTaskFromSummaryTable(cursor);
+      if (task) {
+          res.header = GTD.getTaskHeader(task).header;
+          res.status = 'cursor_in_summary_table';
+      }
+    }
+
+    return res;
 };
 
 GTD.Task.isValidTaskThreadHeader = function(table) {

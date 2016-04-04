@@ -161,7 +161,7 @@ GTD.setTaskColor = function(type, taskName) {
 
     // setColor(re.getElement());
     // change color of the task header.
-    var taskThreadHeader = GTD.Task.getTaskThreadHeader(re.getElement());
+    var taskThreadHeader = GTD.Task.getTaskThreadHeader(re.getElement()).header;
     if (!GTD.Task.isValidTaskThreadHeader(taskThreadHeader)) {
         DocumentApp.getUi().alert('find invalid table thread header when changing color of task: ' + taskName);
         return;
@@ -212,7 +212,8 @@ GTD.getTimeStamp = function(taskName) {
 
 // this function returns the task under cursor
 GTD.getSelectedTask = function(type) {
-    var taskHeader = GTD.Task.getTaskThreadHeader();
+    var taskHeaderResult = GTD.Task.getTaskThreadHeader();
+    var taskHeader = taskHeaderResult.header;
     if (!GTD.Task.isValidTaskThreadHeader(taskHeader)) {
         return {
             error: 'To change status of a task, please ' +
@@ -231,7 +232,8 @@ GTD.getSelectedTask = function(type) {
     return {
         taskDesc: taskDesc,
         threadHeader: taskHeader,
-        statusBefore: statusBefore
+        statusBefore: statusBefore,
+        cursorStatus: taskHeaderResult.status
     };
 };
 
@@ -356,7 +358,7 @@ GTD.searchBookmarkIdBasedOnTaskDesc = function(taskDesc) {
     var bookmarks = doc.getBookmarks();
     var i, header, desc;
     for (i = 0; i < bookmarks.length; ++i) {
-        header = GTD.Task.getTaskThreadHeader(bookmarks[i].getPosition().getElement());
+        header = GTD.Task.getTaskThreadHeader(bookmarks[i].getPosition().getElement()).header;
         desc = GTD.Task.getTaskDesc(header);
         if (taskDesc === desc) {
             return bookmarks[i].getId();
@@ -384,6 +386,8 @@ GTD.getTaskThreadPosition = function(task) {
     }
 };
 
+// Find the task header, set the cursor there and select the whole
+// header to highlight it.
 GTD.jumpAndFocusOnTask = function(task) {
     var doc = DocumentApp.getActiveDocument();
     var taskDesc = task.taskDesc;
@@ -397,7 +401,7 @@ GTD.jumpAndFocusOnTask = function(task) {
     // Make the task to be selected. This gives user a visual indicator
     // of the start of the task.
     var rangeBuilder = doc.newRange();
-    var header = GTD.Task.getTaskThreadHeader(position.getElement());
+    var header = GTD.Task.getTaskThreadHeader(position.getElement()).header;
     rangeBuilder.addElement(header);
     doc.setSelection(rangeBuilder.build());
 };
@@ -410,13 +414,62 @@ GTD.changeTaskStatusMenuWrapper = function(options) {
         DocumentApp.getUi().alert(ret.error);
         return;
     }
+
+    var comment = 'Move from ' + ret.statusBefore + ' to ' + statusAfter;
+
+    // if cursor is in summary table, display a dialog for comment
+    if (ret.cursorStatus === 'cursor_in_summary_table') {
+        var task;
+        var ui = DocumentApp.getUi();
+        var result = ui.prompt('Update status',
+                               'Please enter your comment:',
+                               ui.ButtonSet.OK_CANCEL);
+
+        var button = result.getSelectedButton();
+        var text = result.getResponseText();
+        if (button == ui.Button.OK) {
+            comment = comment + '\n' + text;
+        } else {
+            return;
+        }
+
+    }
+
     GTD.changeTaskStatus({task: ret, status: statusAfter});
     GTD.Task.insertComment({
       threadHeader: ret.threadHeader,
-      message: 'Move from ' + ret.statusBefore + ' to ' + statusAfter,
+      message: comment,
       location: 'thread'
     });
+
+    // if cursor was in summary table before the change, move the cursor
+    // back to the summary table
+    if (ret.cursorStatus === 'cursor_in_summary_table') {
+        var doc = DocumentApp.getActiveDocument();
+        var position = doc.newPosition(GTD.getTaskTable(), 0);
+        doc.setCursor(position);
+    }
 };
+
+// This function assume cursor is inside summary table and find the task
+// description from the summary table.
+GTD.getTaskFromSummaryTable = function(cursor) {
+    var ele = cursor.getElement();
+    if (ele.getType() === DocumentApp.ElementType.TEXT) {
+        ele = ele.getParent();
+    }
+    if (ele.getType() === DocumentApp.ElementType.PARAGRAPH) {
+        ele = ele.getParent();
+    }
+    if (!ele || ele.getType() != DocumentApp.ElementType.TABLE_CELL) {
+        DocumentApp.getUi().alert('Cannot find task under cursor!' );
+        return;
+    }
+
+    return {
+        taskDesc: ele.editAsText().getText()
+    };
+}
 
 // GTD.initTaskTable();
 

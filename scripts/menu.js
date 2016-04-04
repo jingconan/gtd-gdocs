@@ -74,21 +74,11 @@ function jumpToTask() {
         debug('no cursor');
         return;
     }
-    var ele = cursor.getElement();
-    if (ele.getType() === DocumentApp.ElementType.TEXT) {
-        ele = ele.getParent();
-    }
-    if (ele.getType() === DocumentApp.ElementType.PARAGRAPH) {
-        ele = ele.getParent();
-    }
-    if (!ele || ele.getType() != DocumentApp.ElementType.TABLE_CELL) {
-        DocumentApp.getUi().alert('Cannot find task under cursor!' );
-        return;
-    }
 
-    GTD.jumpAndFocusOnTask({
-        taskDesc: ele.editAsText().getText()
-    });
+    var task = GTD.getTaskFromSummaryTable(cursor);
+    if (task) {
+        GTD.jumpAndFocusOnTask(task);
+    }
 }
 
 function insertDate() {
