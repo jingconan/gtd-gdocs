@@ -1,4 +1,4 @@
-// compiled from git commit version: 2217fdac053e314c69dd7004fe1bd6d09c629c50
+// compiled from git commit version: 5c5ece9faf89806a3323b6af0c2c1a8dd9c462e4
 function onOpen() {
   var ui = DocumentApp.getUi();
   // Or DocumentApp or FormApp.
@@ -612,9 +612,9 @@ GTD.Task = {
     THREAD_HEADER_WIDTH: [70, 450, 70],
     NOTE_FORMAT: {
         'code': {
-            'color': '#CCFF90',
+            'color': '#D9EAD3',
             'font-family': 'Consolas',
-            'font-size': 12
+            'font-size': 9
         },
         'email': {
             'color': '#80D8FF',
