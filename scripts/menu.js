@@ -13,7 +13,6 @@ function onOpen() {
       .addItem('Insert separator', 'insertSeparator')
       .addItem('Jump to task', 'jumpToTask')
       .addItem('Show sidebar', 'showSidebar')
-      .addItem('test tasks', 'testTask')
       .addSeparator()
       .addSubMenu(ui.createMenu('Note')
         .addItem('Format as code', 'insertNoteCode')
@@ -61,8 +60,10 @@ function insertTask() {
     if (button == ui.Button.OK) {
         task = GTD.insertTask(text);
         // By default, mark this task as Actionable task
-        // task = GTD.cleanTask('All', task);
-        GTD.addTask('Actionable', task);
+        GTD.changeTaskStatus({
+            task: task,
+            status: 'Actionable'
+        });
     } else {
         return;
     }

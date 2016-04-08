@@ -322,11 +322,23 @@ GTD.TOC.pullHeaders = function () {
 
 GTD.changeTaskStatus = function(options) {
     var task = options.task;
+
+    // Update Summary table
     GTD.cleanTask('All', task);
     GTD.addTask(options.status, task);
     if (options.setTaskColor) {
         GTD.setTaskColor(options.status, task);
     }
+
+    // Update gtask service
+    var tl = GTD.gtask.getActiveTaskList();
+    var timestamp = GTD.getTimeStamp(task.taskDesc);
+    var title = task.taskDesc.replace(timestamp + '\n', '');
+    GTD.gtask.updateTask(tl.taskListId, tl.parentTask, {
+      title: title,
+      notes: timestamp + ' moved from [' + task.statusBefore + '] to [' + options.status + ']',
+      status: options.status
+    });
 };
 
 GTD.insertTask = function(name) {
@@ -499,135 +511,5 @@ function changeTaskStatus(taskDesc, status) {
 function findAndFocusOnTask(taskName) {
     GTD.initialize();
     GTD.jumpAndFocusOnTask({taskDesc:taskName});
-}
-
-/////////////////////////////////////////////////////////////////////////////
-// These functions are used to sync data between google docs and gmail tasks
-////////////////////////////////////////////////////////////////////////////
-
-GTD.gtask = GTD.gtask || {
-    listName: 'GTD Lists'
-
-};
-
-GTD.gtask.findListIdByName = function(name) {
-    var taskLists = Tasks.Tasklists.list();
-    var ret = {};
-    if (taskLists.items) {
-        for (var i = 0; i < taskLists.items.length; i++) {
-            var taskList = taskLists.items[i];
-            if (taskList.title !== name) {
-                continue;
-            }
-            ret.id = taskList.id;
-            ret.title = taskList.title;
-            ret.status = 'SUCCESS';
-            return ret;
-        }
-    }
-
-    ret.status = 'NOT_FOUND';
-    return ret;
-};
-
-GTD.gtask.findTaskByName = function(taskListId, taskName) {
-    var tasks = Tasks.Tasks.list(taskListId);
-    var ret = {};
-    var retTask, taskId, position;
-    if (tasks.items) {
-        for (var i = 0; i < tasks.items.length; i++) {
-            var task = tasks.items[i];
-            var name = GTD.gtask.removeStatusCodeFromTaskName(task.title);
-            if(taskName == name){ 
-                taskId = task.id;
-                retTask = task;
-                Logger.log('Task with title "%s" and ID "%s" was found.', task.title, task.id);
-            }
-            //lets pick up the last child task's position in order to insert the new task below
-            if(taskId == task.parent) position = task.position;
-        }
-        ret.id = taskId;
-        ret.idx = position;
-        ret.task = retTask;
-    } 
-    return ret;
-};
-
-// Get parent task name from document name
-// The [Log] prefix is trimed and digits are removed. Leading and
-// trailing spaces are also trimed.
-GTD.gtask.getParentTaskNameFromDocName = function(docName) {
-    return docName.replace(/^\[Log\] /, '')
-                  .replace(/[0-9]/g, '')
-                  .trim();
-};
-
-GTD.gtask.removeStatusCodeFromTaskName = function(taskName) {
-    return taskName.replace(/[^\w\s]/gi, '')
-                   .trim();
-}
-
-GTD.gtask.findOrInsertTask = function(taskListId, taskName) {
-    var ret = GTD.gtask.findTaskByName(taskListId, taskName);
-    if(!ret.id) {
-        var newTask = Tasks.newTask().setTitle(taskName);
-        newTask = Tasks.Tasks.insert(newTask, taskListId);
-        ret.id = newTask.id;
-        ret.idx = newTask.position;
-    }
-    return ret;
-};
-
-GTD.gtask.listTaskLists = function() {
-    debug('run here');
-    var taskLists = Tasks.Tasklists.list();
-    if (taskLists.items) {
-        for (var i = 0; i < taskLists.items.length; i++) {
-            var taskList = taskLists.items[i];
-            debug('Task list with title "%s" and ID "%s" was found.' +
-                    taskList.title + taskList.id);
-        }
-    } else {
-        debug('No task lists found.');
-    }
-};
-
-GTD.gtask.insertOrUpdateTask = function(taskListId, parentTask, taskDetails) {
-    var taskName = GTD.gtask.removeStatusCodeFromTaskName(taskDetails.title);
-    debug('taskName: ' + taskName);
-    var taskRet = GTD.gtask.findTaskByName(taskListId, taskName);
-    // Insert this task if not exists
-    if (!taskRet.id) {
-        taskDetails.parent = parentTask.id;
-        taskDetails.position = parentTask.idx;
-        var newTask = Tasks.newTask().setTitle(taskDetails.title);
-        newTask = Tasks.Tasks.insert(newTask, taskListId, taskDetails);
-        newTask.setParent(parentTask.id);
-    }
-    // TODO(hbhzwj) handle the logic whether the task already exists
-    var updatedTask = Tasks.Tasks.update(taskRet.task, taskListId, taskDetails);
-    debug('finish test');
-};
-
-function testTask() {
-    // Get Current Name
-    var listName = GTD.gtask.listName;
-    var ret = GTD.gtask.findListIdByName(listName);
-    if (ret.status !== 'SUCCESS') {
-        DocumentApp.getUi().alert('Cannot find task list with name: ' +
-                                  listName);
-        return;
-    }
-    var taskListId = ret.id;
-    var doc = DocumentApp.getActiveDocument();
-    var parentTaskName = GTD.gtask.getParentTaskNameFromDocName(doc.getName());
-    var parentTask = GTD.gtask.findOrInsertTask(taskListId, parentTaskName);
-
-    var taskDetails = {
-      // title: "/!\\test title",
-      title: "(x)test title",
-      notes: 'test note',
-    };
-    GTD.gtask.insertOrUpdateTask(taskListId, parentTask, taskDetails);
 }
 

@@ -9,5 +9,18 @@ var GTD = {
   defaultRows: 1,
   templates: {},
   TOC: {},
+  gtask: {
+      listName: 'GTD Lists',
+      statusSymbols: {
+          'Actionable': '(x)',
+          'Waiting For': '/!\\',
+          'Someday': '(~)',
+          'Unknown': ''
+      }
+  },
   initialized: false
+};
+
+GTD.startsWith = function(str) {
+    return (this.indexOf(str) === 0);
 };
