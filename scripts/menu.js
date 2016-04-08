@@ -13,6 +13,7 @@ function onOpen() {
       .addItem('Insert separator', 'insertSeparator')
       .addItem('Jump to task', 'jumpToTask')
       .addItem('Show sidebar', 'showSidebar')
+      .addItem('test tasks', 'testTask')
       .addSeparator()
       .addSubMenu(ui.createMenu('Note')
         .addItem('Format as code', 'insertNoteCode')

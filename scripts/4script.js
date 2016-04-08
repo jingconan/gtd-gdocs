@@ -512,4 +512,3 @@ function findAndFocusOnTask(taskName) {
     GTD.initialize();
     GTD.jumpAndFocusOnTask({taskDesc:taskName});
 }
-
