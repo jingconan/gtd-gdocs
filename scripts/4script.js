@@ -331,14 +331,16 @@ GTD.changeTaskStatus = function(options) {
     }
 
     // Update gtask service
-    var tl = GTD.gtask.getActiveTaskList();
-    var timestamp = GTD.getTimeStamp(task.taskDesc);
-    var title = task.taskDesc.replace(timestamp + '\n', '');
-    GTD.gtask.updateTask(tl.taskListId, tl.parentTask, {
-      title: title,
-      notes: timestamp + ' moved from [' + task.statusBefore + '] to [' + options.status + ']',
-      status: options.status
-    });
+    if (GTD.gtask.isInitialized()) {
+        var tl = GTD.gtask.getActiveTaskList();
+        var timestamp = GTD.getTimeStamp(task.taskDesc);
+        var title = task.taskDesc.replace(timestamp + '\n', '');
+        GTD.gtask.updateTask(tl.taskListId, tl.parentTask, {
+            title: title,
+            notes: timestamp + ' moved from [' + task.statusBefore + '] to [' + options.status + ']',
+            status: options.status
+        });
+    }
 };
 
 GTD.insertTask = function(name) {

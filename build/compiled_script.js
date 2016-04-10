@@ -1,4 +1,4 @@
-// compiled from git commit version: 5f28a156dae402673cccb1069fa4d7125fd410fb
+// compiled from git commit version: fd4eb599ef984b1cf6e623c4f48e58576198d417
 var GTD = {
   body: DocumentApp.getActiveDocument().getBody(),
   header: ['Actionable', 'Waiting For', 'Done', 'Someday'], //FIXME change to taskStatus
@@ -127,6 +127,11 @@ GTD.util.startsWith = function(A, str) {
 /////////////////////////////////////////////////////////////////////////////
 // These functions are used to sync data between google docs and gmail tasks
 ////////////////////////////////////////////////////////////////////////////
+
+GTD.gtask.isInitialized = function() {
+    return (typeof Tasks !== 'undefined');
+};
+
 GTD.gtask.findListIdByName = function(name) {
     var taskLists = Tasks.Tasklists.list();
     var ret = {};
@@ -898,14 +903,16 @@ GTD.changeTaskStatus = function(options) {
     }
 
     // Update gtask service
-    var tl = GTD.gtask.getActiveTaskList();
-    var timestamp = GTD.getTimeStamp(task.taskDesc);
-    var title = task.taskDesc.replace(timestamp + '\n', '');
-    GTD.gtask.updateTask(tl.taskListId, tl.parentTask, {
-      title: title,
-      notes: timestamp + ' moved from [' + task.statusBefore + '] to [' + options.status + ']',
-      status: options.status
-    });
+    if (GTD.gtask.isInitialized()) {
+        var tl = GTD.gtask.getActiveTaskList();
+        var timestamp = GTD.getTimeStamp(task.taskDesc);
+        var title = task.taskDesc.replace(timestamp + '\n', '');
+        GTD.gtask.updateTask(tl.taskListId, tl.parentTask, {
+            title: title,
+            notes: timestamp + ' moved from [' + task.statusBefore + '] to [' + options.status + ']',
+            status: options.status
+        });
+    }
 };
 
 GTD.insertTask = function(name) {

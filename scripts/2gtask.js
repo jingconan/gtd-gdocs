@@ -1,6 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////
 // These functions are used to sync data between google docs and gmail tasks
 ////////////////////////////////////////////////////////////////////////////
+
+GTD.gtask.isInitialized = function() {
+    return (typeof Tasks !== 'undefined');
+};
+
 GTD.gtask.findListIdByName = function(name) {
     var taskLists = Tasks.Tasklists.list();
     var ret = {};
