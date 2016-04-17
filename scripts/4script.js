@@ -322,10 +322,24 @@ GTD.TOC.pullHeaders = function () {
 
 GTD.changeTaskStatus = function(options) {
     var task = options.task;
+
+    // Update Summary table
     GTD.cleanTask('All', task);
     GTD.addTask(options.status, task);
     if (options.setTaskColor) {
         GTD.setTaskColor(options.status, task);
+    }
+
+    // Update gtask service
+    if (GTD.gtask.isInitialized()) {
+        var tl = GTD.gtask.getActiveTaskList();
+        var timestamp = GTD.getTimeStamp(task.taskDesc);
+        var title = task.taskDesc.replace(timestamp + '\n', '');
+        GTD.gtask.updateTask(tl.taskListId, tl.parentTask, {
+            title: title,
+            notes: timestamp + ' moved from [' + task.statusBefore + '] to [' + options.status + ']',
+            status: options.status
+        });
     }
 };
 

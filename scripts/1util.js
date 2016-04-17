@@ -89,3 +89,7 @@ GTD.util.alertNoCursor = function() {
                               "Please try without text selection.");
 
 };
+
+GTD.util.startsWith = function(A, str) {
+    return (A.indexOf(str) === 0);
+};

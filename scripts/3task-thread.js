@@ -70,7 +70,8 @@ GTD.Task.insertThreadHeader = function( name) {
 
     // return task here
     return {
-      taskDesc: taskDesc
+      taskDesc: taskDesc,
+      statusBefore: 'NotExist'
     };
 
 };
