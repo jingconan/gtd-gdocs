@@ -1,4 +1,4 @@
-// compiled from git commit version: fd4eb599ef984b1cf6e623c4f48e58576198d417
+// compiled from git commit version: 31637bf89344556302462ae51d342ae577bebdb9
 var GTD = {
   body: DocumentApp.getActiveDocument().getBody(),
   header: ['Actionable', 'Waiting For', 'Done', 'Someday'], //FIXME change to taskStatus
@@ -945,6 +945,9 @@ GTD.searchBookmarkIdBasedOnTaskDesc = function(taskDesc) {
     var i, header, desc;
     for (i = 0; i < bookmarks.length; ++i) {
         header = GTD.Task.getTaskThreadHeader(bookmarks[i].getPosition().getElement()).header;
+        if (!GTD.Task.isValidTaskThreadHeader(header)) {
+            continue;
+        }
         desc = GTD.Task.getTaskDesc(header);
         if (taskDesc === desc) {
             return bookmarks[i].getId();

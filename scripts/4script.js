@@ -373,6 +373,9 @@ GTD.searchBookmarkIdBasedOnTaskDesc = function(taskDesc) {
     var i, header, desc;
     for (i = 0; i < bookmarks.length; ++i) {
         header = GTD.Task.getTaskThreadHeader(bookmarks[i].getPosition().getElement()).header;
+        if (!GTD.Task.isValidTaskThreadHeader(header)) {
+            continue;
+        }
         desc = GTD.Task.getTaskDesc(header);
         if (taskDesc === desc) {
             return bookmarks[i].getId();
