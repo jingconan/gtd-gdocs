@@ -265,3 +265,13 @@ GTD.Task.getThreadHeaderStatus = function(threadHeader) {
 GTD.Task.getTaskDesc = function(threadHeader) {
     return threadHeader.getCell(this.CONTENT_ROW, 0).getText() + '\n' + threadHeader.getCell(this.CONTENT_ROW, 1).getText();
 };
+
+GTD.Task.isThreadHeader = function(table) {
+    return (table.getNumRows() === this.SIZE[0]) && 
+           (table.getRow(0).getNumChildren() === this.SIZE[1]) &&
+           (table.getCell(0, 0).getText() == 'Timestamp');
+};
+
+GTD.Task.isSeparator = function(table) {
+    return table.getText() === 'Task Separator';
+};

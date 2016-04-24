@@ -13,17 +13,31 @@ function onOpen() {
       .addItem('Insert separator', 'insertSeparator')
       .addItem('Jump to task', 'jumpToTask')
       .addItem('Show sidebar', 'showSidebar')
-      .addItem('test tasks', 'testTask')
+      .addItem('Sync From GTasks', 'syncFromGTasks')
       .addSeparator()
       .addSubMenu(ui.createMenu('Note')
         .addItem('Format as code', 'insertNoteCode')
         .addItem('Format as email', 'insertNoteEmail')
         .addItem('Format as checklist', 'insertNoteChecklist'))
       .addToUi();
+
 }
 
 function onInstall(e) {
   onOpen();
+}
+
+function syncFromGTasks() {
+
+  var atl = GTD.gtask.getActiveTaskList();
+  var gTasksInfo = GTD.gtask.listAllSubtasksOfParentTask(atl.taskListId, atl.parentTask);
+  //TODO(hbhzwj) need to write a function to compare the info from gtask
+  //and summay table and update the task status accordingly.
+  // GTD.util.setCursorAfterFirstSeparator();
+  //
+  // for (var i = 0; i < tasks.length; ++i) {
+  //     debug('task: ' + i + ':  ' + tasks[i].getTitle());
+  // }
 }
 
 function insertSeparator() {
