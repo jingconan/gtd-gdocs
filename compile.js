@@ -5,6 +5,21 @@ var glob = require('glob'),
     fs = require('fs'),
     exec = require('child_process').exec;
 
+// JS files used in this project
+var scripts = [
+    'scripts/namespace.js',
+    'scripts/util.js',
+    'scripts/gtask.js',
+    'scripts/task-thread.js',
+    'scripts/script.js',
+    'scripts/menu.js'
+];
+
+// Template files used in this project
+var templates = [
+    'templates/sidebar.html'
+]
+
 var walk = function(dir) {
     var results = [];
     var list = fs.readdirSync(dir);
@@ -19,7 +34,7 @@ var walk = function(dir) {
 
 function concat_template(code) {
     var filepath;
-    var scriptFilePaths = walk('./scripts');
+    var scriptFilePaths = scripts;
     var i;
     for(i = 0; i < scriptFilePaths.length; ++i) {
         filepath = scriptFilePaths[i];
@@ -37,7 +52,7 @@ function concat_template(code) {
     // }
 
     // Compile templates
-    var templateFilepaths = walk("./templates");
+    var templateFilepaths = templates;
     for(i = 0; i < templateFilepaths.length; ++i) {
         filepath = templateFilepaths[i];
         console.log("Compile template: " + filepath);

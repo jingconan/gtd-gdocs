@@ -1,4 +1,4 @@
-// compiled from git commit version: 31637bf89344556302462ae51d342ae577bebdb9
+// compiled from git commit version: c72cf95d6ea264b32446071bbc96731299379dab
 var GTD = {
   body: DocumentApp.getActiveDocument().getBody(),
   header: ['Actionable', 'Waiting For', 'Done', 'Someday'], //FIXME change to taskStatus
