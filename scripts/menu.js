@@ -20,7 +20,6 @@ function onOpen() {
         .addItem('Format as email', 'insertNoteEmail')
         .addItem('Format as checklist', 'insertNoteChecklist'))
       .addToUi();
-
 }
 
 function onInstall(e) {
@@ -28,16 +27,10 @@ function onInstall(e) {
 }
 
 function syncFromGTasks() {
-
+  GTD.initTaskTable();
   var atl = GTD.gtask.getActiveTaskList();
   var gTasksInfo = GTD.gtask.listAllSubtasksOfParentTask(atl.taskListId, atl.parentTask);
-  //TODO(hbhzwj) need to write a function to compare the info from gtask
-  //and summay table and update the task status accordingly.
-  // GTD.util.setCursorAfterFirstSeparator();
-  //
-  // for (var i = 0; i < tasks.length; ++i) {
-  //     debug('task: ' + i + ':  ' + tasks[i].getTitle());
-  // }
+  GTD.updateTaskStatusInBatch(gTasksInfo);
 }
 
 function insertSeparator() {
@@ -73,12 +66,7 @@ function insertTask() {
     var button = result.getSelectedButton();
     var text = result.getResponseText();
     if (button == ui.Button.OK) {
-        task = GTD.insertTask(text);
-        // By default, mark this task as Actionable task
-        GTD.changeTaskStatus({
-            task: task,
-            status: 'Actionable'
-        });
+        task = GTD.insertTask(text, 'Actionable');
     } else {
         return;
     }

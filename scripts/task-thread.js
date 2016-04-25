@@ -22,8 +22,14 @@ GTD.Task = {
     }
 };
 
-GTD.Task.createNewTask = function(name) {
-    this.status = 0;
+GTD.Task.createNewTask = function(name, statusName) {
+    var statusCode = 0;
+    for (var i = 0; i < GTD.header.length; ++i) {
+        if (GTD.header[i] === statusName) {
+            statusCode = i;
+        }
+    }
+    this.status = statusCode;
     this.subTasksTotal = 0;
     this.subTasksDone = 0;
 

@@ -116,7 +116,6 @@ GTD.findFirstCell = function(col, target, useID) {
 
 GTD.cleanTask = function(type, task, alert) {
     var taskName = task.taskDesc;
-    //debug('from: ' + type);
     var i;
     if (typeof type === 'undefined') {
         return;
@@ -139,7 +138,8 @@ GTD.cleanTask = function(type, task, alert) {
 };
 
 // Change the color of a task according to its current type
-GTD.setTaskColor = function(type, taskName) {
+GTD.setTaskColor = function(type, task) {
+    var taskName = task.taskDesc;
     // setColor = (function (type, ele) {
     //     if (!ele) return;
     //     ele.asText().editAsText().setForegroundColor(this.headerColor[this.getColIdx(type)]);
@@ -207,6 +207,11 @@ GTD.getTimeStamp = function(taskName) {
     //HH:MM:SS. It is seperated by other content by \n;
     var tokens = taskName.split('\n');
     return tokens[0];
+};
+
+GTD.getTaskName = function(taskName) {
+    var tokens = taskName.split('\n');
+    return tokens[1];
 };
 
 
@@ -320,6 +325,18 @@ GTD.TOC.pullHeaders = function () {
 
 };
 
+/**
+ * changeTaskStatus
+ *
+ * @param {object} options.task object
+ * @param {string} options.task.taskDesc task description
+ * @param {boolean} options.disableGTask indicate whether GTask service
+ *     needs to be updated 
+ * @param {boolean} options.setTaskColor indicate whether we should
+ *     update task color
+ * @param {string} options.status {'Actionable'|'Waiting
+ *     For'|'Done'|'SomDay'}, a string that represents the status
+ */
 GTD.changeTaskStatus = function(options) {
     var task = options.task;
 
@@ -331,7 +348,7 @@ GTD.changeTaskStatus = function(options) {
     }
 
     // Update gtask service
-    if (GTD.gtask.isInitialized()) {
+    if (!options.disableGTask && GTD.gtask.isInitialized()) {
         var tl = GTD.gtask.getActiveTaskList();
         var timestamp = GTD.getTimeStamp(task.taskDesc);
         var title = task.taskDesc.replace(timestamp + '\n', '');
@@ -343,8 +360,28 @@ GTD.changeTaskStatus = function(options) {
     }
 };
 
-GTD.insertTask = function(name) {
-    return GTD.Task.createNewTask(name);
+/**
+ * Insert task and update information in summary table
+ *
+ * @param {string} name task name
+ * @param {string} status status of task
+ * @param {boolean} disableGTask indicate whether gtask service needs to
+ *     be updated
+ * @returns {object} task object
+ */
+GTD.insertTask = function(name, status, disableGTask) {
+    if (typeof disableGTask === 'undefined') {
+        disableGTask = false;
+    }
+    var task = GTD.Task.createNewTask(name, status);
+    // Update task's status in summary table.
+    GTD.changeTaskStatus({
+        task: task,
+        status: status,
+        disableGTask: disableGTask
+    });
+
+    return task;
 };
 
 GTD.insertComment = function() {
@@ -486,7 +523,66 @@ GTD.getTaskFromSummaryTable = function(cursor) {
     return {
         taskDesc: ele.editAsText().getText()
     };
-}
+};
+
+GTD.updateTaskStatusInBatch = function(gTasksInfo) {
+    // Create a table to search for status of existing tasks
+    var existingTasks = {};
+    for (var i = 0; i < this.header.length; ++i) {
+        var tasks = this.getAllTasksFromCol(i);
+        thisTasks = [];
+        for (var j = 0; j < tasks.length; ++j) {
+            var taskName = GTD.getTaskName(tasks[j]);
+            existingTasks[taskName] = {
+                'status': this.header[i],
+                'task': tasks[j]
+            }
+        }
+    }
+    // debug('existingTasks: ' + JSON.stringify(existingTasks));
+
+    for (var i = 0; i < gTasksInfo.length; ++i) {
+        var info = GTD.gtask.decodeTaskTitle(gTasksInfo[i].getTitle());
+        // If task is marked completed in gtask, the corresponding
+        // status should be 'Done' regardless of symbol encoded in
+        // title.
+        if (gTasksInfo[i].getStatus() === 'completed') {
+            info.status = 'Done';
+        }
+        if (info.status === 'Unknown') {
+            //TODO(hbhzwj): right now we don't process tasks whose status is
+            //unknown. Need to think whether this is the best approach
+            continue;
+        }
+        var existingInfo = existingTasks[info.taskName];
+        // If the task doesn't exist in the document yet, then create it
+        if (typeof existingInfo === 'undefined') {
+            GTD.util.setCursorAfterFirstSeparator();
+            GTD.insertTask(info.taskName, info.status, true);
+            // GTD.Task.insertComment({
+            //     threadHeader: ret.threadHeader,
+            //     location: 'thread',
+            //     message: gTasksInfo[i].getNotes()
+            // });
+            continue;
+        }
+
+        // Update task status if the status of gtasks and document doesn't matches
+        if (existingInfo.status !== info.status) {
+            // debug('change task with description: ' + existingInfo.task + ' from ' + 
+            //       existingInfo.status + ' to status ' + info.status);
+            GTD.changeTaskStatus({
+                task: {
+                    taskDesc: existingInfo.task
+                },
+                status: info.status,
+                setTaskColor: true,
+                disableGTask: true
+            });
+        }
+    }
+};
+
 
 // GTD.initTaskTable();
 
