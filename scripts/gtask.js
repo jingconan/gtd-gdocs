@@ -1,11 +1,29 @@
-/////////////////////////////////////////////////////////////////////////////
-// These functions are used to sync data between google docs and gmail tasks
-////////////////////////////////////////////////////////////////////////////
+/**
+ * These functions are used to sync data between google docs and gmail tasks
+ *
+ * In order to provide a coherent view of multiple gtd documents, we
+ * display tasks from all documents in one google task list view.
+ * Each document corresponds to one tasks, which is referred to as
+ * parent task in the code. All tasks in this document become sub-tasks
+ * of this task (i.e., with one more indentation).
+ *
+ * The status of tasks are encoded in title. Title has the format
+ * <status_symbol>:<task_name>. Each status has a unique symbol, and
+ * please see GTD.gtask.statusSymbols for a complete lists of status
+ * symbols.
+ *
+ */
 
 GTD.gtask.isInitialized = function() {
     return (typeof Tasks !== 'undefined');
 };
 
+/**
+ * Find list ID based on task list name
+ * @param {String} name The name for the task list, you must create such
+ *     a list manually in google tasks.
+ * @return {{id:String,title:String,status:String}}
+ */
 GTD.gtask.findListIdByName = function(name) {
     var taskLists = Tasks.Tasklists.list();
     var ret = {};
@@ -26,7 +44,12 @@ GTD.gtask.findListIdByName = function(name) {
     return ret;
 };
 
-// Get task by its name
+/**
+ * Get task by its name. The status is ignored in the matching process
+ * @param {String} taskListId ID of the tasks list
+ * @param {String} taskName Name of the task
+ * @return {{id:String,idx:Number,task:Object}}
+ */
 GTD.gtask.findTaskByName = function(taskListId, taskName) {
     var tasks = Tasks.Tasks.list(taskListId);
     var ret = {};
@@ -50,17 +73,21 @@ GTD.gtask.findTaskByName = function(taskListId, taskName) {
     return ret;
 };
 
-// Get parent task name from document name
-// The [Log] prefix is trimed and digits are removed. Leading and
-// trailing spaces are also trimed.
+/* Get parent task name from document name
+ * The [Log] prefix is trimed and digits are removed. Leading and
+ * trailing spaces are also trimed.
+ * @param {String} docName document name
+ * @return {String}
+ */
 GTD.gtask.getParentTaskNameFromDocName = function(docName) {
     return docName.replace(/^\[Log\] /, '')
                   .replace(/[0-9]/g, '')
                   .trim();
 };
 
-// Encode the taskName and status together. We stores status as prefix
-// of task name.
+/* Encode the taskName and status together.
+ * We stores status as prefix of task name.
+ */
 GTD.gtask.encodeTaskTitle = function(taskName, status) {
     var symbols = GTD.gtask.statusSymbols;
     var sym = symbols[status];
@@ -68,9 +95,10 @@ GTD.gtask.encodeTaskTitle = function(taskName, status) {
     return ret;
 };
 
-// Decode status from taskName.
-// Loop through all the status and return status if the corresponding
-// symbol exists.
+/* Decode status from taskName.
+ * Loop through all the status and return status if the corresponding
+ * symbol exists.
+ */
 GTD.gtask.decodeTaskTitle = function(title) {
     var symbols = GTD.gtask.statusSymbols;
     var ret = {}, sym, status;
@@ -89,25 +117,6 @@ GTD.gtask.decodeTaskTitle = function(title) {
     ret.taskName = title;
     ret.status = 'Unknown';
     return ret;
-};
-
-// GTD.gtask.removeStatusCodeFromTaskName = function(taskName) {
-//     return taskName.replace(/[^\w\s]/gi, '')
-//                    .trim();
-// }
-
-
-GTD.gtask.listTaskLists = function() {
-    var taskLists = Tasks.Tasklists.list();
-    if (taskLists.items) {
-        for (var i = 0; i < taskLists.items.length; i++) {
-            var taskList = taskLists.items[i];
-            debug('Task list with title "%s" and ID "%s" was found.' +
-                    taskList.title + taskList.id);
-        }
-    } else {
-        debug('No task lists found.');
-    }
 };
 
 GTD.gtask.findOrInsertTask = function(taskListId, parentTask, taskDetails) {
@@ -132,8 +141,9 @@ GTD.gtask.findOrInsertTask = function(taskListId, parentTask, taskDetails) {
     return ret;
 };
 
-// Update details of a task, if the task doesn't exist, then a new task
-// will be inserted and updated
+/* Update details of a task, if the task doesn't exist, then a new task
+ * will be inserted and updated
+ */
 GTD.gtask.updateTask = function(taskListId, parentTask, taskDetails) {
     var tmp = GTD.gtask.decodeTaskTitle(taskDetails.title);
     var taskRet = GTD.gtask.findOrInsertTask(taskListId, parentTask,
@@ -153,6 +163,8 @@ GTD.gtask.updateTask = function(taskListId, parentTask, taskDetails) {
     var updatedTask = Tasks.Tasks.patch(task, taskListId, task.id);
 };
 
+/* Get active task list based on the current document name
+ */
 GTD.gtask.getActiveTaskList = function() {
     // Get Current Name
     var listName = GTD.gtask.listName;
@@ -172,4 +184,23 @@ GTD.gtask.getActiveTaskList = function() {
         taskListId: taskListId,
         parentTask: parentTask
     };
+};
+
+/* List all subtasks of a document that corresponds to a parent task
+ */
+GTD.gtask.listAllSubtasksOfParentTask = function(taskListId, parentTask) {
+    var tasks = Tasks.Tasks.list(taskListId);
+    var retTasks = [];
+    if (tasks.items) {
+        for (var i = 0; i < tasks.items.length; i++) {
+            var task = tasks.items[i];
+            if (!task.getParent() || (task.getParent() !== parentTask.id)) {
+                continue;
+            }
+            retTasks.push(task);
+        }
+    } else {
+        Logger.log('No tasks found.');
+    }
+    return retTasks;
 };

@@ -1,4 +1,4 @@
-function onOpen() {
+function onOpen(e) {
   var ui = DocumentApp.getUi();
   // Or DocumentApp or FormApp.
   ui.createMenu('GTD')
@@ -13,17 +13,32 @@ function onOpen() {
       .addItem('Insert separator', 'insertSeparator')
       .addItem('Jump to task', 'jumpToTask')
       .addItem('Show sidebar', 'showSidebar')
-      .addItem('test tasks', 'testTask')
+      .addItem('Sync From GTasks', 'syncFromGTasks')
       .addSeparator()
       .addSubMenu(ui.createMenu('Note')
         .addItem('Format as code', 'insertNoteCode')
         .addItem('Format as email', 'insertNoteEmail')
         .addItem('Format as checklist', 'insertNoteChecklist'))
       .addToUi();
+
+  if (e && e.authMode == ScriptApp.AuthMode.FULL) {
+      syncFromGTasks();
+  }
 }
 
 function onInstall(e) {
-  onOpen();
+  onOpen(e);
+}
+
+function syncFromGTasks() {
+  if (!GTD.gtask.isInitialized()) {
+      Logger.log('gtask service is not initialized');
+      return;
+  }
+  GTD.initTaskTable();
+  var atl = GTD.gtask.getActiveTaskList();
+  var gTasksInfo = GTD.gtask.listAllSubtasksOfParentTask(atl.taskListId, atl.parentTask);
+  GTD.updateTaskStatusInBatch(gTasksInfo);
 }
 
 function insertSeparator() {
@@ -59,12 +74,7 @@ function insertTask() {
     var button = result.getSelectedButton();
     var text = result.getResponseText();
     if (button == ui.Button.OK) {
-        task = GTD.insertTask(text);
-        // By default, mark this task as Actionable task
-        GTD.changeTaskStatus({
-            task: task,
-            status: 'Actionable'
-        });
+        task = GTD.insertTask(text, 'Actionable');
     } else {
         return;
     }

@@ -22,8 +22,14 @@ GTD.Task = {
     }
 };
 
-GTD.Task.createNewTask = function(name) {
-    this.status = 0;
+GTD.Task.createNewTask = function(name, statusName) {
+    var statusCode = 0;
+    for (var i = 0; i < GTD.header.length; ++i) {
+        if (GTD.header[i] === statusName) {
+            statusCode = i;
+        }
+    }
+    this.status = statusCode;
     this.subTasksTotal = 0;
     this.subTasksDone = 0;
 
@@ -264,4 +270,14 @@ GTD.Task.getThreadHeaderStatus = function(threadHeader) {
 
 GTD.Task.getTaskDesc = function(threadHeader) {
     return threadHeader.getCell(this.CONTENT_ROW, 0).getText() + '\n' + threadHeader.getCell(this.CONTENT_ROW, 1).getText();
+};
+
+GTD.Task.isThreadHeader = function(table) {
+    return (table.getNumRows() === this.SIZE[0]) && 
+           (table.getRow(0).getNumChildren() === this.SIZE[1]) &&
+           (table.getCell(0, 0).getText() == 'Timestamp');
+};
+
+GTD.Task.isSeparator = function(table) {
+    return table.getText() === 'Task Separator';
 };

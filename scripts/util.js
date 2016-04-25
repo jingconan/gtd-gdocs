@@ -84,6 +84,29 @@ GTD.util.setCursorAtStart = function() {
     doc.setCursor(position);
 };
 
+GTD.util.setCursorAfterFirstSeparator = function() {
+    var doc = DocumentApp.getActiveDocument();
+    var body = doc.getBody();
+    var tables = body.getTables();
+    for (var i = 0; i < tables.length; ++i) {
+        var table = tables[i];
+        if (GTD.Task.isSeparator(table)) {
+            var index = body.getChildIndex(table);
+            var position = doc.newPosition(body, index+1);
+            doc.setCursor(position);
+            return;
+        } else if (GTD.Task.isThreadHeader(table)) {
+            var index = body.getChildIndex(table);
+            var position = doc.newPosition(body, index-1);
+            doc.setCursor(position);
+            GTD.Task.addThreadSeparator();
+            return;
+        }
+    }
+    // var position = doc.newPosition(rg.getElement().getParent(), 1);
+};
+
+
 GTD.util.alertNoCursor = function() {
     DocumentApp.getUi().alert("Cannot find cursor, are you selecting texts? " +
                               "Please try without text selection.");
