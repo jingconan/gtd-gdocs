@@ -1,4 +1,4 @@
-// compiled from git commit version: 4358db024c431afb09f679801eb23f1b6a26b574
+// compiled from git commit version: 9cc0b254b4706b0987ad455963b619db24dc3bde
 var GTD = {
   body: DocumentApp.getActiveDocument().getBody(),
   header: ['Actionable', 'Waiting For', 'Done', 'Someday'], //FIXME change to taskStatus
@@ -1257,7 +1257,7 @@ function findAndFocusOnTask(taskName) {
 }
 
 
-function onOpen() {
+function onOpen(e) {
   var ui = DocumentApp.getUi();
   // Or DocumentApp or FormApp.
   ui.createMenu('GTD')
@@ -1279,13 +1279,21 @@ function onOpen() {
         .addItem('Format as email', 'insertNoteEmail')
         .addItem('Format as checklist', 'insertNoteChecklist'))
       .addToUi();
+
+  if (e && e.authMode == ScriptApp.AuthMode.FULL) {
+      syncFromGTasks();
+  }
 }
 
 function onInstall(e) {
-  onOpen();
+  onOpen(e);
 }
 
 function syncFromGTasks() {
+  if (!GTD.gtask.isInitialized()) {
+      Logger.log('gtask service is not initialized');
+      return;
+  }
   GTD.initTaskTable();
   var atl = GTD.gtask.getActiveTaskList();
   var gTasksInfo = GTD.gtask.listAllSubtasksOfParentTask(atl.taskListId, atl.parentTask);
