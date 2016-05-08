@@ -1,4 +1,4 @@
-// compiled from git commit version: 582351e04938af73407efd24ccf04a5bd2b59781
+// compiled from git commit version: 159ae2dda6e9a66866f6df3d7c840f9b81ca2d56
 var GTD = {
     // Commonly used DOM object
     document: DocumentApp.getActiveDocument(),
@@ -653,7 +653,7 @@ GTD.Task.isSeparator = function(table) {
 
 // FIXME need to factor the script.js to several smaller files
 
-/* Verifty whether the current document is a GTD document
+/* Verify whether the current document is a GTD document
  * Returns true if the document contains a summary table and the page
  * setting is as expected, and false otherwise.
  */
@@ -1292,19 +1292,18 @@ function onOpen(e) {
       ui.createMenu('GTD')
           .addItem('Insert task', 'insertTask')
           .addItem('Insert comment', 'insertComment')
-          .addItem('Mark as Actionable', 'createActionableTask')
-          .addItem('Mark as WaitingFor', 'moveTaskToWaitingFor')
-          .addItem('Mark as Done', 'moveTaskToDone')
-          .addItem('Mark as Someday', 'moveTaskToSomeday')
-          .addItem('Insert separator', 'insertSeparator')
+          .addItem('Insert task separator', 'insertSeparator')
           .addItem('Jump to task thread', 'jumpToTask')
-          .addItem('Show sidebar', 'showSidebar')
-          .addItem('Sync From GTasks', 'syncFromGTasks')
-          .addSeparator()
-          .addSubMenu(ui.createMenu('Format Table As')
+          .addSubMenu(ui.createMenu('Mark task as')
+                  .addItem('Actionable', 'createActionableTask')
+                  .addItem('WaitingFor', 'moveTaskToWaitingFor')
+                  .addItem('Done', 'moveTaskToDone')
+                  .addItem('Someday', 'moveTaskToSomeday'))
+          .addSubMenu(ui.createMenu('Format comment as')
                   .addItem('Code', 'insertNoteCode')
                   .addItem('Email', 'insertNoteEmail')
                   .addItem('Checklist', 'insertNoteChecklist'))
+          .addItem('Sync from google tasks', 'syncFromGTasks')
           .addToUi();
 
       if (e && e.authMode == ScriptApp.AuthMode.FULL) {
@@ -1423,18 +1422,6 @@ function moveTaskToSomeday() {
     });
 }
 
-function showSidebar() {
-    var html = HtmlService.createHtmlOutput(GTD.templates.sidebar)
-        .setSandboxMode(HtmlService.SandboxMode.IFRAME)
-        .setTitle('My task list')
-        .setWidth(300);
-
-    DocumentApp.getUi() // Or DocumentApp or FormApp.
-        .showSidebar(html);
-}
 
 
-
-
-GTD.templates.sidebar = "<link rel='stylesheet' href='https://ssl.gstatic.com/docs/script/css/add-ons.css'><script src='https://code.jquery.com/jquery-2.1.3.min.js'></script><script src='https://cdnjs.cloudflare.com/ajax/libs/mustache.js/0.8.1/mustache.min.js'></script><style>.collapse{  font-size: 20px;  display:block;}.collapse + input{  display:none;}.collapse + input + *{  display:none;}.collapse+ input:checked + *{  display:block;}.task:hover {    color: #4d90fe;    cursor: pointer;     cursor: hand;}</style><div align='right'>    <input type='button' value='Refresh' onclick='google.script.run.showSidebar()' /></div><div id='task_queue' style='display:none'>{{#task_queues}}<div id={{type}}>    <label class='collapse' ondrop='SB.onDrop(event)' ondragover='SB.allowDrop(event)', ondragleave='SB.dragLeave(event)' style='color: {{color}}' for='_{{index}}'>{{type}}</label>    <input id='_{{index}}' type='checkbox' checked='checked'>    <div class='task_list' ondragover=''>        <ul>        {{#tasks}}            <li class='task' draggable='true' id={{name}}            ondragstart='SB.onDrag(event)'>{{name}}</li>        {{/tasks}}        </ul>    </div></div>{{/task_queues}}</div><div id='table_of_content' style='display:none'><label class='collapse' style='color: black' for='_5'>Table of Content</label><input id='_5' type='checkbox' checked='checked'><div><ul>{{#headers}}<li id='{{toc}}'>{{text}}</li>{{/headers}}{{^headers}}Please insert a table of content in the document using insert->table of content{{/headers}}</ul></div></div><script>SB = {};SB.findTaskHandler = function (result) {    console.log('findTaskHandler res: ' + result);};SB.addClickHandler = function () {    $('.task').click(function (e) {        var task = $(this).parents('li').add(this).map(function () {            return $.trim(this.firstChild.nodeValue)        }).get();        console.log('test run here task: ' + task);        google.script.run.withSuccessHandler(SB.findTaskHandler)            .findAndFocusOnTask(task[0]);    });};SB.onDrag = function (ev) {    console.log('onDrag called');    ev.dataTransfer.setData('task', ev.target.id);};SB.onDrop = function (ev) {    ev.preventDefault();    var data = ev.dataTransfer.getData('task');    var ele = document.getElementById(data);    ev.target.parentNode.getElementsByTagName('ul')[0].appendChild(ele);    $('#task_queue label').css({        'background-color': 'white'    });    google.script.run.withSuccessHandler(SB.changeStatusSuccess)        .changeTaskStatus(ele.textContent, ev.target.textContent);};SB.allowDrop = function (ev) {    ev.preventDefault();    $(ev.target).css({        'background-color': '#4d90fe'    });};SB.dragLeave = function (ev) {    console.log('dragleave: ');    console.dir(ev);    debugger;    $('#task_queue label').css({        'background-color': 'white'    });};SB.buildTaskQueue = function (result) {    var taskQueue = document.getElementById('task_queue');    var content = JSON.parse(result);    taskQueue.innerHTML = Mustache.to_html(taskQueue.innerHTML, content);    taskQueue.style.display = 'block';    SB.addClickHandler();};SB.buildToC = function (result) {  var content = JSON.parse(result);  var list = document.getElementById('table_of_content');  list.innerHTML = Mustache.to_html(list.innerHTML, content);  list.style.display = 'block';};SB.changeStatusSuccess = function () {    console.log('status changed');};google.script.run.withSuccessHandler(SB.buildTaskQueue).getTasksString();google.script.run.withSuccessHandler(SB.buildToC).getTOCString();</script>";
 
