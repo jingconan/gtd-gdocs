@@ -6,8 +6,33 @@
 //
 // This code is under GPL license.
 
-
 // FIXME need to factor the script.js to several smaller files
+
+/* Verify whether the current document is a GTD document
+ * Returns true if the document contains a summary table and the page
+ * setting is as expected, and false otherwise.
+ */
+GTD.isGtdDocument = function() {
+    // Verify that the document contains a summary task table
+    var tables = GTD.body.getTables();
+    if (tables.length === 0 || !GTD._isTaskTable(tables[0])) {
+        return false;
+    }
+
+    // Verify that the margin of the document is okay
+    bodyAttr = GTD.body.getAttributes();
+    marginLeft = bodyAttr[DocumentApp.Attribute.MARGIN_LEFT];
+    marginTop = bodyAttr[DocumentApp.Attribute.MARGIN_TOP];
+    marginRight = bodyAttr[DocumentApp.Attribute.MARGIN_RIGHT];
+    marginBottom = bodyAttr[DocumentApp.Attribute.MARGIN_BOTTOM];
+    if ((marginLeft === GTD.bodyMargins[0]) &&
+        (marginTop === GTD.bodyMargins[1]) &&
+        (marginRight === GTD.bodyMargins[2]) &&
+        (marginBottom === GTD.bodyMargins[3])) {
+        return true;
+    }
+    return false;
+};
 
 GTD.initTaskTable = function() {
     var tables = this.body.getTables();
