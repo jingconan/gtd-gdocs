@@ -1,28 +1,33 @@
 function onOpen(e) {
   var ui = DocumentApp.getUi();
   // Or DocumentApp or FormApp.
-  ui.createMenu('GTD')
-      // .addItem('insert date', 'insertDate')
-      .addItem('Initialize', 'initTaskFunction')
-      .addItem('Insert task', 'insertTask')
-      .addItem('Insert comment', 'insertComment')
-      .addItem('Mark as Actionable', 'createActionableTask')
-      .addItem('Mark as WaitingFor', 'moveTaskToWaitingFor')
-      .addItem('Mark as Done', 'moveTaskToDone')
-      .addItem('Mark as Someday', 'moveTaskToSomeday')
-      .addItem('Insert separator', 'insertSeparator')
-      .addItem('Jump to task', 'jumpToTask')
-      .addItem('Show sidebar', 'showSidebar')
-      .addItem('Sync From GTasks', 'syncFromGTasks')
-      .addSeparator()
-      .addSubMenu(ui.createMenu('Note')
-        .addItem('Format as code', 'insertNoteCode')
-        .addItem('Format as email', 'insertNoteEmail')
-        .addItem('Format as checklist', 'insertNoteChecklist'))
-      .addToUi();
+  if (GTD.isGtdDocument()) {
+      ui.createMenu('GTD')
+          .addItem('Insert task', 'insertTask')
+          .addItem('Insert comment', 'insertComment')
+          .addItem('Mark as Actionable', 'createActionableTask')
+          .addItem('Mark as WaitingFor', 'moveTaskToWaitingFor')
+          .addItem('Mark as Done', 'moveTaskToDone')
+          .addItem('Mark as Someday', 'moveTaskToSomeday')
+          .addItem('Insert separator', 'insertSeparator')
+          .addItem('Jump to task thread', 'jumpToTask')
+          .addItem('Show sidebar', 'showSidebar')
+          .addItem('Sync From GTasks', 'syncFromGTasks')
+          .addSeparator()
+          .addSubMenu(ui.createMenu('Format Table As')
+                  .addItem('Code', 'insertNoteCode')
+                  .addItem('Email', 'insertNoteEmail')
+                  .addItem('Checklist', 'insertNoteChecklist'))
+          .addToUi();
 
-  if (e && e.authMode == ScriptApp.AuthMode.FULL) {
-      syncFromGTasks();
+      if (e && e.authMode == ScriptApp.AuthMode.FULL) {
+          syncFromGTasks();
+      }
+
+  } else {
+      ui.createMenu('GTD')
+          .addItem('Initialize', 'initTaskFunction')
+          .addToUi();
   }
 }
 
@@ -104,6 +109,7 @@ function insertDate() {
 
 function initTaskFunction() {
     GTD.initialize();
+    onOpen();
 }
 
 function createActionableTask() {

@@ -1,25 +1,28 @@
-// compiled from git commit version: f7f7acfb85a536559a90038d2441afd656009877
+// compiled from git commit version: 582351e04938af73407efd24ccf04a5bd2b59781
 var GTD = {
-  body: DocumentApp.getActiveDocument().getBody(),
-  header: ['Actionable', 'Waiting For', 'Done', 'Someday'], //FIXME change to taskStatus
-  headerColor: ['#ff0000', '#9d922e', '#16a031', '#808080'], //FIXME change to taskStatusColor 
-  bodyMargins: [7.2, 7.2, 7.2, 7.2], // L, T, R, D unit is point
-  commentStyle: {
-      foregroundColor: '#000000'
-  },
-  defaultRows: 1,
-  templates: {},
-  TOC: {},
-  gtask: {
-      listName: 'GTD Lists',
-      statusSymbols: {
-          'Actionable': '(x)',
-          'Waiting For': '/!\\',
-          'Someday': '(~)',
-          'Unknown': ''
-      }
-  },
-  initialized: false
+    // Commonly used DOM object
+    document: DocumentApp.getActiveDocument(),
+    body: DocumentApp.getActiveDocument().getBody(),
+
+    header: ['Actionable', 'Waiting For', 'Done', 'Someday'], //FIXME change to taskStatus
+    headerColor: ['#ff0000', '#9d922e', '#16a031', '#808080'], //FIXME change to taskStatusColor 
+    bodyMargins: [7.2, 7.2, 7.2, 7.2], // L, T, R, D unit is point
+    commentStyle: {
+        foregroundColor: '#000000'
+    },
+    defaultRows: 1,
+    templates: {},
+    TOC: {},
+    gtask: {
+        listName: 'GTD Lists',
+        statusSymbols: {
+            'Actionable': '(x)',
+            'Waiting For': '/!\\',
+            'Someday': '(~)',
+            'Unknown': ''
+        }
+    },
+    initialized: false
 };
 
 GTD.startsWith = function(str) {
@@ -648,8 +651,33 @@ GTD.Task.isSeparator = function(table) {
 //
 // This code is under GPL license.
 
-
 // FIXME need to factor the script.js to several smaller files
+
+/* Verifty whether the current document is a GTD document
+ * Returns true if the document contains a summary table and the page
+ * setting is as expected, and false otherwise.
+ */
+GTD.isGtdDocument = function() {
+    // Verify that the document contains a summary task table
+    var tables = GTD.body.getTables();
+    if (tables.length === 0 || !GTD._isTaskTable(tables[0])) {
+        return false;
+    }
+
+    // Verify that the margin of the document is okay
+    bodyAttr = GTD.body.getAttributes();
+    marginLeft = bodyAttr[DocumentApp.Attribute.MARGIN_LEFT];
+    marginTop = bodyAttr[DocumentApp.Attribute.MARGIN_TOP];
+    marginRight = bodyAttr[DocumentApp.Attribute.MARGIN_RIGHT];
+    marginBottom = bodyAttr[DocumentApp.Attribute.MARGIN_BOTTOM];
+    if ((marginLeft === GTD.bodyMargins[0]) &&
+        (marginTop === GTD.bodyMargins[1]) &&
+        (marginRight === GTD.bodyMargins[2]) &&
+        (marginBottom === GTD.bodyMargins[3])) {
+        return true;
+    }
+    return false;
+};
 
 GTD.initTaskTable = function() {
     var tables = this.body.getTables();
@@ -1260,28 +1288,33 @@ function findAndFocusOnTask(taskName) {
 function onOpen(e) {
   var ui = DocumentApp.getUi();
   // Or DocumentApp or FormApp.
-  ui.createMenu('GTD')
-      // .addItem('insert date', 'insertDate')
-      .addItem('Initialize', 'initTaskFunction')
-      .addItem('Insert task', 'insertTask')
-      .addItem('Insert comment', 'insertComment')
-      .addItem('Mark as Actionable', 'createActionableTask')
-      .addItem('Mark as WaitingFor', 'moveTaskToWaitingFor')
-      .addItem('Mark as Done', 'moveTaskToDone')
-      .addItem('Mark as Someday', 'moveTaskToSomeday')
-      .addItem('Insert separator', 'insertSeparator')
-      .addItem('Jump to task', 'jumpToTask')
-      .addItem('Show sidebar', 'showSidebar')
-      .addItem('Sync From GTasks', 'syncFromGTasks')
-      .addSeparator()
-      .addSubMenu(ui.createMenu('Note')
-        .addItem('Format as code', 'insertNoteCode')
-        .addItem('Format as email', 'insertNoteEmail')
-        .addItem('Format as checklist', 'insertNoteChecklist'))
-      .addToUi();
+  if (GTD.isGtdDocument()) {
+      ui.createMenu('GTD')
+          .addItem('Insert task', 'insertTask')
+          .addItem('Insert comment', 'insertComment')
+          .addItem('Mark as Actionable', 'createActionableTask')
+          .addItem('Mark as WaitingFor', 'moveTaskToWaitingFor')
+          .addItem('Mark as Done', 'moveTaskToDone')
+          .addItem('Mark as Someday', 'moveTaskToSomeday')
+          .addItem('Insert separator', 'insertSeparator')
+          .addItem('Jump to task thread', 'jumpToTask')
+          .addItem('Show sidebar', 'showSidebar')
+          .addItem('Sync From GTasks', 'syncFromGTasks')
+          .addSeparator()
+          .addSubMenu(ui.createMenu('Format Table As')
+                  .addItem('Code', 'insertNoteCode')
+                  .addItem('Email', 'insertNoteEmail')
+                  .addItem('Checklist', 'insertNoteChecklist'))
+          .addToUi();
 
-  if (e && e.authMode == ScriptApp.AuthMode.FULL) {
-      syncFromGTasks();
+      if (e && e.authMode == ScriptApp.AuthMode.FULL) {
+          syncFromGTasks();
+      }
+
+  } else {
+      ui.createMenu('GTD')
+          .addItem('Initialize', 'initTaskFunction')
+          .addToUi();
   }
 }
 
@@ -1363,6 +1396,7 @@ function insertDate() {
 
 function initTaskFunction() {
     GTD.initialize();
+    onOpen();
 }
 
 function createActionableTask() {
