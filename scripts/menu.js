@@ -5,19 +5,18 @@ function onOpen(e) {
       ui.createMenu('GTD')
           .addItem('Insert task', 'insertTask')
           .addItem('Insert comment', 'insertComment')
-          .addItem('Mark as Actionable', 'createActionableTask')
-          .addItem('Mark as WaitingFor', 'moveTaskToWaitingFor')
-          .addItem('Mark as Done', 'moveTaskToDone')
-          .addItem('Mark as Someday', 'moveTaskToSomeday')
-          .addItem('Insert separator', 'insertSeparator')
+          .addItem('Insert task separator', 'insertSeparator')
           .addItem('Jump to task thread', 'jumpToTask')
-          .addItem('Show sidebar', 'showSidebar')
-          .addItem('Sync From GTasks', 'syncFromGTasks')
-          .addSeparator()
-          .addSubMenu(ui.createMenu('Format Table As')
+          .addSubMenu(ui.createMenu('Mark task as')
+                  .addItem('Actionable', 'createActionableTask')
+                  .addItem('WaitingFor', 'moveTaskToWaitingFor')
+                  .addItem('Done', 'moveTaskToDone')
+                  .addItem('Someday', 'moveTaskToSomeday'))
+          .addSubMenu(ui.createMenu('Format comment as')
                   .addItem('Code', 'insertNoteCode')
                   .addItem('Email', 'insertNoteEmail')
                   .addItem('Checklist', 'insertNoteChecklist'))
+          .addItem('Sync from google tasks', 'syncFromGTasks')
           .addToUi();
 
       if (e && e.authMode == ScriptApp.AuthMode.FULL) {
@@ -134,14 +133,4 @@ function moveTaskToSomeday() {
     GTD.changeTaskStatusMenuWrapper({
       statusAfter: 'Someday'
     });
-}
-
-function showSidebar() {
-    var html = HtmlService.createHtmlOutput(GTD.templates.sidebar)
-        .setSandboxMode(HtmlService.SandboxMode.IFRAME)
-        .setTitle('My task list')
-        .setWidth(300);
-
-    DocumentApp.getUi() // Or DocumentApp or FormApp.
-        .showSidebar(html);
 }

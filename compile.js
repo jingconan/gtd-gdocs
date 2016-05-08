@@ -16,9 +16,7 @@ var scripts = [
 ];
 
 // Template files used in this project
-var templates = [
-    'templates/sidebar.html'
-];
+var templates = [];
 
 var walk = function(dir) {
     var results = [];
