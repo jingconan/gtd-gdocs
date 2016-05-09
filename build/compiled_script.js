@@ -1,4 +1,4 @@
-// compiled from git commit version: ca1972ae547dceecc8353ba1b5b753e9974a70ca
+// compiled from git commit version: 321570dc6fda15fe4bc27dcc6cb720db9f49bc47
 var GTD = {
     // Commonly used DOM object
     document: DocumentApp.getActiveDocument(),
@@ -1289,7 +1289,7 @@ GTD.updateTaskStatusInBatch = function(gTasksInfo) {
 // GTD.initTaskTable();
 
 /////////////////////////////////////////////////////////////
-// These functions are used by javascript for sidebar view.
+// These functions are used by javascript HTML services
 /////////////////////////////////////////////////////////////
 
 function getTOCString() {
@@ -1315,6 +1315,14 @@ function findAndFocusOnTask(taskName) {
     GTD.initialize();
     GTD.jumpAndFocusOnTask({taskDesc:taskName});
 }
+
+/* Insert task
+ */
+function runInsertTask(text, status) {
+    return GTD.insertTask(text, status);
+}
+
+
 
 
 function onOpen(e) {
@@ -1384,17 +1392,12 @@ function insertNoteChecklist() {
   GTD.Task.insertNote('checklist');
 }
 
-// A callback function to be called by
-function runInsertTask(text, status) {
-    return GTD.insertTask(text, status);
-}
-
 function insertTask() {
     GTD.initialize();
     var html = HtmlService.createHtmlOutput(GTD.templates.insert_task_diag)
         .setSandboxMode(HtmlService.SandboxMode.IFRAME)
         .setWidth(400)
-        .setHeight(300);
+        .setHeight(200);
     DocumentApp.getUi() // Or DocumentApp or FormApp.
         .showModalDialog(html, 'Dialog to insert new task');
 }
@@ -1453,5 +1456,5 @@ function moveTaskToSomeday() {
 
 
 
-GTD.templates.insert_task_diag = "<link rel='stylesheet' href='https://ssl.gstatic.com/docs/script/css/add-ons1.css'><h1>Task description</h1><textarea rows='4' cols='50' id='task_desc' placeholder='Please enter a short task description here: e.g., write a report of google apps for jack'></textarea><button class='action' id='insert'>Insert</button><button  value='Close' onclick='google.script.host.close()'>Close</button><script>document.getElementById('insert').onclick= function(){  var taskDesc = document.getElementById('task_desc').value;  google.script.run.withFailureHandler(function(e)  {google.script.run.debug(JSON.stringify(e))}).runInsertTask(taskDesc, 'Actionable');  google.script.host.close();};</script>";
+GTD.templates.insert_task_diag = "<link rel='stylesheet' href='https://ssl.gstatic.com/docs/script/css/add-ons1.css'><h1>Task description</h1><textarea rows='4' cols='50' id='task_desc' placeholder='Please enter a short task description here: e.g., write a report of google apps for jack'></textarea><button class='action' id='insert'>Insert</button><button  value='Close' onclick='google.script.host.close()'>Close</button><script>document.getElementById('insert').onclick= function(){  var taskDesc = document.getElementById('task_desc').value;  google.script.run.runInsertTask(taskDesc, 'Actionable');  google.script.host.close();};</script>";
 

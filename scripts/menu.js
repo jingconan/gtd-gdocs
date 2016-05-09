@@ -70,7 +70,7 @@ function insertTask() {
     var html = HtmlService.createHtmlOutput(GTD.templates.insert_task_diag)
         .setSandboxMode(HtmlService.SandboxMode.IFRAME)
         .setWidth(400)
-        .setHeight(300);
+        .setHeight(200);
     DocumentApp.getUi() // Or DocumentApp or FormApp.
         .showModalDialog(html, 'Dialog to insert new task');
 }
