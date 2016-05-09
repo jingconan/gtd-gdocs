@@ -161,18 +161,31 @@ GTD.Task.insertComment = function(options) {
     GTD.util.setCursorAtTable(table, [1, 0]);
 };
 
-// Get task header from its name
+/* Get task header from its name
+ * Return an object ret that is equal to the return value of
+ * getTaskThreadHeader if thread position can be found and {} otherwise
+ */
 GTD.getTaskHeader = function(task) {
     var doc = DocumentApp.getActiveDocument();
     var taskDesc = task.taskDesc;
     var position = GTD.getTaskThreadPosition(task);
     if (!position) {
-        return;
+        return {};
     }
     return GTD.Task.getTaskThreadHeader(position.getElement());
 }
 
-// getTaskThreadHeader returns the task thread header under the cursor
+/* Returns the task thread header that is parent of an element.
+ *
+ * It will search upward from ele to find the first task thread header.
+ * If ele is not set, the current element under cursor is used.
+ * If element or cursor is in summary table, then the task name is used
+ * to retrievel the task thread header position.
+ *
+ * Returns an object ret
+ * ret.header: the DOM object of task header
+ * ret.status: {'not_found', 'cursor_in_header', 'cursor_in_summary_table'}
+ */
 GTD.Task.getTaskThreadHeader = function(ele) {
     var cursor, task, res = {};
     if (typeof ele === 'undefined') {
@@ -197,7 +210,8 @@ GTD.Task.getTaskThreadHeader = function(ele) {
         ele = ele.getParent();
     }
     if (!ele || ele.getType() != DocumentApp.ElementType.TABLE) {
-        DocumentApp.getUi().alert('Cannot find task header under cursor! ele.type: ' + ele.getType());
+        // DocumentApp.getUi().alert('Cannot find task header under cursor! ele.type: ' + ele.getType());
+        res.status = 'not_found'
         return res;
     }
     
@@ -215,6 +229,7 @@ GTD.Task.getTaskThreadHeader = function(ele) {
       if (task) {
           res.header = GTD.getTaskHeader(task).header;
           res.status = 'cursor_in_summary_table';
+          debug('run here with task: ' + task);
       }
     }
 

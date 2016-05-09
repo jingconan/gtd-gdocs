@@ -1,4 +1,4 @@
-// compiled from git commit version: 159ae2dda6e9a66866f6df3d7c840f9b81ca2d56
+// compiled from git commit version: 1650a04104823c387df6092b3b4bc3045bed653f
 var GTD = {
     // Commonly used DOM object
     document: DocumentApp.getActiveDocument(),
@@ -521,18 +521,31 @@ GTD.Task.insertComment = function(options) {
     GTD.util.setCursorAtTable(table, [1, 0]);
 };
 
-// Get task header from its name
+/* Get task header from its name
+ * Return an object ret that is equal to the return value of
+ * getTaskThreadHeader if thread position can be found and {} otherwise
+ */
 GTD.getTaskHeader = function(task) {
     var doc = DocumentApp.getActiveDocument();
     var taskDesc = task.taskDesc;
     var position = GTD.getTaskThreadPosition(task);
     if (!position) {
-        return;
+        return {};
     }
     return GTD.Task.getTaskThreadHeader(position.getElement());
 }
 
-// getTaskThreadHeader returns the task thread header under the cursor
+/* Returns the task thread header that is parent of an element.
+ *
+ * It will search upward from ele to find the first task thread header.
+ * If ele is not set, the current element under cursor is used.
+ * If element or cursor is in summary table, then the task name is used
+ * to retrievel the task thread header position.
+ *
+ * Returns an object ret
+ * ret.header: the DOM object of task header
+ * ret.status: {'not_found', 'cursor_in_header', 'cursor_in_summary_table'}
+ */
 GTD.Task.getTaskThreadHeader = function(ele) {
     var cursor, task, res = {};
     if (typeof ele === 'undefined') {
@@ -557,7 +570,8 @@ GTD.Task.getTaskThreadHeader = function(ele) {
         ele = ele.getParent();
     }
     if (!ele || ele.getType() != DocumentApp.ElementType.TABLE) {
-        DocumentApp.getUi().alert('Cannot find task header under cursor! ele.type: ' + ele.getType());
+        // DocumentApp.getUi().alert('Cannot find task header under cursor! ele.type: ' + ele.getType());
+        res.status = 'not_found'
         return res;
     }
     
@@ -575,6 +589,7 @@ GTD.Task.getTaskThreadHeader = function(ele) {
       if (task) {
           res.header = GTD.getTaskHeader(task).header;
           res.status = 'cursor_in_summary_table';
+          debug('run here with task: ' + task);
       }
     }
 
@@ -884,32 +899,33 @@ GTD.getTaskName = function(taskName) {
     return tokens[1];
 };
 
-
-// this function returns the task under cursor
+/* Get the task under cursor
+ */
 GTD.getSelectedTask = function(type) {
+    var ret = {};
     var taskHeaderResult = GTD.Task.getTaskThreadHeader();
     var taskHeader = taskHeaderResult.header;
+    if (!taskHeader) {
+        ret.status = 'NO_TASK_FOUND';
+        return ret;
+    }
     if (!GTD.Task.isValidTaskThreadHeader(taskHeader)) {
-        return {
-            error: 'To change status of a task, please ' +
-                   'put cursor in the task description ' +
-                   'table in the main body.'
-        };
+        ret.status = 'INVALID_TASK_THREAD_HEADER';
+        return ret;
     }
     var statusBefore = GTD.Task.getThreadHeaderStatus(taskHeader);
     GTD.Task.setThreadHeaderStatus(taskHeader, type);
     var taskDesc = GTD.Task.getTaskDesc(taskHeader);
     if (!taskDesc) {
-        return {
-            error: 'cannot find task name'
-        };
+        ret.status = 'NO_VALID_TASK_NAME'
+        return ret;
     }
-    return {
-        taskDesc: taskDesc,
-        threadHeader: taskHeader,
-        statusBefore: statusBefore,
-        cursorStatus: taskHeaderResult.status
-    };
+    ret.taskDesc = taskDesc;
+    ret.threadHeader = taskHeader;
+    ret.statusBefore = statusBefore;
+    ret.cursorStatus = taskHeaderResult.status;
+    ret.status = 'SUCCESS';
+    return ret;
 };
 
 GTD.appendLogEntry = function() {
@@ -1090,6 +1106,10 @@ GTD.searchBookmarkIdBasedOnTaskDesc = function(taskDesc) {
     }
 };
 
+/* Get position of thread header for a task
+ * Returns Position if the position can be found, and undfined
+ * otherwise.
+ */
 GTD.getTaskThreadPosition = function(task) {
     var doc = DocumentApp.getActiveDocument();
     var documentProperties = PropertiesService.getDocumentProperties();
@@ -1100,7 +1120,6 @@ GTD.getTaskThreadPosition = function(task) {
         if (bookmarkId) {
             documentProperties.setProperty(task.taskDesc, bookmarkId);
         } else {
-            DocumentApp.getUi().alert('Cannot find bookmark ID for task: ' + task.taskDesc);
             return;
         }
     }
@@ -1134,8 +1153,10 @@ GTD.changeTaskStatusMenuWrapper = function(options) {
     GTD.initialize();
     var statusAfter = options.statusAfter;
     var ret = GTD.getSelectedTask(statusAfter);
-    if (ret.error) {
-        DocumentApp.getUi().alert(ret.error);
+    if (ret.status !== 'SUCCESS') {
+        DocumentApp.getUi().alert('Cannot find a valid task under cursor. ' +
+                                  'Please put cursor in a task in summary table ' +
+                                  'or thread header');
         return;
     }
 

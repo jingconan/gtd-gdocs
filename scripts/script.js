@@ -239,32 +239,33 @@ GTD.getTaskName = function(taskName) {
     return tokens[1];
 };
 
-
-// this function returns the task under cursor
+/* Get the task under cursor
+ */
 GTD.getSelectedTask = function(type) {
+    var ret = {};
     var taskHeaderResult = GTD.Task.getTaskThreadHeader();
     var taskHeader = taskHeaderResult.header;
+    if (!taskHeader) {
+        ret.status = 'NO_TASK_FOUND';
+        return ret;
+    }
     if (!GTD.Task.isValidTaskThreadHeader(taskHeader)) {
-        return {
-            error: 'To change status of a task, please ' +
-                   'put cursor in the task description ' +
-                   'table in the main body.'
-        };
+        ret.status = 'INVALID_TASK_THREAD_HEADER';
+        return ret;
     }
     var statusBefore = GTD.Task.getThreadHeaderStatus(taskHeader);
     GTD.Task.setThreadHeaderStatus(taskHeader, type);
     var taskDesc = GTD.Task.getTaskDesc(taskHeader);
     if (!taskDesc) {
-        return {
-            error: 'cannot find task name'
-        };
+        ret.status = 'NO_VALID_TASK_NAME'
+        return ret;
     }
-    return {
-        taskDesc: taskDesc,
-        threadHeader: taskHeader,
-        statusBefore: statusBefore,
-        cursorStatus: taskHeaderResult.status
-    };
+    ret.taskDesc = taskDesc;
+    ret.threadHeader = taskHeader;
+    ret.statusBefore = statusBefore;
+    ret.cursorStatus = taskHeaderResult.status;
+    ret.status = 'SUCCESS';
+    return ret;
 };
 
 GTD.appendLogEntry = function() {
@@ -445,6 +446,10 @@ GTD.searchBookmarkIdBasedOnTaskDesc = function(taskDesc) {
     }
 };
 
+/* Get position of thread header for a task
+ * Returns Position if the position can be found, and undfined
+ * otherwise.
+ */
 GTD.getTaskThreadPosition = function(task) {
     var doc = DocumentApp.getActiveDocument();
     var documentProperties = PropertiesService.getDocumentProperties();
@@ -455,7 +460,6 @@ GTD.getTaskThreadPosition = function(task) {
         if (bookmarkId) {
             documentProperties.setProperty(task.taskDesc, bookmarkId);
         } else {
-            DocumentApp.getUi().alert('Cannot find bookmark ID for task: ' + task.taskDesc);
             return;
         }
     }
@@ -489,8 +493,10 @@ GTD.changeTaskStatusMenuWrapper = function(options) {
     GTD.initialize();
     var statusAfter = options.statusAfter;
     var ret = GTD.getSelectedTask(statusAfter);
-    if (ret.error) {
-        DocumentApp.getUi().alert(ret.error);
+    if (ret.status !== 'SUCCESS') {
+        DocumentApp.getUi().alert('Cannot find a valid task under cursor. ' +
+                                  'Please put cursor in a task in summary table ' +
+                                  'or thread header');
         return;
     }
 
