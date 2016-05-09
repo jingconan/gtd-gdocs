@@ -61,7 +61,6 @@ GTD.util.insertTableAtCursor = function(cells) {
     } catch(err) {
         return 'element_not_found';
     }
-
 };
 
 GTD.util.insertTableAfterThreadHeader = function(options) {
@@ -103,7 +102,13 @@ GTD.util.setCursorAfterFirstSeparator = function() {
             return;
         }
     }
-    // var position = doc.newPosition(rg.getElement().getParent(), 1);
+    // This means that the document doesn't contain any task separator,
+    // we insert a separator after summay table
+    var summayTable = GTD.Summary.getSummaryTable();
+    var index = body.getChildIndex(summayTable);
+    var position = doc.newPosition(body, index+1);
+    doc.setCursor(position);
+    GTD.Task.addThreadSeparator();
 };
 
 

@@ -67,21 +67,12 @@ function insertNoteChecklist() {
 
 function insertTask() {
     GTD.initialize();
-
-    var task;
-    var ui = DocumentApp.getUi();
-    var result = ui.prompt(
-        'Let\'s start!',
-        'Please enter a short task description:',
-    ui.ButtonSet.OK_CANCEL);
-
-    var button = result.getSelectedButton();
-    var text = result.getResponseText();
-    if (button == ui.Button.OK) {
-        task = GTD.insertTask(text, 'Actionable');
-    } else {
-        return;
-    }
+    var html = HtmlService.createHtmlOutput(GTD.templates.insert_task_diag)
+        .setSandboxMode(HtmlService.SandboxMode.IFRAME)
+        .setWidth(400)
+        .setHeight(200);
+    DocumentApp.getUi() // Or DocumentApp or FormApp.
+        .showModalDialog(html, 'Dialog to insert new task');
 }
 
 function jumpToTask() {
