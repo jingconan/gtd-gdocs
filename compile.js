@@ -9,6 +9,7 @@ var glob = require('glob'),
 var scripts = [
     'scripts/namespace.js',
     'scripts/util.js',
+    'scripts/summary.js',
     'scripts/gtask.js',
     'scripts/task-thread.js',
     'scripts/script.js',
@@ -16,7 +17,9 @@ var scripts = [
 ];
 
 // Template files used in this project
-var templates = [];
+var templates = [
+   'templates/insert_task_diag.html'
+];
 
 var walk = function(dir) {
     var results = [];

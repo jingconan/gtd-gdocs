@@ -1,0 +1,14 @@
+<link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+<h1>Task description</h1>
+<textarea rows="4" cols="50" id="task_desc" placeholder="Please enter a short task description here: e.g., write a report of google apps for jack">
+</textarea>
+<button class="action" id="insert">Insert</button>
+<button  value="Close" onclick="google.script.host.close()">Close</button>
+<script>
+document.getElementById('insert').onclick= function(){
+  var taskDesc = document.getElementById('task_desc').value;
+  google.script.run.runInsertTask(taskDesc, 'Actionable');
+  google.script.host.close();
+};
+</script>
+

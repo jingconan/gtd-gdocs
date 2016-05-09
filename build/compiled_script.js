@@ -1,4 +1,4 @@
-// compiled from git commit version: 1650a04104823c387df6092b3b4bc3045bed653f
+// compiled from git commit version: ca1972ae547dceecc8353ba1b5b753e9974a70ca
 var GTD = {
     // Commonly used DOM object
     document: DocumentApp.getActiveDocument(),
@@ -147,6 +147,42 @@ GTD.util.alertNoCursor = function() {
 
 GTD.util.startsWith = function(A, str) {
     return (A.indexOf(str) === 0);
+};
+
+
+GTD.Summary = GTD.Summary || {};
+
+/* Delete tasks of a certain type in summary table.
+ */
+GTD.Summary.cleanTask = function(type, task, alert) {
+    var taskName = task.taskDesc;
+    var i;
+    if (typeof type === 'undefined') {
+        return;
+    }
+    if (type === 'All') {
+        for (i = 0; i < GTD.header.length; ++i) {
+            GTD.Summary.cleanTask(GTD.header[i], {taskDesc: taskName});
+        }
+        return;
+    }
+
+    var cell = GTD.findFirstCell(type, taskName);
+    if (typeof cell === 'undefined') {
+        if (alert) {
+            DocumentApp.getUi().alert('cannot find task name: ' + taskName);
+        }
+    } else {
+        cell.clear();
+    }
+};
+
+
+GTD.Summary.getSummaryTable = function() {
+    if (!GTD.taskTable) {
+        GTD.initTaskTable();
+    }
+    return GTD.taskTable;
 };
 
 
@@ -695,14 +731,14 @@ GTD.isGtdDocument = function() {
 };
 
 GTD.initTaskTable = function() {
-    var tables = this.body.getTables();
+    var tables = GTD.body.getTables();
     var taskTable;
-    if (tables.length === 0 || !this._isTaskTable(tables[0])) {
-        taskTable = this._createDefaultGTDTable(this.body);
+    if (tables.length === 0 || !GTD._isTaskTable(tables[0])) {
+        taskTable = GTD._createDefaultGTDTable(GTD.body);
     } else {
         taskTable = tables[0];
     }
-    this.taskTable = taskTable;
+    GTD.taskTable = taskTable;
 };
 
 GTD.initPageMargin = function() {
@@ -712,14 +748,11 @@ GTD.initPageMargin = function() {
     this.body.setMarginBottom(this.bodyMargins[3]);
 };
 
-GTD.getTaskTable = function() {
-    return this.taskTable;
-};
-
 GTD.getAllTasksFromCol = function(col) {
-    var i, cell, rowNum = this.taskTable.getNumRows(), res = [];
+    var summaryTable = GTD.Summary.getSummaryTable();
+    var i, cell, rowNum = summaryTable.getNumRows(), res = [];
     for (i = 1; i < rowNum; ++i) {
-        cell = this.taskTable.getCell(i, col);
+        cell = summaryTable.getCell(i, col);
         if (typeof cell !== 'undefined' && cell.getText() !== '') {
             res.push(cell.getText());
         }
@@ -752,13 +785,13 @@ GTD.getSideBarTableContent = function() {
 
 GTD.getColIdx = function(name) {
     var i;
-    if (typeof this.colIdx === 'undefined') {
-        this.colIdx = {};
-        for (i = 0; i < this.header.length; ++i) {
-            this.colIdx[this.header[i]] = i;
+    if (typeof GTD.colIdx === 'undefined') {
+        GTD.colIdx = {};
+        for (i = 0; i < GTD.header.length; ++i) {
+            GTD.colIdx[GTD.header[i]] = i;
         }
     }
-    return this.colIdx[name];
+    return GTD.colIdx[name];
 };
 
 GTD.getID = function(s) {
@@ -774,20 +807,21 @@ GTD.getID = function(s) {
 
 // this function returns the first empty cell in a column.
 GTD.findFirstEmptyCell = function(col) {
-    return this.findFirstCell(col, '', false);
+    return GTD.findFirstCell(col, '', false);
 };
 
 GTD.findFirstCell = function(col, target, useID) {
+    var summaryTable = GTD.Summary.getSummaryTable();
     if (typeof col === 'string') {
-        col = this.getColIdx(col);
+        col = GTD.getColIdx(col);
     }
     if (typeof col === 'undefined') {
         return;
     }
-    var i, cell, rowNum = this.taskTable.getNumRows();
+    var i, cell, rowNum = summaryTable.getNumRows();
     for (i = 0; i < rowNum; ++i) {
-        cell = this.taskTable.getCell(i, col);
-        if (useID && (this.getID(cell.getText()) === this.getID(target))) {
+        cell = summaryTable.getCell(i, col);
+        if (useID && (GTD.getID(cell.getText()) === GTD.getID(target))) {
             // compare using ID
             return cell;
         } else if (cell.getText() === target) {
@@ -796,30 +830,6 @@ GTD.findFirstCell = function(col, target, useID) {
         }
     }
     return;
-};
-
-
-GTD.cleanTask = function(type, task, alert) {
-    var taskName = task.taskDesc;
-    var i;
-    if (typeof type === 'undefined') {
-        return;
-    }
-    if (type === 'All') {
-        for (i = 0; i < this.header.length; ++i) {
-            this.cleanTask(this.header[i], {taskDesc: taskName});
-        }
-        return;
-    }
-
-    var cell = this.findFirstCell(type, taskName);
-    if (typeof cell === 'undefined') {
-        if (alert) {
-            DocumentApp.getUi().alert('cannot find task name: ' + taskName);
-        }
-    } else {
-        cell.clear();
-    }
 };
 
 // Change the color of a task according to its current type
@@ -856,10 +866,11 @@ GTD.setTaskColor = function(type, task) {
 
 GTD.addTask = function(type, task) {
     var taskName = task.taskDesc;
-    cell = this.findFirstEmptyCell(type);
+    var summaryTable = GTD.Summary.getSummaryTable();
+    cell = GTD.findFirstEmptyCell(type);
     if (typeof cell === 'undefined') {
         this.appendRow(1);
-        cell = this.taskTable.getCell(this.taskTable.getNumRows() - 1, this.getColIdx(type));
+        cell = summaryTable.getCell(summaryTable.getNumRows() - 1, GTD.getColIdx(type));
     }
     cell.setText(taskName);
     // this.setTaskColor(type, taskName);
@@ -1027,7 +1038,7 @@ GTD.changeTaskStatus = function(options) {
     var task = options.task;
 
     // Update Summary table
-    GTD.cleanTask('All', task);
+    GTD.Summary.cleanTask('All', task);
     GTD.addTask(options.status, task);
     if (options.setTaskColor) {
         GTD.setTaskColor(options.status, task);
@@ -1191,7 +1202,7 @@ GTD.changeTaskStatusMenuWrapper = function(options) {
     // back to the summary table
     if (ret.cursorStatus === 'cursor_in_summary_table') {
         var doc = DocumentApp.getActiveDocument();
-        var position = doc.newPosition(GTD.getTaskTable(), 0);
+        var position = doc.newPosition(GTD.Summary.getSummaryTable(), 0);
         doc.setCursor(position);
     }
 };
@@ -1373,23 +1384,19 @@ function insertNoteChecklist() {
   GTD.Task.insertNote('checklist');
 }
 
+// A callback function to be called by
+function runInsertTask(text, status) {
+    return GTD.insertTask(text, status);
+}
+
 function insertTask() {
     GTD.initialize();
-
-    var task;
-    var ui = DocumentApp.getUi();
-    var result = ui.prompt(
-        'Let\'s start!',
-        'Please enter a short task description:',
-    ui.ButtonSet.OK_CANCEL);
-
-    var button = result.getSelectedButton();
-    var text = result.getResponseText();
-    if (button == ui.Button.OK) {
-        task = GTD.insertTask(text, 'Actionable');
-    } else {
-        return;
-    }
+    var html = HtmlService.createHtmlOutput(GTD.templates.insert_task_diag)
+        .setSandboxMode(HtmlService.SandboxMode.IFRAME)
+        .setWidth(400)
+        .setHeight(300);
+    DocumentApp.getUi() // Or DocumentApp or FormApp.
+        .showModalDialog(html, 'Dialog to insert new task');
 }
 
 function jumpToTask() {
@@ -1445,4 +1452,6 @@ function moveTaskToSomeday() {
 
 
 
+
+GTD.templates.insert_task_diag = "<link rel='stylesheet' href='https://ssl.gstatic.com/docs/script/css/add-ons1.css'><h1>Task description</h1><textarea rows='4' cols='50' id='task_desc' placeholder='Please enter a short task description here: e.g., write a report of google apps for jack'></textarea><button class='action' id='insert'>Insert</button><button  value='Close' onclick='google.script.host.close()'>Close</button><script>document.getElementById('insert').onclick= function(){  var taskDesc = document.getElementById('task_desc').value;  google.script.run.withFailureHandler(function(e)  {google.script.run.debug(JSON.stringify(e))}).runInsertTask(taskDesc, 'Actionable');  google.script.host.close();};</script>";
 
