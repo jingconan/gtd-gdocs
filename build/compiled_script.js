@@ -1,4 +1,4 @@
-// compiled from git commit version: 321570dc6fda15fe4bc27dcc6cb720db9f49bc47
+// compiled from git commit version: dc813c58aea3a8341c670e3ee98436f42c248df6
 var GTD = {
     // Commonly used DOM object
     document: DocumentApp.getActiveDocument(),
@@ -93,7 +93,6 @@ GTD.util.insertTableAtCursor = function(cells) {
     } catch(err) {
         return 'element_not_found';
     }
-
 };
 
 GTD.util.insertTableAfterThreadHeader = function(options) {
@@ -135,7 +134,12 @@ GTD.util.setCursorAfterFirstSeparator = function() {
             return;
         }
     }
-    // var position = doc.newPosition(rg.getElement().getParent(), 1);
+    // This means that the document doesn't contain any task separator or
+    var summayTable = GTD.Summary.getSummaryTable();
+    var index = body.getChildIndex(summayTable);
+    var position = doc.newPosition(body, index+1);
+    doc.setCursor(position);
+    GTD.Task.addThreadSeparator();
 };
 
 
@@ -450,7 +454,7 @@ GTD.Task.insertThreadHeader = function( name) {
     ]);
 
     // set table column width
-    this.setColumnWidth(headerTable);
+    GTD.Task.setColumnWidth(headerTable);
 
     // set table color
     var taskColor = GTD.headerColor[this.status];

@@ -54,7 +54,7 @@ GTD.Task.insertThreadHeader = function( name) {
     ]);
 
     // set table column width
-    this.setColumnWidth(headerTable);
+    GTD.Task.setColumnWidth(headerTable);
 
     // set table color
     var taskColor = GTD.headerColor[this.status];
