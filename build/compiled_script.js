@@ -1,4 +1,4 @@
-// compiled from git commit version: dc813c58aea3a8341c670e3ee98436f42c248df6
+// compiled from git commit version: c4a97c2eff251c648e8cf2b9aa38326985c27171
 var GTD = {
     // Commonly used DOM object
     document: DocumentApp.getActiveDocument(),
@@ -134,7 +134,8 @@ GTD.util.setCursorAfterFirstSeparator = function() {
             return;
         }
     }
-    // This means that the document doesn't contain any task separator or
+    // This means that the document doesn't contain any task separator,
+    // we insert a separator after summay table
     var summayTable = GTD.Summary.getSummaryTable();
     var index = body.getChildIndex(summayTable);
     var position = doc.newPosition(body, index+1);
@@ -187,6 +188,20 @@ GTD.Summary.getSummaryTable = function() {
         GTD.initTaskTable();
     }
     return GTD.taskTable;
+};
+
+/* Get tasks from a particular column
+ */
+GTD.Summary.getAllTasksFromCol = function(col) {
+    var summaryTable = GTD.Summary.getSummaryTable();
+    var i, cell, rowNum = summaryTable.getNumRows(), res = [];
+    for (i = 1; i < rowNum; ++i) {
+        cell = summaryTable.getCell(i, col);
+        if (typeof cell !== 'undefined' && cell.getText() !== '') {
+            res.push(cell.getText());
+        }
+    }
+    return res;
 };
 
 
@@ -395,6 +410,123 @@ GTD.gtask.listAllSubtasksOfParentTask = function(taskListId, parentTask) {
         Logger.log('No tasks found.');
     }
     return retTasks;
+};
+
+
+GTD.TM = GTD.TM || {};
+
+
+GTD.TM.getColIdx = function(status) {
+    var i;
+    // lazy initialization of colIdx table
+    if (typeof GTD.colIdx === 'undefined') {
+        GTD.colIdx = {};
+        for (i = 0; i < GTD.header.length; ++i) {
+            GTD.colIdx[GTD.header[i]] = i;
+        }
+    }
+    return GTD.colIdx[status];
+};
+
+/* Get tasks with a particular status
+ */
+GTD.TM.getTasksWithStatus = function(status) {
+    var colIdx = GTD.TM.getColIdx(status);
+    return GTD.Summary.getAllTasksFromCol(colIdx);
+};
+
+/* Create a task search table for tasks whose status is in statusList
+ */
+GTD.TM.createTaskSearchTable = function(statusList) {
+    var existingTasks = {};
+    for (var i = 0; i < statusList.length; ++i) {
+        var tasks = GTD.TM.getTasksWithStatus(statusList[i]);
+        debug('run headers with: ' + statusList[i]);
+        var thisTasks = [];
+        for (var j = 0; j < tasks.length; ++j) {
+            var taskName = GTD.getTaskName(tasks[j]);
+            existingTasks[taskName] = {
+                'status': statusList[i],
+                'task': tasks[j]
+            }
+        }
+    }
+    debug('existing Tasks:' + JSON.stringify(existingTasks));
+    return existingTasks;
+};
+
+/* Update tasks status bases on information from google tasks
+ */
+GTD.TM.updateTaskStatusInBatch = function(gTasksInfo) {
+    // Create a table to search for status of existing tasks
+    var existingTasks = GTD.TM.createTaskSearchTable(GTD.header);
+
+    for (var i = 0; i < gTasksInfo.length; ++i) {
+        var info = GTD.gtask.decodeTaskTitle(gTasksInfo[i].getTitle());
+        // If task is marked completed in gtask, the corresponding
+        // status should be 'Done' regardless of symbol encoded in
+        // title.
+        if (gTasksInfo[i].getStatus() === 'completed') {
+            info.status = 'Done';
+        }
+        if (info.status === 'Unknown') {
+            //TODO(hbhzwj): right now we don't process tasks whose status is
+            //unknown. Need to think whether this is the best approach
+            continue;
+        }
+        var existingInfo = existingTasks[info.taskName];
+        // If the task doesn't exist in the document yet, then create it
+        if (typeof existingInfo === 'undefined') {
+            GTD.util.setCursorAfterFirstSeparator();
+            GTD.insertTask(info.taskName, info.status, true);
+            // GTD.Task.insertComment({
+            //     threadHeader: ret.threadHeader,
+            //     location: 'thread',
+            //     message: gTasksInfo[i].getNotes()
+            // });
+            continue;
+        }
+
+        // Update task status if the status of gtasks and document doesn't matches
+        if (existingInfo.status !== info.status) {
+            // debug('change task with description: ' + existingInfo.task + ' from ' + 
+            //       existingInfo.status + ' to status ' + info.status);
+            GTD.changeTaskStatus({
+                task: {
+                    taskDesc: existingInfo.task
+                },
+                status: info.status,
+                setTaskColor: true,
+                disableGTask: true
+            });
+        }
+    }
+};
+
+/* Mark all tasks that are not in google tasks as done
+ */
+GTD.TM.markMissingTasksAsDone = function(gTasksInfo) {
+    var existingTasks = GTD.TM.createTaskSearchTable(['Actionable', 'Waiting For']);
+    debug('run line 94 ');
+
+    // delete all tasks that is in gTasksInfo
+    for (var i = 0; i < gTasksInfo.length; ++i) {
+        var info = GTD.gtask.decodeTaskTitle(gTasksInfo[i].getTitle());
+        delete existingTasks[info.taskName];
+    }
+
+    for (var key in existingTasks) {
+        if (existingTasks.hasOwnProperty(key)) {
+            GTD.changeTaskStatus({
+                task: {
+                    taskDesc: existingTasks[key].task
+                },
+                status: 'Done',
+                setTaskColor: true,
+                disableGTask: true
+            });
+        }
+    }
 };
 
 
@@ -629,7 +761,6 @@ GTD.Task.getTaskThreadHeader = function(ele) {
       if (task) {
           res.header = GTD.getTaskHeader(task).header;
           res.status = 'cursor_in_summary_table';
-          debug('run here with task: ' + task);
       }
     }
 
@@ -671,7 +802,7 @@ GTD.Task.setForegroundColor = function(headerTable, color, range) {
 GTD.Task.setThreadHeaderStatus = function(threadHeader, status) {
 
     // Change color
-    var colIdx = GTD.getColIdx(status);
+    var colIdx = GTD.TM.getColIdx(status);
     var color = GTD.headerColor[colIdx];
     GTD.Task.setForegroundColor(threadHeader, color, [1, this.SIZE[0], 0, this.SIZE[1]]);
 
@@ -752,26 +883,13 @@ GTD.initPageMargin = function() {
     this.body.setMarginBottom(this.bodyMargins[3]);
 };
 
-GTD.getAllTasksFromCol = function(col) {
-    var summaryTable = GTD.Summary.getSummaryTable();
-    var i, cell, rowNum = summaryTable.getNumRows(), res = [];
-    for (i = 1; i < rowNum; ++i) {
-        cell = summaryTable.getCell(i, col);
-        if (typeof cell !== 'undefined' && cell.getText() !== '') {
-            res.push(cell.getText());
-        }
-    }
-    return res;
-};
-
-
 GTD.getSideBarTableContent = function() {
     var i, j, tasks, thisTasks;
     var res = {
         task_queues: [],
     };
     for (i = 0; i < this.header.length; ++i) {
-        tasks = this.getAllTasksFromCol(i);
+        tasks = GTD.Summary.getAllTasksFromCol(i);
         thisTasks = [];
         for (j = 0; j < tasks.length; ++j) {
             thisTasks.push({name: tasks[j]});
@@ -784,18 +902,6 @@ GTD.getSideBarTableContent = function() {
         });
     }
     return res;
-};
-
-
-GTD.getColIdx = function(name) {
-    var i;
-    if (typeof GTD.colIdx === 'undefined') {
-        GTD.colIdx = {};
-        for (i = 0; i < GTD.header.length; ++i) {
-            GTD.colIdx[GTD.header[i]] = i;
-        }
-    }
-    return GTD.colIdx[name];
 };
 
 GTD.getID = function(s) {
@@ -817,7 +923,7 @@ GTD.findFirstEmptyCell = function(col) {
 GTD.findFirstCell = function(col, target, useID) {
     var summaryTable = GTD.Summary.getSummaryTable();
     if (typeof col === 'string') {
-        col = GTD.getColIdx(col);
+        col = GTD.TM.getColIdx(col);
     }
     if (typeof col === 'undefined') {
         return;
@@ -841,7 +947,7 @@ GTD.setTaskColor = function(type, task) {
     var taskName = task.taskDesc;
     // setColor = (function (type, ele) {
     //     if (!ele) return;
-    //     ele.asText().editAsText().setForegroundColor(this.headerColor[this.getColIdx(type)]);
+    //     ele.asText().editAsText().setForegroundColor(this.headerColor[this.TM.getColIdx(type)]);
     // }).bind(this, type);
     // Change the color of the task in the task table
     var timeStamp = this.getTimeStamp(taskName);
@@ -874,7 +980,7 @@ GTD.addTask = function(type, task) {
     cell = GTD.findFirstEmptyCell(type);
     if (typeof cell === 'undefined') {
         this.appendRow(1);
-        cell = summaryTable.getCell(summaryTable.getNumRows() - 1, GTD.getColIdx(type));
+        cell = summaryTable.getCell(summaryTable.getNumRows() - 1, GTD.TM.getColIdx(type));
     }
     cell.setText(taskName);
     // this.setTaskColor(type, taskName);
@@ -1231,65 +1337,6 @@ GTD.getTaskFromSummaryTable = function(cursor) {
     };
 };
 
-GTD.updateTaskStatusInBatch = function(gTasksInfo) {
-    // Create a table to search for status of existing tasks
-    var existingTasks = {};
-    for (var i = 0; i < this.header.length; ++i) {
-        var tasks = this.getAllTasksFromCol(i);
-        thisTasks = [];
-        for (var j = 0; j < tasks.length; ++j) {
-            var taskName = GTD.getTaskName(tasks[j]);
-            existingTasks[taskName] = {
-                'status': this.header[i],
-                'task': tasks[j]
-            }
-        }
-    }
-    // debug('existingTasks: ' + JSON.stringify(existingTasks));
-
-    for (var i = 0; i < gTasksInfo.length; ++i) {
-        var info = GTD.gtask.decodeTaskTitle(gTasksInfo[i].getTitle());
-        // If task is marked completed in gtask, the corresponding
-        // status should be 'Done' regardless of symbol encoded in
-        // title.
-        if (gTasksInfo[i].getStatus() === 'completed') {
-            info.status = 'Done';
-        }
-        if (info.status === 'Unknown') {
-            //TODO(hbhzwj): right now we don't process tasks whose status is
-            //unknown. Need to think whether this is the best approach
-            continue;
-        }
-        var existingInfo = existingTasks[info.taskName];
-        // If the task doesn't exist in the document yet, then create it
-        if (typeof existingInfo === 'undefined') {
-            GTD.util.setCursorAfterFirstSeparator();
-            GTD.insertTask(info.taskName, info.status, true);
-            // GTD.Task.insertComment({
-            //     threadHeader: ret.threadHeader,
-            //     location: 'thread',
-            //     message: gTasksInfo[i].getNotes()
-            // });
-            continue;
-        }
-
-        // Update task status if the status of gtasks and document doesn't matches
-        if (existingInfo.status !== info.status) {
-            // debug('change task with description: ' + existingInfo.task + ' from ' + 
-            //       existingInfo.status + ' to status ' + info.status);
-            GTD.changeTaskStatus({
-                task: {
-                    taskDesc: existingInfo.task
-                },
-                status: info.status,
-                setTaskColor: true,
-                disableGTask: true
-            });
-        }
-    }
-};
-
-
 // GTD.initTaskTable();
 
 /////////////////////////////////////////////////////////////
@@ -1373,7 +1420,8 @@ function syncFromGTasks() {
   GTD.initTaskTable();
   var atl = GTD.gtask.getActiveTaskList();
   var gTasksInfo = GTD.gtask.listAllSubtasksOfParentTask(atl.taskListId, atl.parentTask);
-  GTD.updateTaskStatusInBatch(gTasksInfo);
+  GTD.TM.updateTaskStatusInBatch(gTasksInfo);
+  GTD.TM.markMissingTasksAsDone(gTasksInfo);
 }
 
 function insertSeparator() {

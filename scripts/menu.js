@@ -42,7 +42,8 @@ function syncFromGTasks() {
   GTD.initTaskTable();
   var atl = GTD.gtask.getActiveTaskList();
   var gTasksInfo = GTD.gtask.listAllSubtasksOfParentTask(atl.taskListId, atl.parentTask);
-  GTD.updateTaskStatusInBatch(gTasksInfo);
+  GTD.TM.updateTaskStatusInBatch(gTasksInfo);
+  GTD.TM.markMissingTasksAsDone(gTasksInfo);
 }
 
 function insertSeparator() {

@@ -52,26 +52,13 @@ GTD.initPageMargin = function() {
     this.body.setMarginBottom(this.bodyMargins[3]);
 };
 
-GTD.getAllTasksFromCol = function(col) {
-    var summaryTable = GTD.Summary.getSummaryTable();
-    var i, cell, rowNum = summaryTable.getNumRows(), res = [];
-    for (i = 1; i < rowNum; ++i) {
-        cell = summaryTable.getCell(i, col);
-        if (typeof cell !== 'undefined' && cell.getText() !== '') {
-            res.push(cell.getText());
-        }
-    }
-    return res;
-};
-
-
 GTD.getSideBarTableContent = function() {
     var i, j, tasks, thisTasks;
     var res = {
         task_queues: [],
     };
     for (i = 0; i < this.header.length; ++i) {
-        tasks = this.getAllTasksFromCol(i);
+        tasks = GTD.Summary.getAllTasksFromCol(i);
         thisTasks = [];
         for (j = 0; j < tasks.length; ++j) {
             thisTasks.push({name: tasks[j]});
@@ -84,18 +71,6 @@ GTD.getSideBarTableContent = function() {
         });
     }
     return res;
-};
-
-
-GTD.getColIdx = function(name) {
-    var i;
-    if (typeof GTD.colIdx === 'undefined') {
-        GTD.colIdx = {};
-        for (i = 0; i < GTD.header.length; ++i) {
-            GTD.colIdx[GTD.header[i]] = i;
-        }
-    }
-    return GTD.colIdx[name];
 };
 
 GTD.getID = function(s) {
@@ -117,7 +92,7 @@ GTD.findFirstEmptyCell = function(col) {
 GTD.findFirstCell = function(col, target, useID) {
     var summaryTable = GTD.Summary.getSummaryTable();
     if (typeof col === 'string') {
-        col = GTD.getColIdx(col);
+        col = GTD.TM.getColIdx(col);
     }
     if (typeof col === 'undefined') {
         return;
@@ -141,7 +116,7 @@ GTD.setTaskColor = function(type, task) {
     var taskName = task.taskDesc;
     // setColor = (function (type, ele) {
     //     if (!ele) return;
-    //     ele.asText().editAsText().setForegroundColor(this.headerColor[this.getColIdx(type)]);
+    //     ele.asText().editAsText().setForegroundColor(this.headerColor[this.TM.getColIdx(type)]);
     // }).bind(this, type);
     // Change the color of the task in the task table
     var timeStamp = this.getTimeStamp(taskName);
@@ -174,7 +149,7 @@ GTD.addTask = function(type, task) {
     cell = GTD.findFirstEmptyCell(type);
     if (typeof cell === 'undefined') {
         this.appendRow(1);
-        cell = summaryTable.getCell(summaryTable.getNumRows() - 1, GTD.getColIdx(type));
+        cell = summaryTable.getCell(summaryTable.getNumRows() - 1, GTD.TM.getColIdx(type));
     }
     cell.setText(taskName);
     // this.setTaskColor(type, taskName);
@@ -530,65 +505,6 @@ GTD.getTaskFromSummaryTable = function(cursor) {
         taskDesc: ele.editAsText().getText()
     };
 };
-
-GTD.updateTaskStatusInBatch = function(gTasksInfo) {
-    // Create a table to search for status of existing tasks
-    var existingTasks = {};
-    for (var i = 0; i < this.header.length; ++i) {
-        var tasks = this.getAllTasksFromCol(i);
-        thisTasks = [];
-        for (var j = 0; j < tasks.length; ++j) {
-            var taskName = GTD.getTaskName(tasks[j]);
-            existingTasks[taskName] = {
-                'status': this.header[i],
-                'task': tasks[j]
-            }
-        }
-    }
-    // debug('existingTasks: ' + JSON.stringify(existingTasks));
-
-    for (var i = 0; i < gTasksInfo.length; ++i) {
-        var info = GTD.gtask.decodeTaskTitle(gTasksInfo[i].getTitle());
-        // If task is marked completed in gtask, the corresponding
-        // status should be 'Done' regardless of symbol encoded in
-        // title.
-        if (gTasksInfo[i].getStatus() === 'completed') {
-            info.status = 'Done';
-        }
-        if (info.status === 'Unknown') {
-            //TODO(hbhzwj): right now we don't process tasks whose status is
-            //unknown. Need to think whether this is the best approach
-            continue;
-        }
-        var existingInfo = existingTasks[info.taskName];
-        // If the task doesn't exist in the document yet, then create it
-        if (typeof existingInfo === 'undefined') {
-            GTD.util.setCursorAfterFirstSeparator();
-            GTD.insertTask(info.taskName, info.status, true);
-            // GTD.Task.insertComment({
-            //     threadHeader: ret.threadHeader,
-            //     location: 'thread',
-            //     message: gTasksInfo[i].getNotes()
-            // });
-            continue;
-        }
-
-        // Update task status if the status of gtasks and document doesn't matches
-        if (existingInfo.status !== info.status) {
-            // debug('change task with description: ' + existingInfo.task + ' from ' + 
-            //       existingInfo.status + ' to status ' + info.status);
-            GTD.changeTaskStatus({
-                task: {
-                    taskDesc: existingInfo.task
-                },
-                status: info.status,
-                setTaskColor: true,
-                disableGTask: true
-            });
-        }
-    }
-};
-
 
 // GTD.initTaskTable();
 

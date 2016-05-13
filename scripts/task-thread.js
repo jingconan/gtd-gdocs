@@ -229,7 +229,6 @@ GTD.Task.getTaskThreadHeader = function(ele) {
       if (task) {
           res.header = GTD.getTaskHeader(task).header;
           res.status = 'cursor_in_summary_table';
-          debug('run here with task: ' + task);
       }
     }
 
@@ -271,7 +270,7 @@ GTD.Task.setForegroundColor = function(headerTable, color, range) {
 GTD.Task.setThreadHeaderStatus = function(threadHeader, status) {
 
     // Change color
-    var colIdx = GTD.getColIdx(status);
+    var colIdx = GTD.TM.getColIdx(status);
     var color = GTD.headerColor[colIdx];
     GTD.Task.setForegroundColor(threadHeader, color, [1, this.SIZE[0], 0, this.SIZE[1]]);
 

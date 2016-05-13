@@ -32,3 +32,17 @@ GTD.Summary.getSummaryTable = function() {
     }
     return GTD.taskTable;
 };
+
+/* Get tasks from a particular column
+ */
+GTD.Summary.getAllTasksFromCol = function(col) {
+    var summaryTable = GTD.Summary.getSummaryTable();
+    var i, cell, rowNum = summaryTable.getNumRows(), res = [];
+    for (i = 1; i < rowNum; ++i) {
+        cell = summaryTable.getCell(i, col);
+        if (typeof cell !== 'undefined' && cell.getText() !== '') {
+            res.push(cell.getText());
+        }
+    }
+    return res;
+};
