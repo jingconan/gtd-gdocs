@@ -159,7 +159,13 @@ GTD.gtask.updateTask = function(taskListId, parentTask, taskDetails) {
         task.setStatus('needsAction');
         task.setCompleted(null);
     }
-    task.setNotes(taskDetails.notes);
+    var notes;
+    if (taskDetails.keepGTaskNote) {
+        notes = task.getNotes() + '\n' + taskDetails.notes;
+    } else {
+        notes = taskDetails.notes;
+    }
+    task.setNotes(notes);
     var updatedTask = Tasks.Tasks.patch(task, taskListId, task.id);
 };
 

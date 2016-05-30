@@ -1,4 +1,4 @@
-// compiled from git commit version: c4a97c2eff251c648e8cf2b9aa38326985c27171
+// compiled from git commit version: 64b3a08883b6de794b650dbf97ed819bc10fccdf
 var GTD = {
     // Commonly used DOM object
     document: DocumentApp.getActiveDocument(),
@@ -366,7 +366,13 @@ GTD.gtask.updateTask = function(taskListId, parentTask, taskDetails) {
         task.setStatus('needsAction');
         task.setCompleted(null);
     }
-    task.setNotes(taskDetails.notes);
+    var notes;
+    if (taskDetails.keepGTaskNote) {
+        notes = task.getNotes() + '\n' + taskDetails.notes;
+    } else {
+        notes = taskDetails.notes;
+    }
+    task.setNotes(notes);
     var updatedTask = Tasks.Tasks.patch(task, taskListId, task.id);
 };
 
@@ -455,6 +461,55 @@ GTD.TM.createTaskSearchTable = function(statusList) {
     return existingTasks;
 };
 
+/* Check whether a line is automatically generated (rather than manually added)
+ * 1. Any line starts with timestamps
+ * 2. Empty line
+ * 3. Line starts with #
+ */
+GTD.TM.isAutoText = function (line) {
+  var re = /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/i;
+  return !line ||
+         line.startsWith('#') ||
+         line.match(re);
+};
+
+/* parse gtask note and group by lines by functionality
+ */
+GTD.TM.parseNote = function(note) {
+  var lines = note.split('\n');
+  var line, autoLines = [], manualLines = [];
+  for (var i = 0; i < lines.length; ++i) {
+    line = lines[i];
+    if (GTD.TM.isAutoText(line)) {
+      autoLines.push(line);
+    } else {
+      manualLines.push(line);
+    }
+  }
+  return {
+    auto: autoLines,
+    manual: manualLines
+  };
+};
+
+/* Geneate a new note in which manual note is commented
+ * Input: parseNote which is return value of parseNote
+ * Output: a string that will be writen to google task's note section
+ */
+GTD.TM.commentManualNote = function(parsedNote) {
+   var resTokens = [];
+   if (parsedNote.auto.length > 0) {
+     resTokens.push(parsedNote.auto.join('\n'));
+   }
+
+   var currentTime = GTD.util.toISO(new Date());
+   resTokens.push('\n' + currentTime + ' Added comment\n#');
+   if (parsedNote.manual.length > 0) {
+      resTokens.push(parsedNote.manual.join('\n# '));
+   }
+   return resTokens.join('');
+};
+
 /* Update tasks status bases on information from google tasks
  */
 GTD.TM.updateTaskStatusInBatch = function(gTasksInfo) {
@@ -479,26 +534,42 @@ GTD.TM.updateTaskStatusInBatch = function(gTasksInfo) {
         if (typeof existingInfo === 'undefined') {
             GTD.util.setCursorAfterFirstSeparator();
             GTD.insertTask(info.taskName, info.status, true);
-            // GTD.Task.insertComment({
-            //     threadHeader: ret.threadHeader,
-            //     location: 'thread',
-            //     message: gTasksInfo[i].getNotes()
-            // });
             continue;
-        }
-
-        // Update task status if the status of gtasks and document doesn't matches
-        if (existingInfo.status !== info.status) {
+        } else {
+          // Update task status if the status of gtasks and document doesn't matches
+          if (existingInfo.status !== info.status) {
             // debug('change task with description: ' + existingInfo.task + ' from ' + 
             //       existingInfo.status + ' to status ' + info.status);
             GTD.changeTaskStatus({
-                task: {
-                    taskDesc: existingInfo.task
-                },
-                status: info.status,
-                setTaskColor: true,
-                disableGTask: true
+              task: {
+                taskDesc: existingInfo.task
+              },
+              status: info.status,
+              setTaskColor: true,
+              disableGTask: true
             });
+          }
+        }
+
+        var parsedNote = GTD.TM.parseNote(gTasksInfo[i].getNotes());
+        // Insert comment to task if the notes section contains manually
+        // edit notes
+        if (parsedNote.manual.length > 0) {
+          debug('parsedNote.manual: ' + JSON.stringify(parsedNote.manual));
+          // Insert manual note to task thread
+          GTD.Task.insertComment({
+              threadHeader: GTD.getTaskHeader({taskDesc: existingInfo.task}).header,
+              location: 'thread',
+              message: parsedNote.manual.join('\n')
+          });
+
+          // comment manual note in google tasks
+          var tl = GTD.gtask.getActiveTaskList();
+          GTD.gtask.updateTask(tl.taskListId, tl.parentTask, {
+            title: gTasksInfo[i].getTitle(),
+            notes: GTD.TM.commentManualNote(parsedNote),
+            status: info.status
+          });
         }
     }
 };
@@ -621,6 +692,10 @@ GTD.Task.setColumnWidth = function(table) {
     }
 };
 
+/* Format the table under the cursor to be a certain format based on
+ * types.
+ * TODO(hbhzwj): change the function name, which is a misnomer.
+ */
 GTD.Task.insertNote = function(noteType) {
     var document = DocumentApp.getActiveDocument();
     var cursor = document.getCursor();
@@ -654,6 +729,13 @@ GTD.Task.insertNote = function(noteType) {
 //     var position = doc.newPosition(cell, 0);
 //     doc.setCursor(position);
 // };
+/* Insert a comment in current cursor or to a specific thread.
+ * If insert to a thread, need to input threadHeader, which is the table
+ * element of the thread.
+ *
+ * Note: If you only have taskDesc, you can get its task header by
+ * calling getTaskHeader
+ */
 GTD.Task.insertComment = function(options) {
     if (typeof options === 'undefined') {
       options = {'location': 'cursor'};
@@ -1159,10 +1241,12 @@ GTD.changeTaskStatus = function(options) {
         var tl = GTD.gtask.getActiveTaskList();
         var timestamp = GTD.getTimeStamp(task.taskDesc);
         var title = task.taskDesc.replace(timestamp + '\n', '');
+        var currentTime = GTD.util.toISO(new Date());
         GTD.gtask.updateTask(tl.taskListId, tl.parentTask, {
             title: title,
-            notes: timestamp + ' moved from [' + task.statusBefore + '] to [' + options.status + ']',
-            status: options.status
+            notes: currentTime + ' moved from [' + task.statusBefore + '] to [' + options.status + ']',
+            status: options.status,
+            keepGTaskNote: true
         });
     }
 };

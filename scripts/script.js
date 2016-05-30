@@ -328,10 +328,12 @@ GTD.changeTaskStatus = function(options) {
         var tl = GTD.gtask.getActiveTaskList();
         var timestamp = GTD.getTimeStamp(task.taskDesc);
         var title = task.taskDesc.replace(timestamp + '\n', '');
+        var currentTime = GTD.util.toISO(new Date());
         GTD.gtask.updateTask(tl.taskListId, tl.parentTask, {
             title: title,
-            notes: timestamp + ' moved from [' + task.statusBefore + '] to [' + options.status + ']',
-            status: options.status
+            notes: currentTime + ' moved from [' + task.statusBefore + '] to [' + options.status + ']',
+            status: options.status,
+            keepGTaskNote: true
         });
     }
 };
