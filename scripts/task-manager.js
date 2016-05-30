@@ -26,7 +26,6 @@ GTD.TM.createTaskSearchTable = function(statusList) {
     var existingTasks = {};
     for (var i = 0; i < statusList.length; ++i) {
         var tasks = GTD.TM.getTasksWithStatus(statusList[i]);
-        debug('run headers with: ' + statusList[i]);
         var thisTasks = [];
         for (var j = 0; j < tasks.length; ++j) {
             var taskName = GTD.getTaskName(tasks[j]);
@@ -36,7 +35,6 @@ GTD.TM.createTaskSearchTable = function(statusList) {
             }
         }
     }
-    debug('existing Tasks:' + JSON.stringify(existingTasks));
     return existingTasks;
 };
 
@@ -134,7 +132,6 @@ GTD.TM.updateTaskStatusInBatch = function(gTasksInfo) {
         // Insert comment to task if the notes section contains manually
         // edit notes
         if (parsedNote.manual.length > 0) {
-          debug('parsedNote.manual: ' + JSON.stringify(parsedNote.manual));
           // Insert manual note to task thread
           GTD.Task.insertComment({
               threadHeader: GTD.getTaskHeader({taskDesc: existingInfo.task}).header,
@@ -157,7 +154,6 @@ GTD.TM.updateTaskStatusInBatch = function(gTasksInfo) {
  */
 GTD.TM.markMissingTasksAsDone = function(gTasksInfo) {
     var existingTasks = GTD.TM.createTaskSearchTable(['Actionable', 'Waiting For']);
-    debug('run line 94 ');
 
     // delete all tasks that is in gTasksInfo
     for (var i = 0; i < gTasksInfo.length; ++i) {
