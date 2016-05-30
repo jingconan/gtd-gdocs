@@ -89,6 +89,10 @@ GTD.Task.setColumnWidth = function(table) {
     }
 };
 
+/* Format the table under the cursor to be a certain format based on
+ * types.
+ * TODO(hbhzwj): change the function name, which is a misnomer.
+ */
 GTD.Task.insertNote = function(noteType) {
     var document = DocumentApp.getActiveDocument();
     var cursor = document.getCursor();
@@ -122,6 +126,13 @@ GTD.Task.insertNote = function(noteType) {
 //     var position = doc.newPosition(cell, 0);
 //     doc.setCursor(position);
 // };
+/* Insert a comment in current cursor or to a specific thread.
+ * If insert to a thread, need to input threadHeader, which is the table
+ * element of the thread.
+ *
+ * Note: If you only have taskDesc, you can get its task header by
+ * calling getTaskHeader
+ */
 GTD.Task.insertComment = function(options) {
     if (typeof options === 'undefined') {
       options = {'location': 'cursor'};
