@@ -160,8 +160,8 @@ GTD.gtask.updateTask = function(taskListId, parentTask, taskDetails) {
         task.setCompleted(null);
     }
     var notes;
-    if (taskDetails.keepGTaskNote) {
-        notes = task.getNotes() + '\n' + taskDetails.notes;
+    if (taskDetails.keepGTaskNote && task.getNotes() !== undefined) {
+        notes = taskDetails.notes + '\n' + task.getNotes();
     } else {
         notes = taskDetails.notes;
     }

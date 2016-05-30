@@ -75,14 +75,14 @@ GTD.TM.parseNote = function(note) {
  */
 GTD.TM.commentManualNote = function(parsedNote) {
    var resTokens = [];
-   if (parsedNote.auto.length > 0) {
-     resTokens.push(parsedNote.auto.join('\n'));
-   }
-
    var currentTime = GTD.util.toISO(new Date());
    resTokens.push('\n' + currentTime + ' Added comment\n#');
    if (parsedNote.manual.length > 0) {
-      resTokens.push(parsedNote.manual.join('\n# '));
+      resTokens.push(parsedNote.manual.join('\n# ') + '\n');
+   }
+
+   if (parsedNote.auto.length > 0) {
+     resTokens.push(parsedNote.auto.join('\n'));
    }
    return resTokens.join('');
 };

@@ -1,4 +1,4 @@
-// compiled from git commit version: 112c7e6879fb23eaff651cd0dd8073a4021e37ef
+// compiled from git commit version: 6691e4645eab7ae9e5db73bf73546cb5e9fb420e
 var GTD = {
     // Commonly used DOM object
     document: DocumentApp.getActiveDocument(),
@@ -367,8 +367,8 @@ GTD.gtask.updateTask = function(taskListId, parentTask, taskDetails) {
         task.setCompleted(null);
     }
     var notes;
-    if (taskDetails.keepGTaskNote) {
-        notes = task.getNotes() + '\n' + taskDetails.notes;
+    if (taskDetails.keepGTaskNote && task.getNotes() !== undefined) {
+        notes = taskDetails.notes + '\n' + task.getNotes();
     } else {
         notes = taskDetails.notes;
     }
@@ -496,14 +496,14 @@ GTD.TM.parseNote = function(note) {
  */
 GTD.TM.commentManualNote = function(parsedNote) {
    var resTokens = [];
-   if (parsedNote.auto.length > 0) {
-     resTokens.push(parsedNote.auto.join('\n'));
-   }
-
    var currentTime = GTD.util.toISO(new Date());
    resTokens.push('\n' + currentTime + ' Added comment\n#');
    if (parsedNote.manual.length > 0) {
-      resTokens.push(parsedNote.manual.join('\n# '));
+      resTokens.push(parsedNote.manual.join('\n# ') + '\n');
+   }
+
+   if (parsedNote.auto.length > 0) {
+     resTokens.push(parsedNote.auto.join('\n'));
    }
    return resTokens.join('');
 };
