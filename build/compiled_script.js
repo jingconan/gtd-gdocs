@@ -1,4 +1,4 @@
-// compiled from git commit version: 64b3a08883b6de794b650dbf97ed819bc10fccdf
+// compiled from git commit version: 3bbaa1a8a45d3f32f6372ff7bf17d8e28802bcb1
 var GTD = {
     // Commonly used DOM object
     document: DocumentApp.getActiveDocument(),
@@ -1592,5 +1592,5 @@ function moveTaskToSomeday() {
 
 
 
-GTD.templates.insert_task_diag = "<link rel='stylesheet' href='https://ssl.gstatic.com/docs/script/css/add-ons1.css'><h1>Task description</h1><textarea rows='4' cols='50' id='task_desc' placeholder='Please enter a short task description here: e.g., write a report of google apps for jack'></textarea><button class='action' id='insert'>Insert</button><button  value='Close' onclick='google.script.host.close()'>Close</button><script>document.getElementById('insert').onclick= function(){  var taskDesc = document.getElementById('task_desc').value;  google.script.run.runInsertTask(taskDesc, 'Actionable');  google.script.host.close();};</script>";
+GTD.templates.insert_task_diag = "<link rel='stylesheet' href='https://ssl.gstatic.com/docs/script/css/add-ons1.css'><h1>Task description</h1><textarea rows='4' cols='50' id='task_desc' placeholder='Please enter a short task description here: e.g., write a report of google apps for jack'></textarea><div><button class='action' id='insert'>Insert</button><button  value='Close' onclick='google.script.host.close()'>Close</button></div><script>document.getElementById('insert').onclick= function(){  var taskDesc = document.getElementById('task_desc').value;  google.script.run.runInsertTask(taskDesc, 'Actionable');  google.script.host.close();};</script>";
 
