@@ -456,20 +456,20 @@ GTD.changeTaskStatusMenuWrapper = function(options) {
 
     // if cursor is in summary table, display a dialog for comment
     if (ret.cursorStatus === 'cursor_in_summary_table') {
-        var task;
-        var ui = DocumentApp.getUi();
-        var result = ui.prompt('Update status',
-                               'Please enter your comment:',
-                               ui.ButtonSet.OK_CANCEL);
-
-        var button = result.getSelectedButton();
-        var text = result.getResponseText();
-        if (button == ui.Button.OK) {
-            comment = comment + '\n' + text;
-        } else {
+        if (!options.comment) {
+            var template = GTD.util.templateReplace(GTD.templates.change_task_status, {
+                statusAfter: statusAfter,
+            });
+            var html = HtmlService.createHtmlOutput(template)
+                .setSandboxMode(HtmlService.SandboxMode.IFRAME)
+                .setWidth(400)
+                .setHeight(200);
+            DocumentApp.getUi() // Or DocumentApp or FormApp.
+                .showModalDialog(html, 'Dialog to change task status');
             return;
+        } else {
+            comment = comment + '\n' + options.comment;
         }
-
     }
 
     GTD.changeTaskStatus({task: ret, status: statusAfter});
@@ -524,15 +524,6 @@ function getTasksString() {
     return JSON.stringify(GTD.getSideBarTableContent());
 }
 
-function changeTaskStatus(taskDesc, status) {
-    GTD.initialize();
-    return GTD.changeTaskStatus({
-        task: {taskDesc: taskDesc},
-        status: status,
-        setTaskColor: true
-    });
-}
-
 function findAndFocusOnTask(taskName) {
     GTD.initialize();
     GTD.jumpAndFocusOnTask({taskDesc:taskName});
@@ -544,4 +535,11 @@ function runInsertTask(text, status) {
     return GTD.insertTask(text, status);
 }
 
-
+/* Change task status
+ */
+function changeTaskStatus(comment, statusAfter) {
+    GTD.changeTaskStatusMenuWrapper({
+      statusAfter: statusAfter,
+      comment: comment
+    });
+}

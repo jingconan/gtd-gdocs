@@ -121,3 +121,12 @@ GTD.util.alertNoCursor = function() {
 GTD.util.startsWith = function(A, str) {
     return (A.indexOf(str) === 0);
 };
+
+GTD.util.templateReplace = function(template, namespace) {
+	for (var key in namespace) {
+	    if (namespace.hasOwnProperty(key)) {
+            template = template.replace('{{' + key + '}}', namespace[key]);
+	    }
+	}
+    return template;
+};

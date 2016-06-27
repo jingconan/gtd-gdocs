@@ -19,7 +19,8 @@ var scripts = [
 
 // Template files used in this project
 var templates = [
-   'templates/insert_task_diag.html'
+   'templates/insert_task_diag.html',
+   'templates/change_task_status.html'
 ];
 
 var walk = function(dir) {
