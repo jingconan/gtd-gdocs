@@ -1,4 +1,4 @@
-// compiled from git commit version: 6f58dbc37ecc5b5d75d3dba5a2d0cb26d9b20d6e
+// compiled from git commit version: 2808c82627f31220e96262cc48a119435059505a
 var GTD = {
     // Commonly used DOM object
     document: DocumentApp.getActiveDocument(),
@@ -1330,7 +1330,7 @@ GTD.changeTaskStatusMenuWrapper = function(options) {
 
     // if cursor is in summary table, display a dialog for comment
     if (ret.cursorStatus === 'cursor_in_summary_table') {
-        if (!options.comment) {
+        if (typeof options.comment === 'undefined') {
             var template = GTD.util.templateReplace(GTD.templates.change_task_status, {
                 statusAfter: statusAfter,
             });

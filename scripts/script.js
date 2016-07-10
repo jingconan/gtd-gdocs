@@ -412,7 +412,7 @@ GTD.changeTaskStatusMenuWrapper = function(options) {
 
     // if cursor is in summary table, display a dialog for comment
     if (ret.cursorStatus === 'cursor_in_summary_table') {
-        if (!options.comment) {
+        if (typeof options.comment === 'undefined') {
             var template = GTD.util.templateReplace(GTD.templates.change_task_status, {
                 statusAfter: statusAfter,
             });
