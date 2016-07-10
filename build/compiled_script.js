@@ -1,4 +1,4 @@
-// compiled from git commit version: 9b79d7a186da9d3289641bc95b7c477627d1c197
+// compiled from git commit version: 73edcfb9511a53d28012423895141190981dc738
 var GTD = {
     // Commonly used DOM object
     document: DocumentApp.getActiveDocument(),
@@ -171,7 +171,15 @@ GTD.util.getID = function(s) {
     if (typeof res === 'undefined') {
         return s;
     }
+};
 
+/* Get timestamp from task name
+ */
+GTD.util.getTimeStamp = function(taskName) {
+    //timestamp is at the begining and has the format YYYY-mm-DD
+    //HH:MM:SS. It is seperated by other content by \n;
+    var tokens = taskName.split('\n');
+    return tokens[0];
 };
 
 
@@ -1078,7 +1086,7 @@ GTD.setTaskColor = function(type, task) {
     //     ele.asText().editAsText().setForegroundColor(this.headerColor[this.TM.getColIdx(type)]);
     // }).bind(this, type);
     // Change the color of the task in the task table
-    var timeStamp = this.getTimeStamp(taskName);
+    var timeStamp = GTD.util.getTimeStamp(taskName);
     var doc = DocumentApp.getActiveDocument();
     var body = doc.getBody();
     // the first element is in the document header table.
@@ -1100,13 +1108,6 @@ GTD.setTaskColor = function(type, task) {
         return;
     }
     GTD.Task.setThreadHeaderStatus(taskThreadHeader, type);
-};
-
-GTD.getTimeStamp = function(taskName) {
-    //timestamp is at the begining and has the format YYYY-mm-DD
-    //HH:MM:SS. It is seperated by other content by \n;
-    var tokens = taskName.split('\n');
-    return tokens[0];
 };
 
 GTD.getTaskName = function(taskName) {
@@ -1140,9 +1141,6 @@ GTD.getSelectedTask = function(type) {
     ret.cursorStatus = taskHeaderResult.status;
     ret.status = 'SUCCESS';
     return ret;
-};
-
-GTD.appendLogEntry = function() {
 };
 
 GTD._isTaskTable = function(table) {
@@ -1220,7 +1218,7 @@ GTD.changeTaskStatus = function(options) {
     // Update gtask service
     if (!options.disableGTask && GTD.gtask.isInitialized()) {
         var tl = GTD.gtask.getActiveTaskList();
-        var timestamp = GTD.getTimeStamp(task.taskDesc);
+        var timestamp = GTD.util.getTimeStamp(task.taskDesc);
         var title = task.taskDesc.replace(timestamp + '\n', '');
         var currentTime = GTD.util.toISO(new Date());
         GTD.gtask.updateTask(tl.taskListId, tl.parentTask, {

@@ -139,5 +139,13 @@ GTD.util.getID = function(s) {
     if (typeof res === 'undefined') {
         return s;
     }
+};
 
+/* Get timestamp from task name
+ */
+GTD.util.getTimeStamp = function(taskName) {
+    //timestamp is at the begining and has the format YYYY-mm-DD
+    //HH:MM:SS. It is seperated by other content by \n;
+    var tokens = taskName.split('\n');
+    return tokens[0];
 };
