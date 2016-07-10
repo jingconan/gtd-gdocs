@@ -1,17 +1,6 @@
 # Google Task Document
 This project turns google docs to a full-fledge task management system. 
 
-GTD using GTD (Get Things Done using Google Task Document)
----------------------
-
-[Get Things Done](http://gettingthingsdone.com/) is a task-management method that significantly boost your efficiency, particularly when you need to handle multiple projects at the same time. 
-
-The idea of GTD is to store all your tasks in some external tools rather than you brain.  Each task is associated with a label that can be either "Actionable", "Waiting For", or "Done". 
-
-If a incoming task can be handled within 2 minutes, it will not be added to the GTD system. Otherwise, if will be push to the "Actionable" queue. Whenever you need to do something, you just pull the first task in the "Actionable" queue, finish it until either it is done, for which case you put it to "Done" queue", or you have to waiting for something, for which case you put it to "Waiting For" queue. 
-
-With GTD, you will be able to focus on what you can do and do it "worry-free". 
-
 With this google app script, you can turn any google doc to a GTD
 system. If the current document is a normal document, it will add an
 **Initialize** option to the menu.
@@ -23,6 +12,7 @@ columns stores the "Someday" tasks that have low priority.
 
 If the documenet has been initialized before, it will add the following
 options to menus:
+
 1. **Insert task**. There will be a popup asking you the name of the
 task. After you click okay button, it will insert a table showing the
 information related to this task. By default, a new task is "Actionable".
@@ -44,10 +34,30 @@ Another useful trick is that when you document becomes very long, you
 can press Ctrl+f and then input the timestamp to switch conveniently
 between the task table and the context of the task. 
 
+##Get Things Done
+The tool is motivated by [Get Things Done](http://gettingthingsdone.com/),
+which is a task-management method that help you improve your efficiency,
+particularly when you need to handle multiple projects at the same time. 
+
+The idea of GTD is to store all your tasks in some external tools rather than you brain.
+Each task is associated with a label that can be either "Actionable", "Waiting For", or
+"Done". If a incoming task can be handled within 2 minutes, it will not be added to the
+GTD system. Otherwise, if will be push to the "Actionable" queue. Whenever you need to
+do something, you just pull the first task in the "Actionable" queue, finish it until
+either it is done, for which case you put it to "Done" queue", or you have to waiting
+for something, for which case you put it to "Waiting For" queue. You can also mark tasks
+as "Someday" if you don't have bandwidth and the task is low-priority. Later when you have
+time, you can move it back to "Actionable".
+
+The following figure illustrated the process
+
+![GTD state diagram](https://cloud.githubusercontent.com/assets/522201/16716781/604968cc-46bb-11e6-9965-07061906f1a3.png)
+
+With GTD, you will be able to focus on what you can do and do it "worry-free". 
+
 For more info about GTD, please read [This awesome book by David Allen](http://www.amazon.com/Getting-Things-Done-Stress-Free-Productivity/dp/0142000280).
 
-Usage
------
+#Usage
 
 Here is an [example doc](https://docs.google.com/document/d/18dowuhhSB5kajFRbJpmm7efWjU3V4AxYkuWMqhObPeI/edit?usp=sharing), you can copy it to a new document and start to play.
 
@@ -66,8 +76,9 @@ If you want to configure by yourself, here are the steps:
  11. You can also click *GTD->Mark task as->Actionable* to mark it as an 'Actionable' task again. 
  12. Enjoy your trip!
 
-Sync to Google Tasks
--------------------
+# Sync to Google Tasks
+
+
 Each task document is usually for one project.  If you enable google
 task api, the tasks are also automatically updated to google tasks. The
 advantage is that you will have an unified interface that display all
@@ -100,17 +111,17 @@ In order to enable task functinon, you need to
  With this addon, tasks with different status will be displayed in
  different colors.
 
-Screen Shot
-------------
+#Screen Shot
+
 ![image](https://github.com/hbhzwj/gtd-gdocs/blob/master/resources/screenshot.png)
 
 
 
-Author Info
------------
+#Author Info
+
 Jing Conan Wang
 hbhzwj@gmail.com
 
-License
--------
+#License
+
 [GPL v3](http://www.gnu.org/copyleft/gpl.html)
