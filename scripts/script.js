@@ -122,18 +122,6 @@ GTD.setTaskColor = function(type, task) {
     GTD.Task.setThreadHeaderStatus(taskThreadHeader, type);
 };
 
-GTD.addTask = function(type, task) {
-    var taskName = task.taskDesc;
-    var summaryTable = GTD.Summary.getSummaryTable();
-    cell = GTD.findFirstEmptyCell(type);
-    if (typeof cell === 'undefined') {
-        this.appendRow(1);
-        cell = summaryTable.getCell(summaryTable.getNumRows() - 1, GTD.TM.getColIdx(type));
-    }
-    cell.setText(taskName);
-    // this.setTaskColor(type, taskName);
-};
-
 GTD.mutateRow = function(row, rowContent) {
     var i;
     for (i = 0; i < rowContent.length; ++i) {
@@ -271,7 +259,7 @@ GTD.changeTaskStatus = function(options) {
 
     // Update Summary table
     GTD.Summary.cleanTask('All', task);
-    GTD.addTask(options.status, task);
+    GTD.Summary.addTask(options.status, task);
     if (options.setTaskColor) {
         GTD.setTaskColor(options.status, task);
     }

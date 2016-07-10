@@ -25,6 +25,19 @@ GTD.Summary.cleanTask = function(type, task, alert) {
     }
 };
 
+/* Add a task to summary table
+ */
+GTD.Summary.addTask = function(type, task) {
+    var taskName = task.taskDesc;
+    var summaryTable = GTD.Summary.getSummaryTable();
+    cell = GTD.findFirstEmptyCell(type);
+    if (typeof cell === 'undefined') {
+        this.appendRow(1);
+        cell = summaryTable.getCell(summaryTable.getNumRows() - 1, GTD.TM.getColIdx(type));
+    }
+    cell.setText(taskName);
+    // this.setTaskColor(type, taskName);
+};
 
 GTD.Summary.getSummaryTable = function() {
     if (!GTD.taskTable) {
