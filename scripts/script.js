@@ -204,7 +204,6 @@ GTD.getSelectedTask = function(type) {
         return ret;
     }
     var statusBefore = GTD.Task.getThreadHeaderStatus(taskHeader);
-    GTD.Task.setThreadHeaderStatus(taskHeader, type);
     var taskDesc = GTD.Task.getTaskDesc(taskHeader);
     if (!taskDesc) {
         ret.status = 'NO_VALID_TASK_NAME'
@@ -322,6 +321,9 @@ GTD.changeTaskStatus = function(options) {
     if (options.setTaskColor) {
         GTD.setTaskColor(options.status, task);
     }
+
+    // Update Task thread header
+    GTD.Task.setThreadHeaderStatus(task.threadHeader, options.status);
 
     // Update gtask service
     if (!options.disableGTask && GTD.gtask.isInitialized()) {

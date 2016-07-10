@@ -1,4 +1,4 @@
-// compiled from git commit version: 2e2a7929416d80071f5c3a8b4f8b27743296a08c
+// compiled from git commit version: 0ab9c7e2cd05fe9e400391f3d362d1ac69d52d52
 var GTD = {
     // Commonly used DOM object
     document: DocumentApp.getActiveDocument(),
@@ -1122,7 +1122,6 @@ GTD.getSelectedTask = function(type) {
         return ret;
     }
     var statusBefore = GTD.Task.getThreadHeaderStatus(taskHeader);
-    GTD.Task.setThreadHeaderStatus(taskHeader, type);
     var taskDesc = GTD.Task.getTaskDesc(taskHeader);
     if (!taskDesc) {
         ret.status = 'NO_VALID_TASK_NAME'
@@ -1240,6 +1239,9 @@ GTD.changeTaskStatus = function(options) {
     if (options.setTaskColor) {
         GTD.setTaskColor(options.status, task);
     }
+
+    // Update Task thread header
+    GTD.Task.setThreadHeaderStatus(task.threadHeader, options.status);
 
     // Update gtask service
     if (!options.disableGTask && GTD.gtask.isInitialized()) {
