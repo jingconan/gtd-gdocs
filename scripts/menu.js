@@ -39,7 +39,7 @@ function syncFromGTasks() {
       Logger.log('gtask service is not initialized');
       return;
   }
-  GTD.initTaskTable();
+  GTD.initSummaryTable();
   var atl = GTD.gtask.getActiveTaskList();
   var gTasksInfo = GTD.gtask.listAllSubtasksOfParentTask(atl.taskListId, atl.parentTask);
   GTD.TM.updateTaskStatusInBatch(gTasksInfo);

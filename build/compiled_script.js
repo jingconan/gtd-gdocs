@@ -1,4 +1,4 @@
-// compiled from git commit version: 73edcfb9511a53d28012423895141190981dc738
+// compiled from git commit version: 25992a0f86e6c78263e8c9be09fc687a76eccb85
 var GTD = {
     // Commonly used DOM object
     document: DocumentApp.getActiveDocument(),
@@ -212,7 +212,7 @@ GTD.Summary.cleanTask = function(type, task, alert) {
 
 GTD.Summary._emptyRowContent = function() {
     var rowContent = [], i;
-    for (i = 0; i < this.header.length; ++i) {
+    for (i = 0; i < GTD.header.length; ++i) {
         rowContent.push('');
     }
     return rowContent;
@@ -223,23 +223,23 @@ GTD.Summary.mutateRow = function(row, rowContent) {
     for (i = 0; i < rowContent.length; ++i) {
         row.appendTableCell(rowContent[i]);
     }
-    return this;
+    return GTD;
 };
 
 GTD.Summary.appendRow = function(rowContent) {
-    var i, rc = this.Summary._emptyRowContent();
+    var i, rc = GTD.Summary._emptyRowContent();
     if (typeof rowContent === 'number') {
         for (i = 0; i < rowContent; ++i) {
             GTD.Summary.appendRow(rc);
         }
-        return this;
+        return GTD;
     }
-    var row = this.taskTable.appendTableRow();
+    var row = GTD.taskTable.appendTableRow();
     GTD.Summary.mutateRow(row, rowContent);
-    return this;
+    return GTD;
 };
 
-// this function returns the first empty cell in a column.
+// GTD function returns the first empty cell in a column.
 GTD.Summary.findFirstEmptyCell = function(col) {
     return GTD.Summary.findFirstCell(col, '', false);
 };
@@ -277,12 +277,12 @@ GTD.Summary.addTask = function(type, task) {
         cell = summaryTable.getCell(summaryTable.getNumRows() - 1, GTD.TM.getColIdx(type));
     }
     cell.setText(taskName);
-    // this.setTaskColor(type, taskName);
+    // GTD.setTaskColor(type, taskName);
 };
 
 GTD.Summary.getSummaryTable = function() {
     if (!GTD.taskTable) {
-        GTD.initTaskTable();
+        GTD.initSummaryTable();
     }
     return GTD.taskTable;
 };
@@ -301,7 +301,7 @@ GTD.Summary.getAllTasksFromCol = function(col) {
     return res;
 };
 
-// This function assume cursor is inside summary table and find the task
+// GTD function assume cursor is inside summary table and find the task
 // description from the summary table.
 GTD.Summary.getTaskFromCursor = function(cursor) {
     var ele = cursor.getElement();
@@ -319,6 +319,53 @@ GTD.Summary.getTaskFromCursor = function(cursor) {
     return {
         taskDesc: ele.editAsText().getText()
     };
+};
+
+GTD.Summary.isTaskSummaryTable = function(table) {
+    if (table.getNumRows() === 0) {
+        return false;
+    }
+    var headerRow = table.getRow(0);
+    if (headerRow.getNumChildren() !== GTD.header.length) {
+        return false;
+    }
+    var i;
+    for (i = 0; i < GTD.header.length; ++i) {
+        if (headerRow.getCell(i).getText() != GTD.header[i]) {
+            return false;
+        }
+    }
+    return true;
+};
+
+GTD.Summary._createDefaultTableContent = function () {
+    var tableContent = [GTD.header];
+    var rowContent = [];
+    var i;
+    for (i = 0; i < GTD.header.length; ++i) {
+        rowContent.push('');
+    }
+    for (i = 0; i < GTD.defaultRows; ++i) {
+        tableContent.push(rowContent);
+    }
+    return tableContent;
+};
+
+GTD.Summary.createSummaryTable = function (body) {
+    GTD.util.setCursorAtStart();
+    var table = GTD.util.insertTableAtCursor(GTD.Summary._createDefaultTableContent());
+    if (!table) {
+        DocumentApp.getUi().alert('Cannot create task summary table!');
+        return;
+    }
+
+    assert(GTD.header.length === GTD.headerColor.length, 'wrong number of color');
+    for (i = 0; i < GTD.header.length; ++i) {
+        table.getCell(0, i)
+        .editAsText()
+        .setForegroundColor(GTD.headerColor[i]);
+    }
+    return table;
 };
 
 
@@ -942,7 +989,7 @@ GTD.Task.getTaskThreadHeader = function(ele) {
         return res;
     }
     
-    if (!GTD._isTaskTable(ele)) {
+    if (!GTD.Summary.isTaskSummaryTable(ele)) {
       res.header = ele;
       res.status = 'cursor_in_header';
       return res;
@@ -950,7 +997,7 @@ GTD.Task.getTaskThreadHeader = function(ele) {
 
     // If the cursor is in the summary table, then find the
     // corresponding header by its name.
-    if (GTD._isTaskTable(ele)) {
+    if (GTD.Summary.isTaskSummaryTable(ele)) {
       // Get task name.
       task = GTD.Summary.getTaskFromCursor(cursor);
       if (task) {
@@ -1041,7 +1088,7 @@ GTD.Task.isSeparator = function(table) {
 GTD.isGtdDocument = function() {
     // Verify that the document contains a summary task table
     var tables = GTD.body.getTables();
-    if (tables.length === 0 || !GTD._isTaskTable(tables[0])) {
+    if (tables.length === 0 || !GTD.Summary.isTaskSummaryTable(tables[0])) {
         return false;
     }
 
@@ -1060,11 +1107,11 @@ GTD.isGtdDocument = function() {
     return false;
 };
 
-GTD.initTaskTable = function() {
+GTD.initSummaryTable = function() {
     var tables = GTD.body.getTables();
     var taskTable;
-    if (tables.length === 0 || !GTD._isTaskTable(tables[0])) {
-        taskTable = GTD._createDefaultGTDTable(GTD.body);
+    if (tables.length === 0 || !GTD.Summary.isTaskSummaryTable(tables[0])) {
+        taskTable = GTD.Summary.createSummaryTable(GTD.body);
     } else {
         taskTable = tables[0];
     }
@@ -1141,53 +1188,6 @@ GTD.getSelectedTask = function(type) {
     ret.cursorStatus = taskHeaderResult.status;
     ret.status = 'SUCCESS';
     return ret;
-};
-
-GTD._isTaskTable = function(table) {
-    if (table.getNumRows() === 0) {
-        return false;
-    }
-    var headerRow = table.getRow(0);
-    if (headerRow.getNumChildren() !== this.header.length) {
-        return false;
-    }
-    var i;
-    for (i = 0; i < this.header.length; ++i) {
-        if (headerRow.getCell(i).getText() != this.header[i]) {
-            return false;
-        }
-    }
-    return true;
-};
-
-GTD._createDefaultTableContent = function () {
-    var tableContent = [this.header];
-    var rowContent = [];
-    var i;
-    for (i = 0; i < this.header.length; ++i) {
-        rowContent.push('');
-    }
-    for (i = 0; i < this.defaultRows; ++i) {
-        tableContent.push(rowContent);
-    }
-    return tableContent;
-};
-
-GTD._createDefaultGTDTable = function (body) {
-    GTD.util.setCursorAtStart();
-    var table = GTD.util.insertTableAtCursor(this._createDefaultTableContent());
-    if (!table) {
-        DocumentApp.getUi().alert('Cannot create task summary table!');
-        return;
-    }
-
-    assert(this.header.length === this.headerColor.length, 'wrong number of color');
-    for (i = 0; i < this.header.length; ++i) {
-        table.getCell(0, i)
-        .editAsText()
-        .setForegroundColor(this.headerColor[i]);
-    }
-    return table;
 };
 
 /**
@@ -1269,7 +1269,7 @@ GTD.initialize = function() {
     var doc = DocumentApp.getActiveDocument().getBody();
     doc.setAttributes(style);
 
-    GTD.initTaskTable();
+    GTD.initSummaryTable();
     GTD.initPageMargin();
     GTD.initialized = true;
 };
@@ -1441,7 +1441,7 @@ function syncFromGTasks() {
       Logger.log('gtask service is not initialized');
       return;
   }
-  GTD.initTaskTable();
+  GTD.initSummaryTable();
   var atl = GTD.gtask.getActiveTaskList();
   var gTasksInfo = GTD.gtask.listAllSubtasksOfParentTask(atl.taskListId, atl.parentTask);
   GTD.TM.updateTaskStatusInBatch(gTasksInfo);

@@ -15,7 +15,7 @@
 GTD.isGtdDocument = function() {
     // Verify that the document contains a summary task table
     var tables = GTD.body.getTables();
-    if (tables.length === 0 || !GTD._isTaskTable(tables[0])) {
+    if (tables.length === 0 || !GTD.Summary.isTaskSummaryTable(tables[0])) {
         return false;
     }
 
@@ -34,11 +34,11 @@ GTD.isGtdDocument = function() {
     return false;
 };
 
-GTD.initTaskTable = function() {
+GTD.initSummaryTable = function() {
     var tables = GTD.body.getTables();
     var taskTable;
-    if (tables.length === 0 || !GTD._isTaskTable(tables[0])) {
-        taskTable = GTD._createDefaultGTDTable(GTD.body);
+    if (tables.length === 0 || !GTD.Summary.isTaskSummaryTable(tables[0])) {
+        taskTable = GTD.Summary.createSummaryTable(GTD.body);
     } else {
         taskTable = tables[0];
     }
@@ -115,53 +115,6 @@ GTD.getSelectedTask = function(type) {
     ret.cursorStatus = taskHeaderResult.status;
     ret.status = 'SUCCESS';
     return ret;
-};
-
-GTD._isTaskTable = function(table) {
-    if (table.getNumRows() === 0) {
-        return false;
-    }
-    var headerRow = table.getRow(0);
-    if (headerRow.getNumChildren() !== this.header.length) {
-        return false;
-    }
-    var i;
-    for (i = 0; i < this.header.length; ++i) {
-        if (headerRow.getCell(i).getText() != this.header[i]) {
-            return false;
-        }
-    }
-    return true;
-};
-
-GTD._createDefaultTableContent = function () {
-    var tableContent = [this.header];
-    var rowContent = [];
-    var i;
-    for (i = 0; i < this.header.length; ++i) {
-        rowContent.push('');
-    }
-    for (i = 0; i < this.defaultRows; ++i) {
-        tableContent.push(rowContent);
-    }
-    return tableContent;
-};
-
-GTD._createDefaultGTDTable = function (body) {
-    GTD.util.setCursorAtStart();
-    var table = GTD.util.insertTableAtCursor(this._createDefaultTableContent());
-    if (!table) {
-        DocumentApp.getUi().alert('Cannot create task summary table!');
-        return;
-    }
-
-    assert(this.header.length === this.headerColor.length, 'wrong number of color');
-    for (i = 0; i < this.header.length; ++i) {
-        table.getCell(0, i)
-        .editAsText()
-        .setForegroundColor(this.headerColor[i]);
-    }
-    return table;
 };
 
 /**
@@ -243,7 +196,7 @@ GTD.initialize = function() {
     var doc = DocumentApp.getActiveDocument().getBody();
     doc.setAttributes(style);
 
-    GTD.initTaskTable();
+    GTD.initSummaryTable();
     GTD.initPageMargin();
     GTD.initialized = true;
 };

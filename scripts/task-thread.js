@@ -226,7 +226,7 @@ GTD.Task.getTaskThreadHeader = function(ele) {
         return res;
     }
     
-    if (!GTD._isTaskTable(ele)) {
+    if (!GTD.Summary.isTaskSummaryTable(ele)) {
       res.header = ele;
       res.status = 'cursor_in_header';
       return res;
@@ -234,7 +234,7 @@ GTD.Task.getTaskThreadHeader = function(ele) {
 
     // If the cursor is in the summary table, then find the
     // corresponding header by its name.
-    if (GTD._isTaskTable(ele)) {
+    if (GTD.Summary.isTaskSummaryTable(ele)) {
       // Get task name.
       task = GTD.Summary.getTaskFromCursor(cursor);
       if (task) {
