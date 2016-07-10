@@ -130,3 +130,14 @@ GTD.util.templateReplace = function(template, namespace) {
 	}
     return template;
 };
+
+GTD.util.getID = function(s) {
+    // Use timestamp as id if there is timestamp
+    var res = s.split(']')[0].split('[')[1];
+    //debug('string: ' + s + ' id: ' + res);
+
+    if (typeof res === 'undefined') {
+        return s;
+    }
+
+};

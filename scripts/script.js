@@ -52,44 +52,6 @@ GTD.initPageMargin = function() {
     this.body.setMarginBottom(this.bodyMargins[3]);
 };
 
-GTD.getID = function(s) {
-    // Use timestamp as id if there is timestamp
-    var res = s.split(']')[0].split('[')[1];
-    //debug('string: ' + s + ' id: ' + res);
-
-    if (typeof res === 'undefined') {
-        return s;
-    }
-
-};
-
-// this function returns the first empty cell in a column.
-GTD.findFirstEmptyCell = function(col) {
-    return GTD.findFirstCell(col, '', false);
-};
-
-GTD.findFirstCell = function(col, target, useID) {
-    var summaryTable = GTD.Summary.getSummaryTable();
-    if (typeof col === 'string') {
-        col = GTD.TM.getColIdx(col);
-    }
-    if (typeof col === 'undefined') {
-        return;
-    }
-    var i, cell, rowNum = summaryTable.getNumRows();
-    for (i = 0; i < rowNum; ++i) {
-        cell = summaryTable.getCell(i, col);
-        if (useID && (GTD.getID(cell.getText()) === GTD.getID(target))) {
-            // compare using ID
-            return cell;
-        } else if (cell.getText() === target) {
-            // compare the full string
-            return cell;
-        }
-    }
-    return;
-};
-
 // Change the color of a task according to its current type
 GTD.setTaskColor = function(type, task) {
     var taskName = task.taskDesc;
@@ -121,28 +83,6 @@ GTD.setTaskColor = function(type, task) {
     }
     GTD.Task.setThreadHeaderStatus(taskThreadHeader, type);
 };
-
-GTD.mutateRow = function(row, rowContent) {
-    var i;
-    for (i = 0; i < rowContent.length; ++i) {
-        row.appendTableCell(rowContent[i]);
-    }
-    return this;
-};
-
-GTD.appendRow = function(rowContent) {
-    var i, rc = this._emptyRowContent();
-    if (typeof rowContent === 'number') {
-        for (i = 0; i < rowContent; ++i) {
-            this.appendRow(rc);
-        }
-        return this;
-    }
-    var row = this.taskTable.appendTableRow();
-    this.mutateRow(row, rowContent);
-    return this;
-};
-
 
 GTD.getTimeStamp = function(taskName) {
     //timestamp is at the begining and has the format YYYY-mm-DD
@@ -202,14 +142,6 @@ GTD._isTaskTable = function(table) {
         }
     }
     return true;
-};
-
-GTD._emptyRowContent = function() {
-    var rowContent = [], i;
-    for (i = 0; i < this.header.length; ++i) {
-        rowContent.push('');
-    }
-    return rowContent;
 };
 
 GTD._createDefaultTableContent = function () {

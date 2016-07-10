@@ -1,4 +1,4 @@
-// compiled from git commit version: 3afbca44617903c6f072ca43db90fdb115654ea3
+// compiled from git commit version: 9b79d7a186da9d3289641bc95b7c477627d1c197
 var GTD = {
     // Commonly used DOM object
     document: DocumentApp.getActiveDocument(),
@@ -163,6 +163,17 @@ GTD.util.templateReplace = function(template, namespace) {
     return template;
 };
 
+GTD.util.getID = function(s) {
+    // Use timestamp as id if there is timestamp
+    var res = s.split(']')[0].split('[')[1];
+    //debug('string: ' + s + ' id: ' + res);
+
+    if (typeof res === 'undefined') {
+        return s;
+    }
+
+};
+
 
 GTD.Summary = GTD.Summary || {};
 
@@ -181,7 +192,7 @@ GTD.Summary.cleanTask = function(type, task, alert) {
         return;
     }
 
-    var cell = GTD.findFirstCell(type, taskName);
+    var cell = GTD.Summary.findFirstCell(type, taskName);
     if (typeof cell === 'undefined') {
         if (alert) {
             DocumentApp.getUi().alert('cannot find task name: ' + taskName);
@@ -191,14 +202,70 @@ GTD.Summary.cleanTask = function(type, task, alert) {
     }
 };
 
+GTD.Summary._emptyRowContent = function() {
+    var rowContent = [], i;
+    for (i = 0; i < this.header.length; ++i) {
+        rowContent.push('');
+    }
+    return rowContent;
+};
+
+GTD.Summary.mutateRow = function(row, rowContent) {
+    var i;
+    for (i = 0; i < rowContent.length; ++i) {
+        row.appendTableCell(rowContent[i]);
+    }
+    return this;
+};
+
+GTD.Summary.appendRow = function(rowContent) {
+    var i, rc = this.Summary._emptyRowContent();
+    if (typeof rowContent === 'number') {
+        for (i = 0; i < rowContent; ++i) {
+            GTD.Summary.appendRow(rc);
+        }
+        return this;
+    }
+    var row = this.taskTable.appendTableRow();
+    GTD.Summary.mutateRow(row, rowContent);
+    return this;
+};
+
+// this function returns the first empty cell in a column.
+GTD.Summary.findFirstEmptyCell = function(col) {
+    return GTD.Summary.findFirstCell(col, '', false);
+};
+
+GTD.Summary.findFirstCell = function(col, target, useID) {
+    var summaryTable = GTD.Summary.getSummaryTable();
+    if (typeof col === 'string') {
+        col = GTD.TM.getColIdx(col);
+    }
+    if (typeof col === 'undefined') {
+        return;
+    }
+    var i, cell, rowNum = summaryTable.getNumRows();
+    for (i = 0; i < rowNum; ++i) {
+        cell = summaryTable.getCell(i, col);
+        if (useID && (GTD.util.getID(cell.getText()) === GTD.util.getID(target))) {
+            // compare using ID
+            return cell;
+        } else if (cell.getText() === target) {
+            // compare the full string
+            return cell;
+        }
+    }
+    return;
+};
+
 /* Add a task to summary table
  */
 GTD.Summary.addTask = function(type, task) {
     var taskName = task.taskDesc;
     var summaryTable = GTD.Summary.getSummaryTable();
-    cell = GTD.findFirstEmptyCell(type);
+    cell = GTD.Summary.findFirstEmptyCell(type);
     if (typeof cell === 'undefined') {
-        this.appendRow(1);
+        GTD.Summary.appendRow(1);
         cell = summaryTable.getCell(summaryTable.getNumRows() - 1, GTD.TM.getColIdx(type));
     }
     cell.setText(taskName);
@@ -1003,44 +1070,6 @@ GTD.initPageMargin = function() {
     this.body.setMarginBottom(this.bodyMargins[3]);
 };
 
-GTD.getID = function(s) {
-    // Use timestamp as id if there is timestamp
-    var res = s.split(']')[0].split('[')[1];
-    //debug('string: ' + s + ' id: ' + res);
-
-    if (typeof res === 'undefined') {
-        return s;
-    }
-
-};
-
-// this function returns the first empty cell in a column.
-GTD.findFirstEmptyCell = function(col) {
-    return GTD.findFirstCell(col, '', false);
-};
-
-GTD.findFirstCell = function(col, target, useID) {
-    var summaryTable = GTD.Summary.getSummaryTable();
-    if (typeof col === 'string') {
-        col = GTD.TM.getColIdx(col);
-    }
-    if (typeof col === 'undefined') {
-        return;
-    }
-    var i, cell, rowNum = summaryTable.getNumRows();
-    for (i = 0; i < rowNum; ++i) {
-        cell = summaryTable.getCell(i, col);
-        if (useID && (GTD.getID(cell.getText()) === GTD.getID(target))) {
-            // compare using ID
-            return cell;
-        } else if (cell.getText() === target) {
-            // compare the full string
-            return cell;
-        }
-    }
-    return;
-};
-
 // Change the color of a task according to its current type
 GTD.setTaskColor = function(type, task) {
     var taskName = task.taskDesc;
@@ -1072,28 +1101,6 @@ GTD.setTaskColor = function(type, task) {
     }
     GTD.Task.setThreadHeaderStatus(taskThreadHeader, type);
 };
-
-GTD.mutateRow = function(row, rowContent) {
-    var i;
-    for (i = 0; i < rowContent.length; ++i) {
-        row.appendTableCell(rowContent[i]);
-    }
-    return this;
-};
-
-GTD.appendRow = function(rowContent) {
-    var i, rc = this._emptyRowContent();
-    if (typeof rowContent === 'number') {
-        for (i = 0; i < rowContent; ++i) {
-            this.appendRow(rc);
-        }
-        return this;
-    }
-    var row = this.taskTable.appendTableRow();
-    this.mutateRow(row, rowContent);
-    return this;
-};
-
 
 GTD.getTimeStamp = function(taskName) {
     //timestamp is at the begining and has the format YYYY-mm-DD
@@ -1153,14 +1160,6 @@ GTD._isTaskTable = function(table) {
         }
     }
     return true;
-};
-
-GTD._emptyRowContent = function() {
-    var rowContent = [], i;
-    for (i = 0; i < this.header.length; ++i) {
-        rowContent.push('');
-    }
-    return rowContent;
 };
 
 GTD._createDefaultTableContent = function () {
