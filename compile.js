@@ -14,6 +14,7 @@ var scripts = [
     'scripts/task-manager.js',
     'scripts/task-thread.js',
     'scripts/script.js',
+    'scripts/service.js',
     'scripts/menu.js'
 ];
 

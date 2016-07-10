@@ -1,4 +1,4 @@
-// compiled from git commit version: 0ab9c7e2cd05fe9e400391f3d362d1ac69d52d52
+// compiled from git commit version: 6f58dbc37ecc5b5d75d3dba5a2d0cb26d9b20d6e
 var GTD = {
     // Commonly used DOM object
     document: DocumentApp.getActiveDocument(),
@@ -970,27 +970,6 @@ GTD.initPageMargin = function() {
     this.body.setMarginBottom(this.bodyMargins[3]);
 };
 
-GTD.getSideBarTableContent = function() {
-    var i, j, tasks, thisTasks;
-    var res = {
-        task_queues: [],
-    };
-    for (i = 0; i < this.header.length; ++i) {
-        tasks = GTD.Summary.getAllTasksFromCol(i);
-        thisTasks = [];
-        for (j = 0; j < tasks.length; ++j) {
-            thisTasks.push({name: tasks[j]});
-        }
-        res.task_queues.push({
-            index: (i + 1).toString(),
-            type: this.header[i],
-            color: this.headerColor[i],
-            tasks: thisTasks
-        });
-    }
-    return res;
-};
-
 GTD.getID = function(s) {
     // Use timestamp as id if there is timestamp
     var res = s.split(']')[0].split('[')[1];
@@ -1191,31 +1170,6 @@ GTD._createDefaultGTDTable = function (body) {
         .setForegroundColor(this.headerColor[i]);
     }
     return table;
-};
-
-
-GTD.TOC.pullHeaders = function () {
-    var doc = DocumentApp.getActiveDocument();
-    headers = [];
-    for (var i = 0; i < doc.getNumChildren(); i++) {
-        var p = doc.getChild(i);
-        if (p.getType() == DocumentApp.ElementType.TABLE_OF_CONTENTS) {
-            var toc = p.asTableOfContents();
-            for (var ti = 0; ti < toc.getNumChildren(); ti++) {
-                var itemToc = toc.getChild(ti).asParagraph().getChild(0).asText();
-                var itemText = itemToc.getText();
-                var itemUrl = itemToc.getLinkUrl();
-                headers.push({
-                    toc: itemToc,
-                    text: itemText,
-                    url: itemUrl
-                });
-            }
-            break;
-        }
-    }
-    return {headers: headers};
-
 };
 
 /**
@@ -1428,27 +1382,10 @@ GTD.getTaskFromSummaryTable = function(cursor) {
     };
 };
 
-// GTD.initTaskTable();
 
 /////////////////////////////////////////////////////////////
 // These functions are used by javascript HTML services
 /////////////////////////////////////////////////////////////
-
-function getTOCString() {
-  GTD.initialize();
-  return JSON.stringify(GTD.TOC.pullHeaders());
-}
-
-function getTasksString() {
-    GTD.initialize();
-    return JSON.stringify(GTD.getSideBarTableContent());
-}
-
-function findAndFocusOnTask(taskName) {
-    GTD.initialize();
-    GTD.jumpAndFocusOnTask({taskDesc:taskName});
-}
-
 /* Insert task
  */
 function runInsertTask(text, status) {

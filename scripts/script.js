@@ -52,27 +52,6 @@ GTD.initPageMargin = function() {
     this.body.setMarginBottom(this.bodyMargins[3]);
 };
 
-GTD.getSideBarTableContent = function() {
-    var i, j, tasks, thisTasks;
-    var res = {
-        task_queues: [],
-    };
-    for (i = 0; i < this.header.length; ++i) {
-        tasks = GTD.Summary.getAllTasksFromCol(i);
-        thisTasks = [];
-        for (j = 0; j < tasks.length; ++j) {
-            thisTasks.push({name: tasks[j]});
-        }
-        res.task_queues.push({
-            index: (i + 1).toString(),
-            type: this.header[i],
-            color: this.headerColor[i],
-            tasks: thisTasks
-        });
-    }
-    return res;
-};
-
 GTD.getID = function(s) {
     // Use timestamp as id if there is timestamp
     var res = s.split(']')[0].split('[')[1];
@@ -273,31 +252,6 @@ GTD._createDefaultGTDTable = function (body) {
         .setForegroundColor(this.headerColor[i]);
     }
     return table;
-};
-
-
-GTD.TOC.pullHeaders = function () {
-    var doc = DocumentApp.getActiveDocument();
-    headers = [];
-    for (var i = 0; i < doc.getNumChildren(); i++) {
-        var p = doc.getChild(i);
-        if (p.getType() == DocumentApp.ElementType.TABLE_OF_CONTENTS) {
-            var toc = p.asTableOfContents();
-            for (var ti = 0; ti < toc.getNumChildren(); ti++) {
-                var itemToc = toc.getChild(ti).asParagraph().getChild(0).asText();
-                var itemText = itemToc.getText();
-                var itemUrl = itemToc.getLinkUrl();
-                headers.push({
-                    toc: itemToc,
-                    text: itemText,
-                    url: itemUrl
-                });
-            }
-            break;
-        }
-    }
-    return {headers: headers};
-
 };
 
 /**
@@ -509,39 +463,3 @@ GTD.getTaskFromSummaryTable = function(cursor) {
         taskDesc: ele.editAsText().getText()
     };
 };
-
-// GTD.initTaskTable();
-
-/////////////////////////////////////////////////////////////
-// These functions are used by javascript HTML services
-/////////////////////////////////////////////////////////////
-
-function getTOCString() {
-  GTD.initialize();
-  return JSON.stringify(GTD.TOC.pullHeaders());
-}
-
-function getTasksString() {
-    GTD.initialize();
-    return JSON.stringify(GTD.getSideBarTableContent());
-}
-
-function findAndFocusOnTask(taskName) {
-    GTD.initialize();
-    GTD.jumpAndFocusOnTask({taskDesc:taskName});
-}
-
-/* Insert task
- */
-function runInsertTask(text, status) {
-    return GTD.insertTask(text, status);
-}
-
-/* Change task status
- */
-function changeTaskStatus(comment, statusAfter) {
-    GTD.changeTaskStatusMenuWrapper({
-      statusAfter: statusAfter,
-      comment: comment
-    });
-}
