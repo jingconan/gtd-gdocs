@@ -1,4 +1,4 @@
-// compiled from git commit version: 25992a0f86e6c78263e8c9be09fc687a76eccb85
+// compiled from git commit version: 74c071783f810e71b8744d8d379d0dfe57c5cbeb
 var GTD = {
     // Commonly used DOM object
     document: DocumentApp.getActiveDocument(),
@@ -181,6 +181,14 @@ GTD.util.getTimeStamp = function(taskName) {
     var tokens = taskName.split('\n');
     return tokens[0];
 };
+
+/* Get name from encoded task name
+ */
+GTD.util.getTaskName = function(taskName) {
+    var tokens = taskName.split('\n');
+    return tokens[1];
+};
+
 
 
 GTD.Summary = GTD.Summary || {};
@@ -613,7 +621,7 @@ GTD.TM.createTaskSearchTable = function(statusList) {
         var tasks = GTD.TM.getTasksWithStatus(statusList[i]);
         var thisTasks = [];
         for (var j = 0; j < tasks.length; ++j) {
-            var taskName = GTD.getTaskName(tasks[j]);
+            var taskName = GTD.util.getTaskName(tasks[j]);
             existingTasks[taskName] = {
                 'status': statusList[i],
                 'task': tasks[j]
@@ -1155,11 +1163,6 @@ GTD.setTaskColor = function(type, task) {
         return;
     }
     GTD.Task.setThreadHeaderStatus(taskThreadHeader, type);
-};
-
-GTD.getTaskName = function(taskName) {
-    var tokens = taskName.split('\n');
-    return tokens[1];
 };
 
 /* Get the task under cursor

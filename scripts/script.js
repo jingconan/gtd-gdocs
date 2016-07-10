@@ -84,11 +84,6 @@ GTD.setTaskColor = function(type, task) {
     GTD.Task.setThreadHeaderStatus(taskThreadHeader, type);
 };
 
-GTD.getTaskName = function(taskName) {
-    var tokens = taskName.split('\n');
-    return tokens[1];
-};
-
 /* Get the task under cursor
  */
 GTD.getSelectedTask = function(type) {

@@ -28,7 +28,7 @@ GTD.TM.createTaskSearchTable = function(statusList) {
         var tasks = GTD.TM.getTasksWithStatus(statusList[i]);
         var thisTasks = [];
         for (var j = 0; j < tasks.length; ++j) {
-            var taskName = GTD.getTaskName(tasks[j]);
+            var taskName = GTD.util.getTaskName(tasks[j]);
             existingTasks[taskName] = {
                 'status': statusList[i],
                 'task': tasks[j]

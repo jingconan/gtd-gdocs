@@ -149,3 +149,11 @@ GTD.util.getTimeStamp = function(taskName) {
     var tokens = taskName.split('\n');
     return tokens[0];
 };
+
+/* Get name from encoded task name
+ */
+GTD.util.getTaskName = function(taskName) {
+    var tokens = taskName.split('\n');
+    return tokens[1];
+};
+
