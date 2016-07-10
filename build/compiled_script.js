@@ -1,4 +1,4 @@
-// compiled from git commit version: 2808c82627f31220e96262cc48a119435059505a
+// compiled from git commit version: 3afbca44617903c6f072ca43db90fdb115654ea3
 var GTD = {
     // Commonly used DOM object
     document: DocumentApp.getActiveDocument(),
@@ -191,6 +191,19 @@ GTD.Summary.cleanTask = function(type, task, alert) {
     }
 };
 
+/* Add a task to summary table
+ */
+GTD.Summary.addTask = function(type, task) {
+    var taskName = task.taskDesc;
+    var summaryTable = GTD.Summary.getSummaryTable();
+    cell = GTD.findFirstEmptyCell(type);
+    if (typeof cell === 'undefined') {
+        this.appendRow(1);
+        cell = summaryTable.getCell(summaryTable.getNumRows() - 1, GTD.TM.getColIdx(type));
+    }
+    cell.setText(taskName);
+    // this.setTaskColor(type, taskName);
+};
 
 GTD.Summary.getSummaryTable = function() {
     if (!GTD.taskTable) {
@@ -211,6 +224,26 @@ GTD.Summary.getAllTasksFromCol = function(col) {
         }
     }
     return res;
+};
+
+// This function assume cursor is inside summary table and find the task
+// description from the summary table.
+GTD.Summary.getTaskFromCursor = function(cursor) {
+    var ele = cursor.getElement();
+    if (ele.getType() === DocumentApp.ElementType.TEXT) {
+        ele = ele.getParent();
+    }
+    if (ele.getType() === DocumentApp.ElementType.PARAGRAPH) {
+        ele = ele.getParent();
+    }
+    if (!ele || ele.getType() != DocumentApp.ElementType.TABLE_CELL) {
+        DocumentApp.getUi().alert('Cannot find task under cursor!' );
+        return;
+    }
+
+    return {
+        taskDesc: ele.editAsText().getText()
+    };
 };
 
 
@@ -844,7 +877,7 @@ GTD.Task.getTaskThreadHeader = function(ele) {
     // corresponding header by its name.
     if (GTD._isTaskTable(ele)) {
       // Get task name.
-      task = GTD.getTaskFromSummaryTable(cursor);
+      task = GTD.Summary.getTaskFromCursor(cursor);
       if (task) {
           res.header = GTD.getTaskHeader(task).header;
           res.status = 'cursor_in_summary_table';
@@ -1040,18 +1073,6 @@ GTD.setTaskColor = function(type, task) {
     GTD.Task.setThreadHeaderStatus(taskThreadHeader, type);
 };
 
-GTD.addTask = function(type, task) {
-    var taskName = task.taskDesc;
-    var summaryTable = GTD.Summary.getSummaryTable();
-    cell = GTD.findFirstEmptyCell(type);
-    if (typeof cell === 'undefined') {
-        this.appendRow(1);
-        cell = summaryTable.getCell(summaryTable.getNumRows() - 1, GTD.TM.getColIdx(type));
-    }
-    cell.setText(taskName);
-    // this.setTaskColor(type, taskName);
-};
-
 GTD.mutateRow = function(row, rowContent) {
     var i;
     for (i = 0; i < rowContent.length; ++i) {
@@ -1189,7 +1210,7 @@ GTD.changeTaskStatus = function(options) {
 
     // Update Summary table
     GTD.Summary.cleanTask('All', task);
-    GTD.addTask(options.status, task);
+    GTD.Summary.addTask(options.status, task);
     if (options.setTaskColor) {
         GTD.setTaskColor(options.status, task);
     }
@@ -1362,26 +1383,6 @@ GTD.changeTaskStatusMenuWrapper = function(options) {
     }
 };
 
-// This function assume cursor is inside summary table and find the task
-// description from the summary table.
-GTD.getTaskFromSummaryTable = function(cursor) {
-    var ele = cursor.getElement();
-    if (ele.getType() === DocumentApp.ElementType.TEXT) {
-        ele = ele.getParent();
-    }
-    if (ele.getType() === DocumentApp.ElementType.PARAGRAPH) {
-        ele = ele.getParent();
-    }
-    if (!ele || ele.getType() != DocumentApp.ElementType.TABLE_CELL) {
-        DocumentApp.getUi().alert('Cannot find task under cursor!' );
-        return;
-    }
-
-    return {
-        taskDesc: ele.editAsText().getText()
-    };
-};
-
 
 /////////////////////////////////////////////////////////////
 // These functions are used by javascript HTML services
@@ -1488,7 +1489,7 @@ function jumpToTask() {
         return;
     }
 
-    var task = GTD.getTaskFromSummaryTable(cursor);
+    var task = GTD.Summary.getTaskFromCursor(cursor);
     if (task) {
         GTD.jumpAndFocusOnTask(task);
     }

@@ -84,7 +84,7 @@ function jumpToTask() {
         return;
     }
 
-    var task = GTD.getTaskFromSummaryTable(cursor);
+    var task = GTD.Summary.getTaskFromCursor(cursor);
     if (task) {
         GTD.jumpAndFocusOnTask(task);
     }
