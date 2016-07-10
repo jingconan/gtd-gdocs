@@ -1,4 +1,4 @@
-// compiled from git commit version: 74c071783f810e71b8744d8d379d0dfe57c5cbeb
+// compiled from git commit version: 12d98d23e8bfce6bcfda33a648b381f4714a5cdc
 var GTD = {
     // Commonly used DOM object
     document: DocumentApp.getActiveDocument(),
