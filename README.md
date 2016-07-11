@@ -27,8 +27,13 @@ have to insert separator between two tasks.
 comment after a task thread header. If you put cursor in a task in the
 summary table and the click this menu, the cursor will jump to the
 corresponding task thread. 
-3. **Mark task as**. You can change task status to be 'Actionable',
-'Waiting For', 'Done' or 'Someday'
+5. **Mark task as**. You can change task status to be 'Actionable',
+'Waiting For', 'Done' or 'Someday'.
+6. **Formart comment as**. You can format the comment under cursor to be
+some predefined format.
+  - 'code': green background, 'consolas' font of size 9
+  - 'email': cyan background, 'Times New Roman' font of size 12
+  - 'checklist': yellow background, 'Airal' font of size 12
 
 Another useful trick is that when you document becomes very long, you
 can press Ctrl+f and then input the timestamp to switch conveniently
