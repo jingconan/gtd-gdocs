@@ -4,7 +4,7 @@
   "description": "Google Task Document",
   "main": "compile.js",
   "dependencies": {
-    "glob": "^5.0.9",
+    "glob": "^5.0.15",
     "recursive-readdir": "^1.2.1"
   },
   "devDependencies": {},

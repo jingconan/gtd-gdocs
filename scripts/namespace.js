@@ -5,7 +5,7 @@ var GTD = {
 
     header: ['Actionable', 'Waiting For', 'Done', 'Someday'], //FIXME change to taskStatus
     headerColor: ['#ff0000', '#9d922e', '#16a031', '#808080'], //FIXME change to taskStatusColor 
-    bodyMargins: [7.2, 7.2, 7.2, 7.2], // L, T, R, D unit is point
+    bodyMargins: [36, 36, 36, 36], // L, T, R, D unit is point
     commentStyle: {
         foregroundColor: '#000000'
     },
