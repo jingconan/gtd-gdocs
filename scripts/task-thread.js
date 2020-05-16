@@ -1,5 +1,5 @@
 GTD.Task = {
-    CONTENT_ROW: 1,
+    CONTENT_ROW: 0,
     SIZE: [2, 3],
     // THREAD_HEADER_WIDTH: [100, 350, 70, 60]
     THREAD_HEADER_WIDTH: [70, 450, 70],
@@ -48,22 +48,15 @@ GTD.Task.insertThreadHeader = function( name) {
     var taskStatus = GTD.header[this.status];
     // var subTaskStatus = this.subTasksDone + '/' + this.subTasksTotal;
 
+    var statusSymbol = GTD.statusSymbol[taskStatus]
     var headerTable = GTD.util.insertTableAtCursor([
-        ['Timestamp', 'Name', 'Status'],
-        [currentTime, name, taskStatus],
+        [statusSymbol + ' ' + name],
     ]);
-
-    // set table column width
-    GTD.Task.setColumnWidth(headerTable);
 
     // set table color
     var taskColor = GTD.headerColor[this.status];
-    headerTable.editAsText().setForegroundColor(taskColor);
     headerTable.setBorderWidth(0);
 
-    GTD.Task.setBackgroundColor(headerTable, '#666666', [0, 1, 0, this.SIZE[1]]);
-    GTD.Task.setForegroundColor(headerTable, '#ffffff', [0, 1, 0, this.SIZE[1]]);
-    GTD.Task.setBackgroundColor(headerTable, '#dde4e6', [1, this.SIZE[0], 0, this.SIZE[1]]);
 
     // Add a bookmark
     var taskDesc = currentTime + '\n' + name;
@@ -246,12 +239,9 @@ GTD.Task.getTaskThreadHeader = function(ele) {
     return res;
 };
 
+// We assume task thread head is a table with only one row.
 GTD.Task.isValidTaskThreadHeader = function(table) {
-    if (table.getNumRows() !== 2) {
-        return false;
-    }
-
-    if (table.getCell(0, 0).editAsText().getText() !== 'Timestamp') {
+    if (table.getNumRows() !== 1) {
         return false;
     }
     return true;
@@ -279,22 +269,24 @@ GTD.Task.setForegroundColor = function(headerTable, color, range) {
 
 
 GTD.Task.setThreadHeaderStatus = function(threadHeader, status) {
-
-    // Change color
-    var colIdx = GTD.TM.getColIdx(status);
-    var color = GTD.headerColor[colIdx];
-    GTD.Task.setForegroundColor(threadHeader, color, [1, this.SIZE[0], 0, this.SIZE[1]]);
-
-    // Change text
-    threadHeader.getCell(this.CONTENT_ROW, 2).setText(status);
+    var symbol = GTD.statusSymbol[status];
+    var taskDesc = GTD.Task.getTaskDesc(threadHeader);
+    threadHeader.getCell(this.CONTENT_ROW, 0).setText(symbol + ' ' + taskDesc);
 };
 
+// We assume the first part of the content is the status.
 GTD.Task.getThreadHeaderStatus = function(threadHeader) {
-    return threadHeader.getCell(this.CONTENT_ROW, 2).getText();
+    var text = threadHeader.getCell(this.CONTENT_ROW, 0).getText();
+    var tokens = text.split(' ');
+    var symbol = tokens[0];
+    return GTD.symbolStatus[symbol];
 }
 
+// We assume the remaining part of the content is the task description.
 GTD.Task.getTaskDesc = function(threadHeader) {
-    return threadHeader.getCell(this.CONTENT_ROW, 0).getText() + '\n' + threadHeader.getCell(this.CONTENT_ROW, 1).getText();
+    var text = threadHeader.getCell(this.CONTENT_ROW, 0).getText();
+    var tokens = text.split(' ');
+    return tokens.slice(1).join(' ');
 };
 
 GTD.Task.isThreadHeader = function(table) {

@@ -5,23 +5,16 @@ function onOpen(e) {
       ui.createMenu('GTD')
           .addItem('Insert task', 'insertTask')
           .addItem('Insert comment', 'insertComment')
-          .addItem('Insert task separator', 'insertSeparator')
-          .addItem('Jump to task thread', 'jumpToTask')
-          .addSubMenu(ui.createMenu('Mark task as')
-                  .addItem('Actionable', 'createActionableTask')
-                  .addItem('WaitingFor', 'moveTaskToWaitingFor')
-                  .addItem('Done', 'moveTaskToDone')
-                  .addItem('Someday', 'moveTaskToSomeday'))
+          .addItem('Mark as Actionable', 'createActionableTask')
+          .addItem('Mark as WaitingFor', 'moveTaskToWaitingFor')
+          .addItem('Mark as Done', 'moveTaskToDone')
+          .addItem('Mark as Someday', 'moveTaskToSomeday')
+          .addItem('Insert separator', 'insertSeparator')
           .addSubMenu(ui.createMenu('Format comment as')
                   .addItem('Code', 'insertNoteCode')
                   .addItem('Email', 'insertNoteEmail')
                   .addItem('Checklist', 'insertNoteChecklist'))
-          .addItem('Sync from google tasks', 'syncFromGTasks')
           .addToUi();
-
-      if (e && e.authMode == ScriptApp.AuthMode.FULL) {
-          syncFromGTasks();
-      }
 
   } else {
       ui.createMenu('GTD')
@@ -34,17 +27,6 @@ function onInstall(e) {
   onOpen(e);
 }
 
-function syncFromGTasks() {
-  if (!GTD.gtask.isInitialized()) {
-      Logger.log('gtask service is not initialized');
-      return;
-  }
-  GTD.initSummaryTable();
-  var atl = GTD.gtask.getActiveTaskList();
-  var gTasksInfo = GTD.gtask.listAllSubtasksOfParentTask(atl.taskListId, atl.parentTask);
-  GTD.TM.updateTaskStatusInBatch(gTasksInfo);
-  GTD.TM.markMissingTasksAsDone(gTasksInfo);
-}
 
 function insertSeparator() {
     GTD.Task.addThreadSeparator();
@@ -74,20 +56,6 @@ function insertTask() {
         .setHeight(200);
     DocumentApp.getUi() // Or DocumentApp or FormApp.
         .showModalDialog(html, 'Dialog to insert new task');
-}
-
-function jumpToTask() {
-    var doc = DocumentApp.getActiveDocument();
-    var cursor = doc.getCursor();
-    if (!cursor) {
-        debug('no cursor');
-        return;
-    }
-
-    var task = GTD.Summary.getTaskFromCursor(cursor);
-    if (task) {
-        GTD.jumpAndFocusOnTask(task);
-    }
 }
 
 function insertDate() {
