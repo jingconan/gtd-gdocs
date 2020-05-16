@@ -3,6 +3,8 @@ var GTD = {
     document: DocumentApp.getActiveDocument(),
     body: DocumentApp.getActiveDocument().getBody(),
 
+    // A map between status and a emoji symbol used
+    // to represent the status.
     statusSymbol: {
         'Actionable': '\uD83C\uDD70\uFE0F',
         'Waiting For': '\uD83C\uDD86',

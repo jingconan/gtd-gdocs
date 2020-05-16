@@ -81,42 +81,8 @@ If you want to configure by yourself, here are the steps:
  11. You can also click *GTD->Mark task as->Actionable* to mark it as an 'Actionable' task again. 
  12. Enjoy your trip!
 
-# Sync to Google Tasks
 
-
-Each task document is usually for one project.  If you enable google
-task api, the tasks are also automatically updated to google tasks. The
-advantage is that you will have an unified interface that display all
-the tasks among multiple projects.
-
-In order to enable task functinon, you need to 
- 1. Open https://mail.google.com/tasks/ig, create a list with name *GTD
- Lists*.
- 2. Create a document, open *Tools->Script Editor*, paste the
- compiled_script.js in to the script editor. In the script editor, click
- *Resources->Advanced Google Services*
- 3. In the popup window, choose v1 for Tasks API and click the button so
- that the status is *on*, which indicates that the API will be allowed.
- 4. In the script editor, select *OnOpen* and click run
- 5. In the document, click "Initialize", you will see that it asks two
- more pemissions. 1. View your tasks and 2. Manage your tasks.
- 6. After click *Insert task*, you may get the following error message
- *Access Not Configured. Tasks API has not been used in project
- <ID> before or it is disabled. Enable it by visiting <SOME_URL>
- then retry. If you enabled this API recently, wait a few minutes for
- the action to propagate to our systems and retry.*
- 7. Open the url in the error message in a new tab and click *Enable*
- button.
- 8. Go back to the document and now you are ready to create and change
- status of tasks.
- 9. Check the summary of your tasks in https://mail.google.com/tasks/ig.
- I recommend you to install this chrome addon: [ExtensionImprovements
- for Google
- Tasks](https://chrome.google.com/webstore/detail/improvements-for-google-t/mhikceoaalnjmimabofghliacpmljocb?hl=en-US).
- With this addon, tasks with different status will be displayed in
- different colors.
-
-#Screen Shot
+#Screenshot
 
 ![image](https://github.com/hbhzwj/gtd-gdocs/blob/master/resources/screenshot.png)
 
@@ -125,7 +91,7 @@ In order to enable task functinon, you need to
 #Author Info
 
 Jing Conan Wang
-hbhzwj@gmail.com
+jingconanwang@gmail.com
 
 #License
 

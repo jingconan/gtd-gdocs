@@ -1,9 +1,11 @@
-// compiled from git commit version: fa2811de26a2a4fdeaccbb89010760997e14888b
+// compiled from git commit version: c120221cba4f1d89eca8dcc283588580d2d66490
 var GTD = {
     // Commonly used DOM object
     document: DocumentApp.getActiveDocument(),
     body: DocumentApp.getActiveDocument().getBody(),
 
+    // A map between status and a emoji symbol used
+    // to represent the status.
     statusSymbol: {
         'Actionable': '\uD83C\uDD70\uFE0F',
         'Waiting For': '\uD83C\uDD86',
@@ -833,7 +835,7 @@ GTD.Task.getThreadHeaderStatus = function(threadHeader) {
     var text = threadHeader.getCell(this.CONTENT_ROW, 0).getText();
     var tokens = text.split(' ');
     var symbol = tokens[0];
-    return GTD.symbolStatus[symbol];
+    return GTD.symbolStatusMap[symbol];
 }
 
 // We assume the remaining part of the content is the task description.
@@ -1033,11 +1035,14 @@ GTD.initialize = function() {
     var doc = DocumentApp.getActiveDocument().getBody();
     doc.setAttributes(style);
 
-    GTD.symbolStatus = {};
+    // symbolStatusMap is a mapping from a symbol to the actual
+    // status. In the task thread, we only use symbol to indicate
+    // task staus, this map will be used to do lookup to get
+    // the actual status.
+    GTD.symbolStatusMap = {};
     for (var key in GTD.statusSymbol) {
-    // check if the property/key is defined in the object itself, not in parent
     if (GTD.statusSymbol.hasOwnProperty(key)) {           
-        GTD.symbolStatus[GTD.statusSymbol[key]] = key;
+        GTD.symbolStatusMap[GTD.statusSymbol[key]] = key;
     }
 }
 
@@ -1115,33 +1120,7 @@ GTD.changeTaskStatusMenuWrapper = function(options) {
                                   'or thread header');
         return;
     }
-
-    var comment = 'Move from ' + ret.statusBefore + ' to ' + statusAfter;
-
-    // if cursor is in summary table, display a dialog for comment
-    if (ret.cursorStatus === 'cursor_in_summary_table') {
-        if (typeof options.comment === 'undefined') {
-            var template = GTD.util.templateReplace(GTD.templates.change_task_status, {
-                statusAfter: statusAfter,
-            });
-            var html = HtmlService.createHtmlOutput(template)
-                .setSandboxMode(HtmlService.SandboxMode.IFRAME)
-                .setWidth(400)
-                .setHeight(200);
-            DocumentApp.getUi() // Or DocumentApp or FormApp.
-                .showModalDialog(html, 'Dialog to change task status');
-            return;
-        } else {
-            comment = comment + '\n' + options.comment;
-        }
-    }
-
     GTD.changeTaskStatus({task: ret, status: statusAfter});
-    GTD.Task.insertComment({
-      threadHeader: ret.threadHeader,
-      message: comment,
-      location: 'thread'
-    });
 
     // if cursor was in summary table before the change, move the cursor
     // back to the summary table
