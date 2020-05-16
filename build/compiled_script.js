@@ -1,4 +1,4 @@
-// compiled from git commit version: c120221cba4f1d89eca8dcc283588580d2d66490
+// compiled from git commit version: 181a614e38cc8d7894366c7f65e6e7ddacf685c6
 var GTD = {
     // Commonly used DOM object
     document: DocumentApp.getActiveDocument(),
@@ -365,6 +365,8 @@ GTD.Summary.createSummaryTable = function (body) {
         DocumentApp.getUi().alert('Cannot create task summary table!');
         return;
     }
+    table.setBorderWidth(1);
+    table.setBorderColor('#d1d5da');
 
     assert(GTD.header.length === GTD.headerColor.length, 'wrong number of color');
     for (i = 0; i < GTD.header.length; ++i) {
@@ -594,6 +596,12 @@ GTD.Task.createNewTask = function(name, statusName) {
 
 GTD.Task.addThreadSeparator = function() {
     var table = GTD.util.insertTableAtCursor([['Task Separator']]);
+    if (table === 'element_not_found' || table === 'cursor_not_found') {
+      DocumentApp.getUi().alert('Please make sure your cursor is not in ' +
+          'any table when inserting comment');
+      return;
+    }
+    
     table.editAsText().setForegroundColor('#ffffff');
     GTD.Task.setBackgroundColor(table, '#4285F4', [0, 1, 0, 1]);
     table.setBorderWidth(0);
@@ -608,9 +616,6 @@ GTD.Task.insertThreadHeader = function( name) {
     var headerTable = GTD.util.insertTableAtCursor([
         [statusSymbol + ' ' + name],
     ]);
-
-    // set table color
-    var taskColor = GTD.headerColor[this.status];
     headerTable.setBorderWidth(0);
 
 
@@ -716,8 +721,9 @@ GTD.Task.insertComment = function(options) {
         .setBackgroundColor('#dde4e6');
     table.getCell(1, 0)
         .setBackgroundColor('#f7f7f7');
-    table.setBorderWidth(0);
-
+    table.setBorderWidth(1);
+    table.setBorderColor('#d1d5da')
+    
     GTD.util.setCursorAtTable(table, [1, 0]);
 };
 
