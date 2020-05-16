@@ -1,4 +1,4 @@
-// compiled from git commit version: 12d98d23e8bfce6bcfda33a648b381f4714a5cdc
+// compiled from git commit version: fc3bfeaf4a2f1fc1b470e4f17d08dab259fcf079
 var GTD = {
     // Commonly used DOM object
     document: DocumentApp.getActiveDocument(),
@@ -1268,7 +1268,7 @@ GTD.initialize = function() {
 
     // Set background of document to be solarized light color
     var style = {};
-    style[DocumentApp.Attribute.BACKGROUND_COLOR] = '#eee8d5';
+    // style[DocumentApp.Attribute.BACKGROUND_COLOR] = '#eee8d5';
     var doc = DocumentApp.getActiveDocument().getBody();
     doc.setAttributes(style);
 
