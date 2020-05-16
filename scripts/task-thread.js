@@ -279,7 +279,7 @@ GTD.Task.getThreadHeaderStatus = function(threadHeader) {
     var text = threadHeader.getCell(this.CONTENT_ROW, 0).getText();
     var tokens = text.split(' ');
     var symbol = tokens[0];
-    return GTD.symbolStatus[symbol];
+    return GTD.symbolStatusMap[symbol];
 }
 
 // We assume the remaining part of the content is the task description.
