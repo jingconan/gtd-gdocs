@@ -1,27 +1,24 @@
-// compiled from git commit version: fc3bfeaf4a2f1fc1b470e4f17d08dab259fcf079
+// compiled from git commit version: fa2811de26a2a4fdeaccbb89010760997e14888b
 var GTD = {
     // Commonly used DOM object
     document: DocumentApp.getActiveDocument(),
     body: DocumentApp.getActiveDocument().getBody(),
 
+    statusSymbol: {
+        'Actionable': '\uD83C\uDD70\uFE0F',
+        'Waiting For': '\uD83C\uDD86',
+        'Done': '\u2705',
+        'Someday': '\uD83C\uDD82',
+    },
     header: ['Actionable', 'Waiting For', 'Done', 'Someday'], //FIXME change to taskStatus
     headerColor: ['#ff0000', '#9d922e', '#16a031', '#808080'], //FIXME change to taskStatusColor 
-    bodyMargins: [7.2, 7.2, 7.2, 7.2], // L, T, R, D unit is point
+    bodyMargins: [36, 36, 36, 36], // L, T, R, D unit is point
     commentStyle: {
         foregroundColor: '#000000'
     },
     defaultRows: 1,
     templates: {},
     TOC: {},
-    gtask: {
-        listName: 'GTD Lists',
-        statusSymbols: {
-            'Actionable': '(x)',
-            'Waiting For': '/!\\',
-            'Someday': '(~)',
-            'Unknown': ''
-        }
-    },
     initialized: false
 };
 
@@ -377,220 +374,6 @@ GTD.Summary.createSummaryTable = function (body) {
 };
 
 
-/**
- * These functions are used to sync data between google docs and gmail tasks
- *
- * In order to provide a coherent view of multiple gtd documents, we
- * display tasks from all documents in one google task list view.
- * Each document corresponds to one tasks, which is referred to as
- * parent task in the code. All tasks in this document become sub-tasks
- * of this task (i.e., with one more indentation).
- *
- * The status of tasks are encoded in title. Title has the format
- * <status_symbol>:<task_name>. Each status has a unique symbol, and
- * please see GTD.gtask.statusSymbols for a complete lists of status
- * symbols.
- *
- */
-
-GTD.gtask.isInitialized = function() {
-    return (typeof Tasks !== 'undefined');
-};
-
-/**
- * Find list ID based on task list name
- * @param {String} name The name for the task list, you must create such
- *     a list manually in google tasks.
- * @return {{id:String,title:String,status:String}}
- */
-GTD.gtask.findListIdByName = function(name) {
-    var taskLists = Tasks.Tasklists.list();
-    var ret = {};
-    if (taskLists.items) {
-        for (var i = 0; i < taskLists.items.length; i++) {
-            var taskList = taskLists.items[i];
-            if (taskList.title !== name) {
-                continue;
-            }
-            ret.id = taskList.id;
-            ret.title = taskList.title;
-            ret.status = 'SUCCESS';
-            return ret;
-        }
-    }
-
-    ret.status = 'NOT_FOUND';
-    return ret;
-};
-
-/**
- * Get task by its name. The status is ignored in the matching process
- * @param {String} taskListId ID of the tasks list
- * @param {String} taskName Name of the task
- * @return {{id:String,idx:Number,task:Object}}
- */
-GTD.gtask.findTaskByName = function(taskListId, taskName) {
-    var tasks = Tasks.Tasks.list(taskListId);
-    var ret = {};
-    var retTask, taskId, position;
-    if (tasks.items) {
-        for (var i = 0; i < tasks.items.length; i++) {
-            var task = tasks.items[i];
-            var name = GTD.gtask.decodeTaskTitle(task.title).taskName;
-            if(taskName == name){ 
-                taskId = task.id;
-                retTask = task;
-                Logger.log('Task with title "%s" and ID "%s" was found.', task.title, task.id);
-            }
-            //lets pick up the last child task's position in order to insert the new task below
-            if(taskId == task.parent) position = task.position;
-        }
-        ret.id = taskId;
-        ret.idx = position;
-        ret.task = retTask;
-    } 
-    return ret;
-};
-
-/* Get parent task name from document name
- * The [Log] prefix is trimed and digits are removed. Leading and
- * trailing spaces are also trimed.
- * @param {String} docName document name
- * @return {String}
- */
-GTD.gtask.getParentTaskNameFromDocName = function(docName) {
-    return docName.replace(/^\[Log\] /, '')
-                  .replace(/[0-9]/g, '')
-                  .trim();
-};
-
-/* Encode the taskName and status together.
- * We stores status as prefix of task name.
- */
-GTD.gtask.encodeTaskTitle = function(taskName, status) {
-    var symbols = GTD.gtask.statusSymbols;
-    var sym = symbols[status];
-    var ret = sym + taskName;
-    return ret;
-};
-
-/* Decode status from taskName.
- * Loop through all the status and return status if the corresponding
- * symbol exists.
- */
-GTD.gtask.decodeTaskTitle = function(title) {
-    var symbols = GTD.gtask.statusSymbols;
-    var ret = {}, sym, status;
-    for (status in symbols) {
-        if (!symbols.hasOwnProperty(status)) {
-            continue;
-        }
-
-        sym = symbols[status];
-        if (GTD.util.startsWith(title, sym)) {
-            ret.taskName = title.replace(sym, '');
-            ret.status = status;
-            return ret;
-        }
-    }
-    ret.taskName = title;
-    ret.status = 'Unknown';
-    return ret;
-};
-
-GTD.gtask.findOrInsertTask = function(taskListId, parentTask, taskDetails) {
-    var taskName = GTD.gtask.decodeTaskTitle(taskDetails.title).taskName;
-    var ret = GTD.gtask.findTaskByName(taskListId, taskName);
-    // Create task if not exists
-    if (!ret.id) {
-        if (parentTask) {
-            taskDetails.parent = parentTask.id;
-            taskDetails.position = parentTask.idx;
-        }
-        var newTask = Tasks.newTask().setTitle(taskDetails.title);
-        newTask = Tasks.Tasks.insert(newTask, taskListId, taskDetails);
-        if (parentTask) {
-            newTask.setParent(parentTask.id);
-        }
-
-        ret.id = newTask.id;
-        ret.idx = newTask.position;
-        ret.task = newTask;
-    }
-    return ret;
-};
-
-/* Update details of a task, if the task doesn't exist, then a new task
- * will be inserted and updated
- */
-GTD.gtask.updateTask = function(taskListId, parentTask, taskDetails) {
-    var tmp = GTD.gtask.decodeTaskTitle(taskDetails.title);
-    var taskRet = GTD.gtask.findOrInsertTask(taskListId, parentTask,
-                                             taskDetails);
-    var task = taskRet.task;
-    task.title = GTD.gtask.encodeTaskTitle(tmp.taskName, taskDetails.status);
-    // If task is done, mark it as completd and use simple title.
-    // Otherwise, encode the status in title.
-    if (taskDetails.status === 'Done') {
-        task.setStatus('completed');
-        task.setTitle(tmp.taskName);
-    } else {
-        task.setStatus('needsAction');
-        task.setCompleted(null);
-    }
-    var notes;
-    if (taskDetails.keepGTaskNote && task.getNotes() !== undefined) {
-        notes = taskDetails.notes + '\n' + task.getNotes();
-    } else {
-        notes = taskDetails.notes;
-    }
-    task.setNotes(notes);
-    var updatedTask = Tasks.Tasks.patch(task, taskListId, task.id);
-};
-
-/* Get active task list based on the current document name
- */
-GTD.gtask.getActiveTaskList = function() {
-    // Get Current Name
-    var listName = GTD.gtask.listName;
-    var ret = GTD.gtask.findListIdByName(listName);
-    if (ret.status !== 'SUCCESS') {
-        DocumentApp.getUi().alert('Cannot find task list with name: ' +
-                                  listName);
-        return;
-    }
-    var taskListId = ret.id;
-    var doc = DocumentApp.getActiveDocument();
-    var parentTaskName = GTD.gtask.getParentTaskNameFromDocName(doc.getName());
-    var parentTask = GTD.gtask.findOrInsertTask(taskListId,
-                                                undefined,
-                                                {title: parentTaskName});
-    return {
-        taskListId: taskListId,
-        parentTask: parentTask
-    };
-};
-
-/* List all subtasks of a document that corresponds to a parent task
- */
-GTD.gtask.listAllSubtasksOfParentTask = function(taskListId, parentTask) {
-    var tasks = Tasks.Tasks.list(taskListId);
-    var retTasks = [];
-    if (tasks.items) {
-        for (var i = 0; i < tasks.items.length; i++) {
-            var task = tasks.items[i];
-            if (!task.getParent() || (task.getParent() !== parentTask.id)) {
-                continue;
-            }
-            retTasks.push(task);
-        }
-    } else {
-        Logger.log('No tasks found.');
-    }
-    return retTasks;
-};
-
-
 GTD.TM = GTD.TM || {};
 
 
@@ -770,7 +553,7 @@ GTD.TM.markMissingTasksAsDone = function(gTasksInfo) {
 
 
 GTD.Task = {
-    CONTENT_ROW: 1,
+    CONTENT_ROW: 0,
     SIZE: [2, 3],
     // THREAD_HEADER_WIDTH: [100, 350, 70, 60]
     THREAD_HEADER_WIDTH: [70, 450, 70],
@@ -819,22 +602,15 @@ GTD.Task.insertThreadHeader = function( name) {
     var taskStatus = GTD.header[this.status];
     // var subTaskStatus = this.subTasksDone + '/' + this.subTasksTotal;
 
+    var statusSymbol = GTD.statusSymbol[taskStatus]
     var headerTable = GTD.util.insertTableAtCursor([
-        ['Timestamp', 'Name', 'Status'],
-        [currentTime, name, taskStatus],
+        [statusSymbol + ' ' + name],
     ]);
-
-    // set table column width
-    GTD.Task.setColumnWidth(headerTable);
 
     // set table color
     var taskColor = GTD.headerColor[this.status];
-    headerTable.editAsText().setForegroundColor(taskColor);
     headerTable.setBorderWidth(0);
 
-    GTD.Task.setBackgroundColor(headerTable, '#666666', [0, 1, 0, this.SIZE[1]]);
-    GTD.Task.setForegroundColor(headerTable, '#ffffff', [0, 1, 0, this.SIZE[1]]);
-    GTD.Task.setBackgroundColor(headerTable, '#dde4e6', [1, this.SIZE[0], 0, this.SIZE[1]]);
 
     // Add a bookmark
     var taskDesc = currentTime + '\n' + name;
@@ -1017,12 +793,9 @@ GTD.Task.getTaskThreadHeader = function(ele) {
     return res;
 };
 
+// We assume task thread head is a table with only one row.
 GTD.Task.isValidTaskThreadHeader = function(table) {
-    if (table.getNumRows() !== 2) {
-        return false;
-    }
-
-    if (table.getCell(0, 0).editAsText().getText() !== 'Timestamp') {
+    if (table.getNumRows() !== 1) {
         return false;
     }
     return true;
@@ -1050,22 +823,24 @@ GTD.Task.setForegroundColor = function(headerTable, color, range) {
 
 
 GTD.Task.setThreadHeaderStatus = function(threadHeader, status) {
-
-    // Change color
-    var colIdx = GTD.TM.getColIdx(status);
-    var color = GTD.headerColor[colIdx];
-    GTD.Task.setForegroundColor(threadHeader, color, [1, this.SIZE[0], 0, this.SIZE[1]]);
-
-    // Change text
-    threadHeader.getCell(this.CONTENT_ROW, 2).setText(status);
+    var symbol = GTD.statusSymbol[status];
+    var taskDesc = GTD.Task.getTaskDesc(threadHeader);
+    threadHeader.getCell(this.CONTENT_ROW, 0).setText(symbol + ' ' + taskDesc);
 };
 
+// We assume the first part of the content is the status.
 GTD.Task.getThreadHeaderStatus = function(threadHeader) {
-    return threadHeader.getCell(this.CONTENT_ROW, 2).getText();
+    var text = threadHeader.getCell(this.CONTENT_ROW, 0).getText();
+    var tokens = text.split(' ');
+    var symbol = tokens[0];
+    return GTD.symbolStatus[symbol];
 }
 
+// We assume the remaining part of the content is the task description.
 GTD.Task.getTaskDesc = function(threadHeader) {
-    return threadHeader.getCell(this.CONTENT_ROW, 0).getText() + '\n' + threadHeader.getCell(this.CONTENT_ROW, 1).getText();
+    var text = threadHeader.getCell(this.CONTENT_ROW, 0).getText();
+    var tokens = text.split(' ');
+    return tokens.slice(1).join(' ');
 };
 
 GTD.Task.isThreadHeader = function(table) {
@@ -1123,6 +898,7 @@ GTD.initSummaryTable = function() {
     } else {
         taskTable = tables[0];
     }
+    taskTable.setBorderWidth(0);
     GTD.taskTable = taskTable;
 };
 
@@ -1217,20 +993,6 @@ GTD.changeTaskStatus = function(options) {
 
     // Update Task thread header
     GTD.Task.setThreadHeaderStatus(task.threadHeader, options.status);
-
-    // Update gtask service
-    if (!options.disableGTask && GTD.gtask.isInitialized()) {
-        var tl = GTD.gtask.getActiveTaskList();
-        var timestamp = GTD.util.getTimeStamp(task.taskDesc);
-        var title = task.taskDesc.replace(timestamp + '\n', '');
-        var currentTime = GTD.util.toISO(new Date());
-        GTD.gtask.updateTask(tl.taskListId, tl.parentTask, {
-            title: title,
-            notes: currentTime + ' moved from [' + task.statusBefore + '] to [' + options.status + ']',
-            status: options.status,
-            keepGTaskNote: true
-        });
-    }
 };
 
 /**
@@ -1268,9 +1030,16 @@ GTD.initialize = function() {
 
     // Set background of document to be solarized light color
     var style = {};
-    // style[DocumentApp.Attribute.BACKGROUND_COLOR] = '#eee8d5';
     var doc = DocumentApp.getActiveDocument().getBody();
     doc.setAttributes(style);
+
+    GTD.symbolStatus = {};
+    for (var key in GTD.statusSymbol) {
+    // check if the property/key is defined in the object itself, not in parent
+    if (GTD.statusSymbol.hasOwnProperty(key)) {           
+        GTD.symbolStatus[GTD.statusSymbol[key]] = key;
+    }
+}
 
     GTD.initSummaryTable();
     GTD.initPageMargin();
@@ -1410,23 +1179,16 @@ function onOpen(e) {
       ui.createMenu('GTD')
           .addItem('Insert task', 'insertTask')
           .addItem('Insert comment', 'insertComment')
-          .addItem('Insert task separator', 'insertSeparator')
-          .addItem('Jump to task thread', 'jumpToTask')
-          .addSubMenu(ui.createMenu('Mark task as')
-                  .addItem('Actionable', 'createActionableTask')
-                  .addItem('WaitingFor', 'moveTaskToWaitingFor')
-                  .addItem('Done', 'moveTaskToDone')
-                  .addItem('Someday', 'moveTaskToSomeday'))
+          .addItem('Mark as Actionable', 'createActionableTask')
+          .addItem('Mark as WaitingFor', 'moveTaskToWaitingFor')
+          .addItem('Mark as Done', 'moveTaskToDone')
+          .addItem('Mark as Someday', 'moveTaskToSomeday')
+          .addItem('Insert separator', 'insertSeparator')
           .addSubMenu(ui.createMenu('Format comment as')
                   .addItem('Code', 'insertNoteCode')
                   .addItem('Email', 'insertNoteEmail')
                   .addItem('Checklist', 'insertNoteChecklist'))
-          .addItem('Sync from google tasks', 'syncFromGTasks')
           .addToUi();
-
-      if (e && e.authMode == ScriptApp.AuthMode.FULL) {
-          syncFromGTasks();
-      }
 
   } else {
       ui.createMenu('GTD')
@@ -1439,17 +1201,6 @@ function onInstall(e) {
   onOpen(e);
 }
 
-function syncFromGTasks() {
-  if (!GTD.gtask.isInitialized()) {
-      Logger.log('gtask service is not initialized');
-      return;
-  }
-  GTD.initSummaryTable();
-  var atl = GTD.gtask.getActiveTaskList();
-  var gTasksInfo = GTD.gtask.listAllSubtasksOfParentTask(atl.taskListId, atl.parentTask);
-  GTD.TM.updateTaskStatusInBatch(gTasksInfo);
-  GTD.TM.markMissingTasksAsDone(gTasksInfo);
-}
 
 function insertSeparator() {
     GTD.Task.addThreadSeparator();
@@ -1479,20 +1230,6 @@ function insertTask() {
         .setHeight(200);
     DocumentApp.getUi() // Or DocumentApp or FormApp.
         .showModalDialog(html, 'Dialog to insert new task');
-}
-
-function jumpToTask() {
-    var doc = DocumentApp.getActiveDocument();
-    var cursor = doc.getCursor();
-    if (!cursor) {
-        debug('no cursor');
-        return;
-    }
-
-    var task = GTD.Summary.getTaskFromCursor(cursor);
-    if (task) {
-        GTD.jumpAndFocusOnTask(task);
-    }
 }
 
 function insertDate() {

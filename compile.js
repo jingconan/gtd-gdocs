@@ -10,7 +10,6 @@ var scripts = [
     'scripts/namespace.js',
     'scripts/util.js',
     'scripts/summary.js',
-    'scripts/gtask.js',
     'scripts/task-manager.js',
     'scripts/task-thread.js',
     'scripts/script.js',

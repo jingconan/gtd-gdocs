@@ -42,6 +42,7 @@ GTD.initSummaryTable = function() {
     } else {
         taskTable = tables[0];
     }
+    taskTable.setBorderWidth(0);
     GTD.taskTable = taskTable;
 };
 
@@ -136,20 +137,6 @@ GTD.changeTaskStatus = function(options) {
 
     // Update Task thread header
     GTD.Task.setThreadHeaderStatus(task.threadHeader, options.status);
-
-    // Update gtask service
-    if (!options.disableGTask && GTD.gtask.isInitialized()) {
-        var tl = GTD.gtask.getActiveTaskList();
-        var timestamp = GTD.util.getTimeStamp(task.taskDesc);
-        var title = task.taskDesc.replace(timestamp + '\n', '');
-        var currentTime = GTD.util.toISO(new Date());
-        GTD.gtask.updateTask(tl.taskListId, tl.parentTask, {
-            title: title,
-            notes: currentTime + ' moved from [' + task.statusBefore + '] to [' + options.status + ']',
-            status: options.status,
-            keepGTaskNote: true
-        });
-    }
 };
 
 /**
@@ -189,6 +176,14 @@ GTD.initialize = function() {
     var style = {};
     var doc = DocumentApp.getActiveDocument().getBody();
     doc.setAttributes(style);
+
+    GTD.symbolStatus = {};
+    for (var key in GTD.statusSymbol) {
+    // check if the property/key is defined in the object itself, not in parent
+    if (GTD.statusSymbol.hasOwnProperty(key)) {           
+        GTD.symbolStatus[GTD.statusSymbol[key]] = key;
+    }
+}
 
     GTD.initSummaryTable();
     GTD.initPageMargin();
