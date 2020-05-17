@@ -1,4 +1,4 @@
-// compiled from git commit version: c1c65985d08bb7d8384a0a89bdefb40c871638f4
+// compiled from git commit version: 59b029eb9a2340a3e142704524ef30b7de9eed24
 var GTD = {
     // Commonly used DOM object
     document: DocumentApp.getActiveDocument(),
@@ -344,6 +344,16 @@ GTD.Summary.getTaskFromCursor = function(cursor) {
         taskDesc: ele.editAsText().getText()
     };
 };
+
+GTD.Summary.searchTaskSummaryTable = function() {
+    var tables = GTD.body.getTables();
+    for (var i = 0; i < tables.length; ++i) {
+        if (GTD.Summary.isTaskSummaryTable(tables[i])) {
+            return tables[i];
+        }
+    }
+    return null;
+}
 
 GTD.Summary.isTaskSummaryTable = function(table) {
     if (table.getNumRows() === 0) {
@@ -899,8 +909,7 @@ GTD.Task.isSeparator = function(table) {
  */
 GTD.isGtdDocument = function() {
     // Verify that the document contains a summary task table
-    var tables = GTD.body.getTables();
-    if (tables.length === 0 || !GTD.Summary.isTaskSummaryTable(tables[0])) {
+    if (GTD.Summary.searchTaskSummaryTable() === null) {
         return false;
     }
 
@@ -920,14 +929,11 @@ GTD.isGtdDocument = function() {
 };
 
 GTD.initSummaryTable = function() {
-    var tables = GTD.body.getTables();
-    var taskTable;
-    if (tables.length === 0 || !GTD.Summary.isTaskSummaryTable(tables[0])) {
+    var taskTable = GTD.Summary.searchTaskSummaryTable();
+    if (taskTable === null) {
         taskTable = GTD.Summary.createSummaryTable(GTD.body);
-    } else {
-        taskTable = tables[0];
+        taskTable.setBorderWidth(0);
     }
-    taskTable.setBorderWidth(0);
     GTD.taskTable = taskTable;
 };
 
@@ -1159,7 +1165,6 @@ GTD.changeTaskStatusMenuWrapper = function(options) {
 /* Insert task
  */
 function runInsertTask(text, status) {
-    console.log('has run to runInsertTask');
     return GTD.insertTask(text, status);
 }
 

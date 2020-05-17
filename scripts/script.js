@@ -14,8 +14,7 @@
  */
 GTD.isGtdDocument = function() {
     // Verify that the document contains a summary task table
-    var tables = GTD.body.getTables();
-    if (tables.length === 0 || !GTD.Summary.isTaskSummaryTable(tables[0])) {
+    if (GTD.Summary.searchTaskSummaryTable() === null) {
         return false;
     }
 
@@ -35,14 +34,11 @@ GTD.isGtdDocument = function() {
 };
 
 GTD.initSummaryTable = function() {
-    var tables = GTD.body.getTables();
-    var taskTable;
-    if (tables.length === 0 || !GTD.Summary.isTaskSummaryTable(tables[0])) {
+    var taskTable = GTD.Summary.searchTaskSummaryTable();
+    if (taskTable === null) {
         taskTable = GTD.Summary.createSummaryTable(GTD.body);
-    } else {
-        taskTable = tables[0];
+        taskTable.setBorderWidth(0);
     }
-    taskTable.setBorderWidth(0);
     GTD.taskTable = taskTable;
 };
 
