@@ -1,5 +1,5 @@
 # Google Task Document
-This project turns google docs to a full-fledge task management system. 
+This project turns google docs to a full-fledge task management system.
 
 With this google app script, you can turn any google doc to a GTD
 system. If the current document is a normal document, it will add an
@@ -10,39 +10,30 @@ all the "Actionable" tasks, the second column stores all the "Waiting
 For" tasks, the third column stores all the "Done" tasks, and the fourth
 columns stores the "Someday" tasks that have low priority.
 
-If the documenet has been initialized before, it will add the following
-options to menus:
+If the document has been initialized before, it will add the following
+options to the menu bar:
 
 1. **Insert task**. There will be a popup asking you the name of the
 task. After you click okay button, it will insert a table showing the
 information related to this task. By default, a new task is "Actionable".
-2. **Insert comment**. You can put any information (context) related to
-this task as a comment. The upper part of the comment display your user
-id and the timestamp you create this comment, and you can write your
-comment in the lower part.
-3. **Insert task separator**. This is to insert a separtor so that
+2. **Insert update**. You can put any information (update) related to
+a task. The upper part of the update display your user
+id and the timestamp you create this update, and you can write your update
+in the lower part.
+3. **Mark task as**. You can change task status to be 'Actionable',
+'Waiting For', 'Done' or 'Someday'.
+4. **Insert task separator**. This is to insert a separator so that
 different tasks can be separated more visually. Of course, you don't
 have to insert separator between two tasks.
-4. **Jump to task thread**. Each task corresponds to a sequence of
-comment after a task thread header. If you put cursor in a task in the
-summary table and the click this menu, the cursor will jump to the
-corresponding task thread. 
-5. **Mark task as**. You can change task status to be 'Actionable',
-'Waiting For', 'Done' or 'Someday'.
-6. **Formart comment as**. You can format the comment under cursor to be
-some predefined format.
-  - 'code': green background, 'consolas' font of size 9
-  - 'email': cyan background, 'Times New Roman' font of size 12
-  - 'checklist': yellow background, 'Airal' font of size 12
 
 Another useful trick is that when you document becomes very long, you
 can press Ctrl+f and then input the timestamp to switch conveniently
-between the task table and the context of the task. 
+between the task table and the context of the task.
 
 ##Get Things Done
 The tool is motivated by [Get Things Done](http://gettingthingsdone.com/),
 which is a task-management method that help you improve your efficiency,
-particularly when you need to handle multiple projects at the same time. 
+particularly when you need to handle multiple projects at the same time.
 
 The idea of GTD is to store all your tasks in some external tools rather than you brain.
 Each task is associated with a label that can be either "Actionable", "Waiting For", or
@@ -58,7 +49,7 @@ The following figure illustrated the process
 
 ![GTD state diagram](https://cloud.githubusercontent.com/assets/522201/16716781/604968cc-46bb-11e6-9965-07061906f1a3.png)
 
-With GTD, you will be able to focus on what you can do and do it "worry-free". 
+With GTD, you will be able to focus on what you can do and do it "worry-free".
 
 For more info about GTD, please read [This awesome book by David Allen](http://www.amazon.com/Getting-Things-Done-Stress-Free-Productivity/dp/0142000280).
 
@@ -74,11 +65,11 @@ If you want to configure by yourself, here are the steps:
  4. Paste the code in *build/compiled_script.js* to the window.
  5. Choose and *onOpen* function and click run in the toolbar.
  6. You can click *GTD->Insert task* to insert a task.
- 7. Type a short description of the task in the popup dialog. After clicking "okay", a table with the task description will be inserted under your cursor. By default the text in the table is red, and it is "Actionable". The task will also be displayed in the summary table in the beginning part of the document.
- 8. You can click *GTD->Insert comment* to insert some context information related to this task. 
- 9. Put your cursor in the table with short description of a task, and click *GTD->move to Waiting For* to mark as a 'Waiting For' task if you have done what you can do and waiting for something, e.g., you colleagues' review. The timestamp and the task description will turn yellow. 
- 10. Click *GTD->Mark task as->Done* to mark as a 'Done' task if you are done with this task. The timestamp and the task description will turn green.
- 11. You can also click *GTD->Mark task as->Actionable* to mark it as an 'Actionable' task again. 
+ 7. Type a short description of the task in the popup dialog. After clicking "okay", a task description will be inserted under your cursor and the beginning of the description will be a emoji that represents the status of the task. The status of a new task will be 'Actionable' and the emoji is '🅰️'. The task will also be displayed in the summary table in the beginning part of the document.
+ 8. You can click *GTD->Insert update* to insert some context information related to this task.
+ 9. Put your cursor in the line of a task (which should have a status emoji at the beginning), and click *GTD->Mark task as Waiting For* to mark the task as a 'Waiting For' task if you have done what you can do and waiting for something, e.g., you colleagues' review. The status emoji should change to '🆆'.
+ 10. Click *GTD->Mark task as Done* to mark as a 'Done' task if you are done with this task. The status emoji should change to '✅'.
+ 11. You can also click *GTD->Mark task as Actionable* to mark it as an 'Actionable' task again and the status emoji will change to '🅰️'.
  12. Enjoy your trip!
 
 
