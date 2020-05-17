@@ -1,4 +1,4 @@
-// compiled from git commit version: 59b029eb9a2340a3e142704524ef30b7de9eed24
+// compiled from git commit version: b7e74448bcc1e2439c9d59b29ed5b9e217fa14a2
 var GTD = {
     // Commonly used DOM object
     document: DocumentApp.getActiveDocument(),
@@ -301,7 +301,6 @@ GTD.Summary.addTask = function(type, task) {
         cell = summaryTable.getCell(summaryTable.getNumRows() - 1, GTD.TM.getColIdx(type));
     }
     cell.setText(taskName);
-    // GTD.setTaskColor(type, taskName);
 };
 
 GTD.Summary.getSummaryTable = function() {
@@ -529,7 +528,6 @@ GTD.TM.updateTaskStatusInBatch = function(gTasksInfo) {
                 taskDesc: existingInfo.task
               },
               status: info.status,
-              setTaskColor: true,
               disableGTask: true
             });
           }
@@ -575,7 +573,6 @@ GTD.TM.markMissingTasksAsDone = function(gTasksInfo) {
                     taskDesc: existingTasks[key].task
                 },
                 status: 'Done',
-                setTaskColor: true,
                 disableGTask: true
             });
         }
@@ -944,38 +941,6 @@ GTD.initPageMargin = function() {
     this.body.setMarginBottom(this.bodyMargins[3]);
 };
 
-// Change the color of a task according to its current type
-GTD.setTaskColor = function(type, task) {
-    var taskName = task.taskDesc;
-    // setColor = (function (type, ele) {
-    //     if (!ele) return;
-    //     ele.asText().editAsText().setForegroundColor(this.headerColor[this.TM.getColIdx(type)]);
-    // }).bind(this, type);
-    // Change the color of the task in the task table
-    var timeStamp = GTD.util.getTimeStamp(taskName);
-    var doc = DocumentApp.getActiveDocument();
-    var body = doc.getBody();
-    // the first element is in the document header table.
-    var re = body.findText(timeStamp);
-    // setColor(re.getElement());
-
-    // If the task exists in the main body, change its color, too.
-    re = body.findText(timeStamp, re);
-    if (!re) {
-        DocumentApp.getUi().alert('cannot find tash thread table for task: ' + taskName);
-        return;
-    }
-
-    // setColor(re.getElement());
-    // change color of the task header.
-    var taskThreadHeader = GTD.Task.getTaskThreadHeader(re.getElement()).header;
-    if (!GTD.Task.isValidTaskThreadHeader(taskThreadHeader)) {
-        DocumentApp.getUi().alert('find invalid table thread header when changing color of task: ' + taskName);
-        return;
-    }
-    GTD.Task.setThreadHeaderStatus(taskThreadHeader, type);
-};
-
 /* Get the task under cursor
  */
 GTD.getSelectedTask = function(type) {
@@ -1011,8 +976,6 @@ GTD.getSelectedTask = function(type) {
  * @param {string} options.task.taskDesc task description
  * @param {boolean} options.disableGTask indicate whether GTask service
  *     needs to be updated
- * @param {boolean} options.setTaskColor indicate whether we should
- *     update task color
  * @param {string} options.status {'Actionable'|'Waiting
  *     For'|'Done'|'SomDay'}, a string that represents the status
  */

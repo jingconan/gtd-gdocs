@@ -122,7 +122,6 @@ GTD.TM.updateTaskStatusInBatch = function(gTasksInfo) {
                 taskDesc: existingInfo.task
               },
               status: info.status,
-              setTaskColor: true,
               disableGTask: true
             });
           }
@@ -168,7 +167,6 @@ GTD.TM.markMissingTasksAsDone = function(gTasksInfo) {
                     taskDesc: existingTasks[key].task
                 },
                 status: 'Done',
-                setTaskColor: true,
                 disableGTask: true
             });
         }

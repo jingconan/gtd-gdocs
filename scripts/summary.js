@@ -92,7 +92,6 @@ GTD.Summary.addTask = function(type, task) {
         cell = summaryTable.getCell(summaryTable.getNumRows() - 1, GTD.TM.getColIdx(type));
     }
     cell.setText(taskName);
-    // GTD.setTaskColor(type, taskName);
 };
 
 GTD.Summary.getSummaryTable = function() {

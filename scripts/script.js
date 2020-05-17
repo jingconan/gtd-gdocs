@@ -49,38 +49,6 @@ GTD.initPageMargin = function() {
     this.body.setMarginBottom(this.bodyMargins[3]);
 };
 
-// Change the color of a task according to its current type
-GTD.setTaskColor = function(type, task) {
-    var taskName = task.taskDesc;
-    // setColor = (function (type, ele) {
-    //     if (!ele) return;
-    //     ele.asText().editAsText().setForegroundColor(this.headerColor[this.TM.getColIdx(type)]);
-    // }).bind(this, type);
-    // Change the color of the task in the task table
-    var timeStamp = GTD.util.getTimeStamp(taskName);
-    var doc = DocumentApp.getActiveDocument();
-    var body = doc.getBody();
-    // the first element is in the document header table.
-    var re = body.findText(timeStamp);
-    // setColor(re.getElement());
-
-    // If the task exists in the main body, change its color, too.
-    re = body.findText(timeStamp, re);
-    if (!re) {
-        DocumentApp.getUi().alert('cannot find tash thread table for task: ' + taskName);
-        return;
-    }
-
-    // setColor(re.getElement());
-    // change color of the task header.
-    var taskThreadHeader = GTD.Task.getTaskThreadHeader(re.getElement()).header;
-    if (!GTD.Task.isValidTaskThreadHeader(taskThreadHeader)) {
-        DocumentApp.getUi().alert('find invalid table thread header when changing color of task: ' + taskName);
-        return;
-    }
-    GTD.Task.setThreadHeaderStatus(taskThreadHeader, type);
-};
-
 /* Get the task under cursor
  */
 GTD.getSelectedTask = function(type) {
@@ -116,8 +84,6 @@ GTD.getSelectedTask = function(type) {
  * @param {string} options.task.taskDesc task description
  * @param {boolean} options.disableGTask indicate whether GTask service
  *     needs to be updated
- * @param {boolean} options.setTaskColor indicate whether we should
- *     update task color
  * @param {string} options.status {'Actionable'|'Waiting
  *     For'|'Done'|'SomDay'}, a string that represents the status
  */
