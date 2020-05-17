@@ -13,18 +13,18 @@ columns stores the "Someday" tasks that have low priority.
 If the document has been initialized before, it will add the following
 options to the menu bar:
 
-1. **Insert task**. There will be a popup asking you the name of the
-task. After you click okay button, it will insert a table showing the
-information related to this task. By default, a new task is "Actionable".
-2. **Insert update**. You can put any information (update) related to
-a task. The upper part of the update display your user
-id and the timestamp you create this update, and you can write your update
-in the lower part.
+1. **Insert task**. You need to put your cursor in the line whose text
+   should be the text description. After that, you could create task by
+   clicking this menu. By default, a new task is "Actionable".
+2. **Insert update**. You can put any information (update) related to a
+   task. The upper part of the update display your user id and the
+   timestamp you create this update, and you can write your update in
+   the lower part.
 3. **Mark task as**. You can change task status to be 'Actionable',
-'Waiting For', 'Done' or 'Someday'.
+   'Waiting For', 'Done' or 'Someday'.
 4. **Insert task separator**. This is to insert a separator so that
-different tasks can be separated more visually. Of course, you don't
-have to insert separator between two tasks.
+   different tasks can be separated more visually. Of course, you don't
+   have to insert separator between two tasks.
 
 Another useful trick is that when you document becomes very long, you
 can press Ctrl+f and then input the timestamp to switch conveniently
@@ -64,7 +64,8 @@ If you want to configure by yourself, here are the steps:
  3. Click Blank Project.
  4. Paste the code in *build/compiled_script.js* to the window.
  5. Choose and *onOpen* function and click run in the toolbar.
- 6. You can click *GTD->Insert task* to insert a task.
+ 6. You can click *GTD->Insert task* to insert a task. The text from the
+    current line will be used as the task description.
  7. Type a short description of the task in the popup dialog. After clicking "okay", a task description will be inserted under your cursor and the beginning of the description will be a emoji that represents the status of the task. The status of a new task will be 'Actionable' and the emoji is '🅰️'. The task will also be displayed in the summary table in the beginning part of the document.
  8. You can click *GTD->Insert update* to insert some context information related to this task.
  9. Put your cursor in the line of a task (which should have a status emoji at the beginning), and click *GTD->Mark task as Waiting For* to mark the task as a 'Waiting For' task if you have done what you can do and waiting for something, e.g., you colleagues' review. The status emoji should change to '🆆'.
