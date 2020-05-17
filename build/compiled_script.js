@@ -1,4 +1,4 @@
-// compiled from git commit version: 212ea237057b0c6bc5fc12c9cf4721a7b447013f
+// compiled from git commit version: c1c65985d08bb7d8384a0a89bdefb40c871638f4
 var GTD = {
     // Commonly used DOM object
     document: DocumentApp.getActiveDocument(),
@@ -188,6 +188,23 @@ GTD.util.getTaskName = function(taskName) {
     return tokens[1];
 };
 
+GTD.util.extractTextAndRemoveCursorElement = function() {
+  var document = DocumentApp.getActiveDocument();
+  var cursor = document.getCursor();
+  if (!cursor) {
+      GTD.util.alertNoCursor();
+      return;
+  }
+  var ele = cursor.getElement();
+  if (ele === null || typeof ele === 'undefined') {
+      return null;
+  }
+  var text = ele.asText().getText();
+  if (text !== '') {
+    ele.editAsText().setText('');
+  }
+  return text;
+}
 
 
 GTD.Summary = GTD.Summary || {};
@@ -490,12 +507,12 @@ GTD.TM.updateTaskStatusInBatch = function(gTasksInfo) {
         // If the task doesn't exist in the document yet, then create it
         if (typeof existingInfo === 'undefined') {
             GTD.util.setCursorAfterFirstSeparator();
-            GTD.insertTask(info.taskName, info.status, true);
+            GTD.insertTask(info.taskName, info.status);
             continue;
         } else {
           // Update task status if the status of gtasks and document doesn't matches
           if (existingInfo.status !== info.status) {
-            // debug('change task with description: ' + existingInfo.task + ' from ' + 
+            // debug('change task with description: ' + existingInfo.task + ' from ' +
             //       existingInfo.status + ' to status ' + info.status);
             GTD.changeTaskStatus({
               task: {
@@ -614,6 +631,11 @@ GTD.Task.insertThreadHeader = function(name) {
     var headerTable = GTD.util.insertTableAtCursor([
         [statusSymbol + ' ' + name],
     ]);
+    if (headerTable === 'element_not_found' || headerTable === 'cursor_not_found') {
+      DocumentApp.getUi().alert('Please make sure your cursor is not in ' +
+          'any table when creating tasks');
+      return;
+    }
     headerTable.setBorderWidth(0);
 
 
@@ -629,7 +651,8 @@ GTD.Task.insertThreadHeader = function(name) {
     // return task here
     return {
       taskDesc: taskDesc,
-      statusBefore: 'NotExist'
+      statusBefore: 'NotExist',
+      threadHeader: headerTable
     };
 
 };
@@ -981,7 +1004,7 @@ GTD.getSelectedTask = function(type) {
  * @param {object} options.task object
  * @param {string} options.task.taskDesc task description
  * @param {boolean} options.disableGTask indicate whether GTask service
- *     needs to be updated 
+ *     needs to be updated
  * @param {boolean} options.setTaskColor indicate whether we should
  *     update task color
  * @param {string} options.status {'Actionable'|'Waiting
@@ -993,9 +1016,6 @@ GTD.changeTaskStatus = function(options) {
     // Update Summary table
     GTD.Summary.cleanTask('All', task);
     GTD.Summary.addTask(options.status, task);
-    if (options.setTaskColor) {
-        GTD.setTaskColor(options.status, task);
-    }
 
     // Update Task thread header
     GTD.Task.setThreadHeaderStatus(task.threadHeader, options.status);
@@ -1006,20 +1026,17 @@ GTD.changeTaskStatus = function(options) {
  *
  * @param {string} name task name
  * @param {string} status status of task
- * @param {boolean} disableGTask indicate whether gtask service needs to
- *     be updated
  * @returns {object} task object
  */
-GTD.insertTask = function(name, status, disableGTask) {
-    if (typeof disableGTask === 'undefined') {
-        disableGTask = false;
-    }
+GTD.insertTask = function(name, status) {
     var task = GTD.Task.createNewTask(name, status);
+    if (task === null || (typeof task === 'undefined')) {
+        return;
+    }
     // Update task's status in summary table.
     GTD.changeTaskStatus({
         task: task,
-        status: status,
-        disableGTask: disableGTask
+        status: status
     });
 
     return task;
@@ -1045,7 +1062,7 @@ GTD.initialize = function() {
     // the actual status.
     GTD.symbolStatusMap = {};
     for (var key in GTD.statusSymbol) {
-    if (GTD.statusSymbol.hasOwnProperty(key)) {           
+    if (GTD.statusSymbol.hasOwnProperty(key)) {
         GTD.symbolStatusMap[GTD.statusSymbol[key]] = key;
     }
 }
@@ -1142,6 +1159,7 @@ GTD.changeTaskStatusMenuWrapper = function(options) {
 /* Insert task
  */
 function runInsertTask(text, status) {
+    console.log('has run to runInsertTask');
     return GTD.insertTask(text, status);
 }
 
@@ -1160,7 +1178,7 @@ function onOpen(e) {
   // Or DocumentApp or FormApp.
   if (GTD.isGtdDocument()) {
       ui.createMenu('GTD')
-          .addItem('Insert task', 'insertTask')
+          .addItem('Create task', 'insertTask')
           .addItem('Insert update', 'insertComment')
           .addItem('Mark task as Actionable', 'createActionableTask')
           .addItem('Mark task as WaitingFor', 'moveTaskToWaitingFor')
@@ -1205,14 +1223,17 @@ function insertNoteChecklist() {
   GTD.Task.insertNote('checklist');
 }
 
+
 function insertTask() {
-    GTD.initialize();
-    var html = HtmlService.createHtmlOutput(GTD.templates.insert_task_diag)
-        .setSandboxMode(HtmlService.SandboxMode.IFRAME)
-        .setWidth(400)
-        .setHeight(200);
-    DocumentApp.getUi() // Or DocumentApp or FormApp.
-        .showModalDialog(html, 'Dialog to insert new task');
+  GTD.initialize();
+  var text = GTD.util.extractTextAndRemoveCursorElement();
+  if (text === null || (typeof text === 'undefined') || text === '' ) {
+      DocumentApp.getUi().alert('Could not find text to create task. ' +
+                                'Please put your cursor in the line whose text ' +
+                                'should be used as task description (do not select the text).');
+      return;
+  }
+  GTD.insertTask(text, 'Actionable');
 }
 
 function insertDate() {

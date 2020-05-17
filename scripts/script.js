@@ -119,7 +119,7 @@ GTD.getSelectedTask = function(type) {
  * @param {object} options.task object
  * @param {string} options.task.taskDesc task description
  * @param {boolean} options.disableGTask indicate whether GTask service
- *     needs to be updated 
+ *     needs to be updated
  * @param {boolean} options.setTaskColor indicate whether we should
  *     update task color
  * @param {string} options.status {'Actionable'|'Waiting
@@ -131,9 +131,6 @@ GTD.changeTaskStatus = function(options) {
     // Update Summary table
     GTD.Summary.cleanTask('All', task);
     GTD.Summary.addTask(options.status, task);
-    if (options.setTaskColor) {
-        GTD.setTaskColor(options.status, task);
-    }
 
     // Update Task thread header
     GTD.Task.setThreadHeaderStatus(task.threadHeader, options.status);
@@ -144,20 +141,17 @@ GTD.changeTaskStatus = function(options) {
  *
  * @param {string} name task name
  * @param {string} status status of task
- * @param {boolean} disableGTask indicate whether gtask service needs to
- *     be updated
  * @returns {object} task object
  */
-GTD.insertTask = function(name, status, disableGTask) {
-    if (typeof disableGTask === 'undefined') {
-        disableGTask = false;
-    }
+GTD.insertTask = function(name, status) {
     var task = GTD.Task.createNewTask(name, status);
+    if (task === null || (typeof task === 'undefined')) {
+        return;
+    }
     // Update task's status in summary table.
     GTD.changeTaskStatus({
         task: task,
-        status: status,
-        disableGTask: disableGTask
+        status: status
     });
 
     return task;
@@ -183,7 +177,7 @@ GTD.initialize = function() {
     // the actual status.
     GTD.symbolStatusMap = {};
     for (var key in GTD.statusSymbol) {
-    if (GTD.statusSymbol.hasOwnProperty(key)) {           
+    if (GTD.statusSymbol.hasOwnProperty(key)) {
         GTD.symbolStatusMap[GTD.statusSymbol[key]] = key;
     }
 }

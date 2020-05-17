@@ -56,6 +56,11 @@ GTD.Task.insertThreadHeader = function(name) {
     var headerTable = GTD.util.insertTableAtCursor([
         [statusSymbol + ' ' + name],
     ]);
+    if (headerTable === 'element_not_found' || headerTable === 'cursor_not_found') {
+      DocumentApp.getUi().alert('Please make sure your cursor is not in ' +
+          'any table when creating tasks');
+      return;
+    }
     headerTable.setBorderWidth(0);
 
 
@@ -71,7 +76,8 @@ GTD.Task.insertThreadHeader = function(name) {
     // return task here
     return {
       taskDesc: taskDesc,
-      statusBefore: 'NotExist'
+      statusBefore: 'NotExist',
+      threadHeader: headerTable
     };
 
 };
