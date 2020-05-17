@@ -3,7 +3,7 @@ function onOpen(e) {
   // Or DocumentApp or FormApp.
   if (GTD.isGtdDocument()) {
       ui.createMenu('GTD')
-          .addItem('Insert task', 'insertTask')
+          .addItem('Create task', 'insertTask')
           .addItem('Insert update', 'insertComment')
           .addItem('Mark task as Actionable', 'createActionableTask')
           .addItem('Mark task as WaitingFor', 'moveTaskToWaitingFor')
@@ -48,14 +48,17 @@ function insertNoteChecklist() {
   GTD.Task.insertNote('checklist');
 }
 
+
 function insertTask() {
-    GTD.initialize();
-    var html = HtmlService.createHtmlOutput(GTD.templates.insert_task_diag)
-        .setSandboxMode(HtmlService.SandboxMode.IFRAME)
-        .setWidth(400)
-        .setHeight(200);
-    DocumentApp.getUi() // Or DocumentApp or FormApp.
-        .showModalDialog(html, 'Dialog to insert new task');
+  GTD.initialize();
+  var text = GTD.util.extractTextAndRemoveCursorElement();
+  if (text === null || (typeof text === 'undefined') || text === '' ) {
+      DocumentApp.getUi().alert('Could not find text to create task. ' +
+                                'Please put your cursor in the line whose text ' +
+                                'should be used as task description (do not select the text).');
+      return;
+  }
+  GTD.insertTask(text, 'Actionable');
 }
 
 function insertDate() {

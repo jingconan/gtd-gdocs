@@ -157,3 +157,20 @@ GTD.util.getTaskName = function(taskName) {
     return tokens[1];
 };
 
+GTD.util.extractTextAndRemoveCursorElement = function() {
+  var document = DocumentApp.getActiveDocument();
+  var cursor = document.getCursor();
+  if (!cursor) {
+      GTD.util.alertNoCursor();
+      return;
+  }
+  var ele = cursor.getElement();
+  if (ele === null || typeof ele === 'undefined') {
+      return null;
+  }
+  var text = ele.asText().getText();
+  if (text !== '') {
+    ele.editAsText().setText('');
+  }
+  return text;
+}

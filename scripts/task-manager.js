@@ -110,12 +110,12 @@ GTD.TM.updateTaskStatusInBatch = function(gTasksInfo) {
         // If the task doesn't exist in the document yet, then create it
         if (typeof existingInfo === 'undefined') {
             GTD.util.setCursorAfterFirstSeparator();
-            GTD.insertTask(info.taskName, info.status, true);
+            GTD.insertTask(info.taskName, info.status);
             continue;
         } else {
           // Update task status if the status of gtasks and document doesn't matches
           if (existingInfo.status !== info.status) {
-            // debug('change task with description: ' + existingInfo.task + ' from ' + 
+            // debug('change task with description: ' + existingInfo.task + ' from ' +
             //       existingInfo.status + ' to status ' + info.status);
             GTD.changeTaskStatus({
               task: {
