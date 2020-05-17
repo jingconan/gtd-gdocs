@@ -4,16 +4,16 @@ function onOpen(e) {
   if (GTD.isGtdDocument()) {
       ui.createMenu('GTD')
           .addItem('Insert task', 'insertTask')
-          .addItem('Insert comment', 'insertComment')
-          .addItem('Mark as Actionable', 'createActionableTask')
-          .addItem('Mark as WaitingFor', 'moveTaskToWaitingFor')
-          .addItem('Mark as Done', 'moveTaskToDone')
-          .addItem('Mark as Someday', 'moveTaskToSomeday')
+          .addItem('Insert update', 'insertComment')
+          .addItem('Mark task as Actionable', 'createActionableTask')
+          .addItem('Mark task as WaitingFor', 'moveTaskToWaitingFor')
+          .addItem('Mark task as Done', 'moveTaskToDone')
+          .addItem('Mark task as Someday', 'moveTaskToSomeday')
           .addItem('Insert separator', 'insertSeparator')
-          .addSubMenu(ui.createMenu('Format comment as')
-                  .addItem('Code', 'insertNoteCode')
-                  .addItem('Email', 'insertNoteEmail')
-                  .addItem('Checklist', 'insertNoteChecklist'))
+          // .addSubMenu(ui.createMenu('Format as')
+          //         .addItem('Code', 'insertNoteCode')
+          //         .addItem('Email', 'insertNoteEmail')
+          //         .addItem('Checklist', 'insertNoteChecklist'))
           .addToUi();
 
   } else {

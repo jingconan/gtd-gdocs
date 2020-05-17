@@ -7,7 +7,7 @@ GTD.Task = {
         'code': {
             'color': '#D9EAD3',
             'font-family': 'Consolas',
-            'font-size': 9
+            'font-size': 11
         },
         'email': {
             'color': '#80D8FF',
@@ -43,16 +43,14 @@ GTD.Task.addThreadSeparator = function() {
           'any table when inserting separator');
       return;
     }
-    
+
     table.editAsText().setForegroundColor('#ffffff');
     GTD.Task.setBackgroundColor(table, '#4285F4', [0, 1, 0, 1]);
     table.setBorderWidth(0);
 };
 
-GTD.Task.insertThreadHeader = function( name) {
-    var currentTime = GTD.util.toISO(new Date());
+GTD.Task.insertThreadHeader = function(name) {
     var taskStatus = GTD.header[this.status];
-    // var subTaskStatus = this.subTasksDone + '/' + this.subTasksTotal;
 
     var statusSymbol = GTD.statusSymbol[taskStatus]
     var headerTable = GTD.util.insertTableAtCursor([
@@ -62,7 +60,7 @@ GTD.Task.insertThreadHeader = function( name) {
 
 
     // Add a bookmark
-    var taskDesc = currentTime + '\n' + name;
+    var taskDesc = name;
     var position = DocumentApp.getActiveDocument().newPosition(headerTable, 0);
     var bookmark = position.insertBookmark();
 
@@ -165,7 +163,7 @@ GTD.Task.insertComment = function(options) {
         .setBackgroundColor('#f7f7f7');
     table.setBorderWidth(1);
     table.setBorderColor('#d1d5da')
-    
+
     GTD.util.setCursorAtTable(table, [1, 0]);
 };
 
@@ -222,7 +220,7 @@ GTD.Task.getTaskThreadHeader = function(ele) {
         res.status = 'not_found'
         return res;
     }
-    
+
     if (!GTD.Summary.isTaskSummaryTable(ele)) {
       res.header = ele;
       res.status = 'cursor_in_header';
@@ -294,7 +292,7 @@ GTD.Task.getTaskDesc = function(threadHeader) {
 };
 
 GTD.Task.isThreadHeader = function(table) {
-    return (table.getNumRows() === this.SIZE[0]) && 
+    return (table.getNumRows() === this.SIZE[0]) &&
            (table.getRow(0).getNumChildren() === this.SIZE[1]) &&
            (table.getCell(0, 0).getText() == 'Timestamp');
 };
