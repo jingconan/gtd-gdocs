@@ -136,6 +136,16 @@ GTD.Summary.getTaskFromCursor = function(cursor) {
     };
 };
 
+GTD.Summary.searchTaskSummaryTable = function() {
+    var tables = GTD.body.getTables();
+    for (var i = 0; i < tables.length; ++i) {
+        if (GTD.Summary.isTaskSummaryTable(tables[i])) {
+            return tables[i];
+        }
+    }
+    return null;
+}
+
 GTD.Summary.isTaskSummaryTable = function(table) {
     if (table.getNumRows() === 0) {
         return false;
