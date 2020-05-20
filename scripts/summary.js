@@ -188,7 +188,8 @@ GTD.Summary.createSummaryTable = function (body) {
         table.getCell(0, i)
         .setBackgroundColor('#fafbfc')
         .editAsText()
-        .setForegroundColor(GTD.headerColor[i]);
+        .setForegroundColor(GTD.headerColor[i])
+        .setBold(true);
     }
     table.setBorderColor('#c0d3eb');
     table.setBorderWidth(1);
