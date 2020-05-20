@@ -1,4 +1,4 @@
-// compiled from git commit version: e96b08bbf55d84f6b293d36f0fd599187088b1a6
+// compiled from git commit version: 014c8d6d2319c7d8305789e6522360507703a30e
 var GTD = {
     // Commonly used DOM object
     document: DocumentApp.getActiveDocument(),
@@ -13,7 +13,7 @@ var GTD = {
         'Someday': '\uD83C\uDD82',
     },
     header: ['Actionable', 'Waiting For', 'Done', 'Someday'], //FIXME change to taskStatus
-    headerColor: ['#ff0000', '#9d922e', '#16a031', '#808080'], //FIXME change to taskStatusColor 
+    headerColor: ['#f92929', '#cc317c', '#229819', '#cccccc'], //FIXME change to taskStatusColor 
     bodyMargins: [36, 36, 36, 36], // L, T, R, D unit is point
     commentStyle: {
         foregroundColor: '#000000'
@@ -397,7 +397,8 @@ GTD.Summary.createSummaryTable = function (body) {
         table.getCell(0, i)
         .setBackgroundColor('#fafbfc')
         .editAsText()
-        .setForegroundColor(GTD.headerColor[i]);
+        .setForegroundColor(GTD.headerColor[i])
+        .setBold(true);
     }
     table.setBorderColor('#c0d3eb');
     table.setBorderWidth(1);
@@ -627,7 +628,7 @@ GTD.Task.addThreadSeparator = function() {
       return;
     }
 
-    table.editAsText().setForegroundColor('#ffffff');
+    table.editAsText().setForegroundColor('#ffffff').setBold(true);
     GTD.Task.setBackgroundColor(table, '#4285F4', [0, 1, 0, 1]);
     table.setBorderWidth(0);
 };

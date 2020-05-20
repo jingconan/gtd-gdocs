@@ -44,7 +44,7 @@ GTD.Task.addThreadSeparator = function() {
       return;
     }
 
-    table.editAsText().setForegroundColor('#ffffff');
+    table.editAsText().setForegroundColor('#ffffff').setBold(true);
     GTD.Task.setBackgroundColor(table, '#4285F4', [0, 1, 0, 1]);
     table.setBorderWidth(0);
 };
