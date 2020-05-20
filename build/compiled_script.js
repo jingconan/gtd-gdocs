@@ -1,4 +1,4 @@
-// compiled from git commit version: b7e74448bcc1e2439c9d59b29ed5b9e217fa14a2
+// compiled from git commit version: e96b08bbf55d84f6b293d36f0fd599187088b1a6
 var GTD = {
     // Commonly used DOM object
     document: DocumentApp.getActiveDocument(),
@@ -391,15 +391,16 @@ GTD.Summary.createSummaryTable = function (body) {
         DocumentApp.getUi().alert('Cannot create task summary table!');
         return;
     }
-    table.setBorderWidth(1);
-    table.setBorderColor('#d1d5da');
 
     assert(GTD.header.length === GTD.headerColor.length, 'wrong number of color');
     for (i = 0; i < GTD.header.length; ++i) {
         table.getCell(0, i)
+        .setBackgroundColor('#fafbfc')
         .editAsText()
         .setForegroundColor(GTD.headerColor[i]);
     }
+    table.setBorderColor('#c0d3eb');
+    table.setBorderWidth(1);
     return table;
 };
 
@@ -746,11 +747,11 @@ GTD.Task.insertComment = function(options) {
     text.setFontSize(user.length+1, text.getText().length-1, 7);
 
     table.getCell(0, 0)
-        .setBackgroundColor('#dde4e6');
+        .setBackgroundColor('#f1f8ff');
     table.getCell(1, 0)
-        .setBackgroundColor('#f7f7f7');
+        .setBackgroundColor('#ffffff');
     table.setBorderWidth(1);
-    table.setBorderColor('#d1d5da')
+    table.setBorderColor('#c0d3eb')
 
     GTD.util.setCursorAtTable(table, [1, 0]);
 };
@@ -929,7 +930,6 @@ GTD.initSummaryTable = function() {
     var taskTable = GTD.Summary.searchTaskSummaryTable();
     if (taskTable === null) {
         taskTable = GTD.Summary.createSummaryTable(GTD.body);
-        taskTable.setBorderWidth(0);
     }
     GTD.taskTable = taskTable;
 };

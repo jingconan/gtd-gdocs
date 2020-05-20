@@ -37,7 +37,6 @@ GTD.initSummaryTable = function() {
     var taskTable = GTD.Summary.searchTaskSummaryTable();
     if (taskTable === null) {
         taskTable = GTD.Summary.createSummaryTable(GTD.body);
-        taskTable.setBorderWidth(0);
     }
     GTD.taskTable = taskTable;
 };

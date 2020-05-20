@@ -1,4 +1,4 @@
-# Google Task Document
+# Great Task Document
 This project turns google docs to a full-fledge task management system.
 
 With this google app script, you can turn any google doc to a GTD
