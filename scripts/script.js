@@ -172,6 +172,7 @@ GTD.getTaskThreadPosition = function(task) {
     var doc = DocumentApp.getActiveDocument();
     var documentProperties = PropertiesService.getDocumentProperties();
     var bookmarkId = documentProperties.getProperty(task.taskDesc);
+    // DocumentApp.getUi().alert('getTaskThreadPosition: task ' + task.taskDesc);
     if (!bookmarkId) {
         Logger.log('PropertiesService unsynced!');
         bookmarkId =  GTD.searchBookmarkIdBasedOnTaskDesc(task.taskDesc);
@@ -182,30 +183,13 @@ GTD.getTaskThreadPosition = function(task) {
         }
     }
     var bookmark = doc.getBookmark(bookmarkId);
+    // DocumentApp.getUi().alert('getTaskThreadPosition: bookmark ' + bookmark);
+
     if (bookmark) {
         return bookmark.getPosition();
     }
 };
 
-// Find the task header, set the cursor there and select the whole
-// header to highlight it.
-GTD.jumpAndFocusOnTask = function(task) {
-    var doc = DocumentApp.getActiveDocument();
-    var taskDesc = task.taskDesc;
-    var position = GTD.getTaskThreadPosition(task);
-    if (!position) {
-        return;
-    }
-
-    doc.setCursor(position);
-
-    // Make the task to be selected. This gives user a visual indicator
-    // of the start of the task.
-    var rangeBuilder = doc.newRange();
-    var header = GTD.Task.getTaskThreadHeader(position.getElement()).header;
-    rangeBuilder.addElement(header);
-    doc.setSelection(rangeBuilder.build());
-};
 
 GTD.changeTaskStatusMenuWrapper = function(options) {
     GTD.initialize();

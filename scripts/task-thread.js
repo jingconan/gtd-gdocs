@@ -49,35 +49,32 @@ GTD.Task.addThreadSeparator = function() {
     table.setBorderWidth(0);
 };
 
+GTD.Task.insertBookmark = function(name) {
+  var taskDesc = name;
+  var doc = DocumentApp.getActiveDocument();
+  var cursor = doc.getCursor();
+  var bookmark = doc.addBookmark(cursor);
+  DocumentApp.getUi().alert('documentProperties.setProperty: taskDesc ' + taskDesc + ' bookmark: ' + bookmark);
+
+  var documentProperties = PropertiesService.getDocumentProperties();
+  documentProperties.setProperty(name, bookmark.getId());
+  DocumentApp.getUi().alert('documentProperties.setProperty: taskDesc ' + taskDesc + ' bookmarkID: ' + bookmark.getId());
+
+}
+
 GTD.Task.insertThreadHeader = function(name) {
     var taskStatus = GTD.header[this.status];
 
     var statusSymbol = GTD.statusSymbol[taskStatus]
-    var headerTable = GTD.util.insertTableAtCursor([
-        [statusSymbol + ' ' + name],
-    ]);
-    if (headerTable === 'element_not_found' || headerTable === 'cursor_not_found') {
-      DocumentApp.getUi().alert('Please make sure your cursor is not in ' +
-          'any table when creating tasks');
-      return;
-    }
-    headerTable.setBorderWidth(0);
+    var threadHeaderEle = GTD.util.insertText(statusSymbol + ' ' + name);
 
-
-    // Add a bookmark
-    var taskDesc = name;
-    var position = DocumentApp.getActiveDocument().newPosition(headerTable, 0);
-    var bookmark = position.insertBookmark();
-
-    // Store the correspondence of taskDesc and bookmark Id.
-    var documentProperties = PropertiesService.getDocumentProperties();
-    documentProperties.setProperty(taskDesc, bookmark.getId());
+    GTD.Task.insertBookmark(name);
 
     // return task here
     return {
-      taskDesc: taskDesc,
+      taskDesc: name,
       statusBefore: 'NotExist',
-      threadHeader: headerTable
+      threadHeader: threadHeaderEle
     };
 
 };
@@ -143,10 +140,10 @@ GTD.Task.insertComment = function(options) {
     if (options.location === 'cursor') {
       table = GTD.util.insertTableAtCursor([[user + ' ' + currentTime], ['']]);
     } else if (options.location === 'thread') {
-      table = GTD.util.insertTableAfterThreadHeader({
-        threadHeader: options.threadHeader,
-        cells: [[user + ' ' + currentTime], [options.message]]
-      });
+      // Move cursor to the position
+      var doc = DocumentApp.getActiveDocument();
+      var position = doc.newPosition(sometext, 11);
+      table = GTD.util.insertTableAtCursor([[user + ' ' + currentTime], ['']]);
     }
 
     if (table === 'cursor_not_found') {
@@ -184,7 +181,7 @@ GTD.getTaskHeader = function(task) {
     if (!position) {
         return {};
     }
-    return GTD.Task.getTaskThreadHeader(position.getElement());
+    return position.getElement();
 }
 
 /* Returns the task thread header that is parent of an element.
@@ -209,20 +206,31 @@ GTD.Task.getTaskThreadHeader = function(ele) {
         ele = cursor.getElement();
     }
 
-    if (ele.getType() === DocumentApp.ElementType.TEXT) {
+    if ((ele.getType() === DocumentApp.ElementType.TEXT) ||
+        (ele.getType() === DocumentApp.ElementType.PARAGRAPH) ||
+        (ele.getType() === DocumentApp.ElementType.LIST_ITEM)) {
+        if (GTD.Task.isValidTaskThreadHeader(ele)) {
+            res.header = ele;
+            res.status = 'cursor_in_header';
+            return res;
+        }
+    }
+    ele = ele.getParent();
+
+    if (ele && ele.getType() === DocumentApp.ElementType.PARAGRAPH) {
         ele = ele.getParent();
     }
-    if (ele.getType() === DocumentApp.ElementType.PARAGRAPH) {
-        ele = ele.getParent();
-    }
-    if (ele.getType() === DocumentApp.ElementType.TABLE_CELL) {
+
+    if (ele && ele.getType() === DocumentApp.ElementType.TABLE_CELL) {
         ele = ele.getParent();
     }
     if (ele.getType() === DocumentApp.ElementType.TABLE_ROW) {
         ele = ele.getParent();
     }
+
+    // DocumentApp.getUi().alert('ele.Type: ' + ele.getType());
     if (!ele || ele.getType() != DocumentApp.ElementType.TABLE) {
-        // DocumentApp.getUi().alert('Cannot find task header under cursor! ele.type: ' + ele.getType());
+        DocumentApp.getUi().alert('Cannot find task header under cursor! ele.type: ' + ele.getType());
         res.status = 'not_found'
         return res;
     }
@@ -231,16 +239,20 @@ GTD.Task.getTaskThreadHeader = function(ele) {
       res.header = ele;
       res.status = 'cursor_in_header';
       return res;
-    }
-
-    // If the cursor is in the summary table, then find the
-    // corresponding header by its name.
-    if (GTD.Summary.isTaskSummaryTable(ele)) {
+    } else {
       // Get task name.
-      task = GTD.Summary.getTaskFromCursor(cursor);
+      task = cursor.getElement().editAsText().getText();
       if (task) {
-          res.header = GTD.getTaskHeader(task).header;
-          res.status = 'cursor_in_summary_table';
+          var position = GTD.getTaskThreadPosition({'taskDesc': task});
+          if (!position) {
+              DocumentApp.getUi().alert('Not found task: ' + task);
+              res.status = 'not_found'
+          } else {
+
+            res.header =  position.getElement();
+            DocumentApp.getUi().alert('Found position: ' + res.header.getText());
+            res.status = 'cursor_in_summary_table';
+          }
       }
     }
 
@@ -248,11 +260,17 @@ GTD.Task.getTaskThreadHeader = function(ele) {
 };
 
 // We assume task thread head is a table with only one row.
-GTD.Task.isValidTaskThreadHeader = function(table) {
-    if (table.getNumRows() !== 1) {
-        return false;
+GTD.Task.isValidTaskThreadHeader = function(ele) {
+    var text = ele.getText();
+    for (var key in GTD.statusSymbol) {
+        // check if the property/key is defined in the object itself, not in parent
+        if (GTD.statusSymbol.hasOwnProperty(key)) {
+            if (text.startsWith(GTD.statusSymbol[key])) {
+                return true;
+            }
+        }
     }
-    return true;
+    return false;
 };
 
 GTD.Task.setBackgroundColor = function(headerTable, color, range) {
@@ -279,12 +297,15 @@ GTD.Task.setForegroundColor = function(headerTable, color, range) {
 GTD.Task.setThreadHeaderStatus = function(threadHeader, status) {
     var symbol = GTD.statusSymbol[status];
     var taskDesc = GTD.Task.getTaskDesc(threadHeader);
-    threadHeader.getCell(this.CONTENT_ROW, 0).setText(symbol + ' ' + taskDesc);
+    // threadHeader.getCell(this.CONTENT_ROW, 0).setText(symbol + ' ' + taskDesc);
+    threadHeader.setText(symbol + ' ' + taskDesc);
+    GTD.Task.insertBookmark(taskDesc);
 };
 
 // We assume the first part of the content is the status.
 GTD.Task.getThreadHeaderStatus = function(threadHeader) {
-    var text = threadHeader.getCell(this.CONTENT_ROW, 0).getText();
+    // var text = threadHeader.getCell(this.CONTENT_ROW, 0).getText();
+    var text = threadHeader.getText();
     var tokens = text.split(' ');
     var symbol = tokens[0];
     return GTD.symbolStatusMap[symbol];
@@ -292,7 +313,7 @@ GTD.Task.getThreadHeaderStatus = function(threadHeader) {
 
 // We assume the remaining part of the content is the task description.
 GTD.Task.getTaskDesc = function(threadHeader) {
-    var text = threadHeader.getCell(this.CONTENT_ROW, 0).getText();
+    var text = threadHeader.getText();
     var tokens = text.split(' ');
     return tokens.slice(1).join(' ');
 };
