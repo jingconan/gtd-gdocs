@@ -1,7 +1,7 @@
 {
   "name": "gtd-gdocs",
   "version": "1.0.0",
-  "description": "Google Task Document",
+  "description": "Great Task Document",
   "main": "compile.js",
   "dependencies": {
     "glob": "^5.0.15",
@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/hbhzwj/gtd-gdocs.git"
+    "url": "https://github.com/jingcwang/gtd-gdocs.git"
   },
   "keywords": [
     "Task",
@@ -22,7 +22,7 @@
   "author": "Jing Conan Wang",
   "license": "GPL",
   "bugs": {
-    "url": "https://github.com/hbhzwj/gtd-gdocs/issues"
+    "url": "https://github.com/jingcwang/gtd-gdocs/issues"
   },
-  "homepage": "https://github.com/hbhzwj/gtd-gdocs"
+  "homepage": "https://github.com/jingcwang/gtd-gdocs"
 }

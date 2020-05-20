@@ -164,11 +164,11 @@ GTD.Task.insertComment = function(options) {
     text.setFontSize(user.length+1, text.getText().length-1, 7);
 
     table.getCell(0, 0)
-        .setBackgroundColor('#dde4e6');
+        .setBackgroundColor('#f1f8ff');
     table.getCell(1, 0)
-        .setBackgroundColor('#f7f7f7');
+        .setBackgroundColor('#ffffff');
     table.setBorderWidth(1);
-    table.setBorderColor('#d1d5da')
+    table.setBorderColor('#c0d3eb')
 
     GTD.util.setCursorAtTable(table, [1, 0]);
 };

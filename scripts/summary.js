@@ -182,14 +182,15 @@ GTD.Summary.createSummaryTable = function (body) {
         DocumentApp.getUi().alert('Cannot create task summary table!');
         return;
     }
-    table.setBorderWidth(1);
-    table.setBorderColor('#d1d5da');
 
     assert(GTD.header.length === GTD.headerColor.length, 'wrong number of color');
     for (i = 0; i < GTD.header.length; ++i) {
         table.getCell(0, i)
+        .setBackgroundColor('#fafbfc')
         .editAsText()
         .setForegroundColor(GTD.headerColor[i]);
     }
+    table.setBorderColor('#c0d3eb');
+    table.setBorderWidth(1);
     return table;
 };
