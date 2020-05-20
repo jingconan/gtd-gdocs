@@ -1,4 +1,4 @@
-// compiled from git commit version: 014c8d6d2319c7d8305789e6522360507703a30e
+// compiled from git commit version: 715d9ab78b405aa9fb3465b2975538802836559b
 var GTD = {
     // Commonly used DOM object
     document: DocumentApp.getActiveDocument(),
@@ -1143,28 +1143,17 @@ function changeTaskStatus(comment, statusAfter) {
 
 
 function onOpen(e) {
-  var ui = DocumentApp.getUi();
-  // Or DocumentApp or FormApp.
-  if (GTD.isGtdDocument()) {
-      ui.createMenu('GTD')
-          .addItem('Create task', 'insertTask')
-          .addItem('Insert update', 'insertComment')
-          .addItem('Mark task as Actionable', 'createActionableTask')
-          .addItem('Mark task as WaitingFor', 'moveTaskToWaitingFor')
-          .addItem('Mark task as Done', 'moveTaskToDone')
-          .addItem('Mark task as Someday', 'moveTaskToSomeday')
-          .addItem('Insert separator', 'insertSeparator')
-          // .addSubMenu(ui.createMenu('Format as')
-          //         .addItem('Code', 'insertNoteCode')
-          //         .addItem('Email', 'insertNoteEmail')
-          //         .addItem('Checklist', 'insertNoteChecklist'))
-          .addToUi();
+    var ui = DocumentApp.getUi();
+    ui.createMenu('GTD')
+        .addItem('Create task', 'insertTask')
+        .addItem('Insert update', 'insertComment')
+        .addItem('Mark task as Actionable', 'createActionableTask')
+        .addItem('Mark task as WaitingFor', 'moveTaskToWaitingFor')
+        .addItem('Mark task as Done', 'moveTaskToDone')
+        .addItem('Mark task as Someday', 'moveTaskToSomeday')
+        .addItem('Insert separator', 'insertSeparator')
+        .addToUi();
 
-  } else {
-      ui.createMenu('GTD')
-          .addItem('Initialize', 'initTaskFunction')
-          .addToUi();
-  }
 }
 
 function onInstall(e) {
@@ -1211,11 +1200,6 @@ function insertDate() {
   var text = '\n' + GTD.toISO(new Date()) + '\n';
   var element = cursor.insertText(text);
   doc.setCursor(doc.newPosition(element, text.length));
-}
-
-function initTaskFunction() {
-    GTD.initialize();
-    onOpen();
 }
 
 function createActionableTask() {

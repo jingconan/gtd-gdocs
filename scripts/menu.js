@@ -1,26 +1,15 @@
 function onOpen(e) {
-  var ui = DocumentApp.getUi();
-  // Or DocumentApp or FormApp.
-  if (GTD.isGtdDocument()) {
-      ui.createMenu('GTD')
-          .addItem('Create task', 'insertTask')
-          .addItem('Insert update', 'insertComment')
-          .addItem('Mark task as Actionable', 'createActionableTask')
-          .addItem('Mark task as WaitingFor', 'moveTaskToWaitingFor')
-          .addItem('Mark task as Done', 'moveTaskToDone')
-          .addItem('Mark task as Someday', 'moveTaskToSomeday')
-          .addItem('Insert separator', 'insertSeparator')
-          // .addSubMenu(ui.createMenu('Format as')
-          //         .addItem('Code', 'insertNoteCode')
-          //         .addItem('Email', 'insertNoteEmail')
-          //         .addItem('Checklist', 'insertNoteChecklist'))
-          .addToUi();
+    var ui = DocumentApp.getUi();
+    ui.createMenu('GTD')
+        .addItem('Create task', 'insertTask')
+        .addItem('Insert update', 'insertComment')
+        .addItem('Mark task as Actionable', 'createActionableTask')
+        .addItem('Mark task as WaitingFor', 'moveTaskToWaitingFor')
+        .addItem('Mark task as Done', 'moveTaskToDone')
+        .addItem('Mark task as Someday', 'moveTaskToSomeday')
+        .addItem('Insert separator', 'insertSeparator')
+        .addToUi();
 
-  } else {
-      ui.createMenu('GTD')
-          .addItem('Initialize', 'initTaskFunction')
-          .addToUi();
-  }
 }
 
 function onInstall(e) {
@@ -67,11 +56,6 @@ function insertDate() {
   var text = '\n' + GTD.toISO(new Date()) + '\n';
   var element = cursor.insertText(text);
   doc.setCursor(doc.newPosition(element, text.length));
-}
-
-function initTaskFunction() {
-    GTD.initialize();
-    onOpen();
 }
 
 function createActionableTask() {
