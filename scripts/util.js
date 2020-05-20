@@ -157,6 +157,17 @@ GTD.util.getTaskName = function(taskName) {
     return tokens[1];
 };
 
+GTD.util.insertText = function(text) {
+  var document = DocumentApp.getActiveDocument();
+  var cursor = document.getCursor();
+  if (!cursor) {
+      GTD.util.alertNoCursor();
+      return;
+  }
+  var ele = cursor.insertText(text);
+  return ele;
+}
+
 GTD.util.extractTextAndRemoveCursorElement = function() {
   var document = DocumentApp.getActiveDocument();
   var cursor = document.getCursor();
