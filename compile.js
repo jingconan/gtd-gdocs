@@ -13,14 +13,11 @@ var scripts = [
     'scripts/task-manager.js',
     'scripts/task-thread.js',
     'scripts/script.js',
-    'scripts/service.js',
     'scripts/menu.js'
 ];
 
 // Template files used in this project
 var templates = [
-   'templates/insert_task_diag.html',
-   'templates/change_task_status.html'
 ];
 
 var walk = function(dir) {

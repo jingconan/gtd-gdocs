@@ -1,25 +1,6 @@
 GTD.Task = {
     CONTENT_ROW: 0,
     SIZE: [2, 3],
-    // THREAD_HEADER_WIDTH: [100, 350, 70, 60]
-    THREAD_HEADER_WIDTH: [70, 450, 70],
-    NOTE_FORMAT: {
-        'code': {
-            'color': '#D9EAD3',
-            'font-family': 'Consolas',
-            'font-size': 11
-        },
-        'email': {
-            'color': '#80D8FF',
-            'font-family': 'Times New Roman',
-            'font-size': 12
-        },
-        'checklist': {
-            'color': '#FFFF8D',
-            'font-family': 'Arial',
-            'font-size': 12
-        }
-    }
 };
 
 GTD.Task.createNewTask = function(name, statusName) {
@@ -85,50 +66,6 @@ GTD.Task.insertThreadHeader = function(name) {
 
 };
 
-GTD.Task.setColumnWidth = function(table) {
-    var i;
-    for (i = 0; i < this.THREAD_HEADER_WIDTH.length; ++i) {
-        table.setColumnWidth(i, this.THREAD_HEADER_WIDTH[i]);
-    }
-};
-
-/* Format the table under the cursor to be a certain format based on
- * types.
- * TODO(hbhzwj): change the function name, which is a misnomer.
- */
-GTD.Task.insertNote = function(noteType) {
-    var document = DocumentApp.getActiveDocument();
-    var cursor = document.getCursor();
-    if (!cursor) {
-        GTD.util.alertNoCursor();
-        return;
-    }
-    var ele = cursor.getElement();
-    var noteCell = ele;
-    // Search up until we find a table cell or return.
-    while (noteCell.getType() !== DocumentApp.ElementType.TABLE_CELL) {
-        noteCell = noteCell.getParent();
-        if (noteCell.getType() == DocumentApp.ElementType.DOCUMENT) {
-            // cannot find a Table cell. Probably because the current cursor is
-            // not inside a table.
-            return;
-        }
-    }
-    // format the table cell.
-    noteCell.setBackgroundColor(GTD.Task.NOTE_FORMAT[noteType]['color']);
-    noteCell.editAsText().setFontFamily(GTD.Task.NOTE_FORMAT[noteType]['font-family']);
-    noteCell.editAsText().setFontSize(GTD.Task.NOTE_FORMAT[noteType]['font-size']);
-    // A workaround to make sure the format of the text is cleared.
-    var text = noteCell.getText();
-    noteCell.clear();
-    noteCell.setText(text);
-};
-
-// GTD.Task.addBody = function(cell) {
-//     var doc = DocumentApp.getActiveDocument();
-//     var position = doc.newPosition(cell, 0);
-//     doc.setCursor(position);
-// };
 /* Insert a comment in current cursor or to a specific thread.
  * If insert to a thread, need to input threadHeader, which is the table
  * element of the thread.

@@ -1,4 +1,4 @@
-// compiled from git commit version: 333ec241e37844bfa69756e60298ac9b24cf9f46
+// compiled from git commit version: 2eaceacafed5866ae0979b0a6517bbba805c7b1e
 var GTD = {
     // Commonly used DOM object
     document: DocumentApp.getActiveDocument(),
@@ -14,7 +14,6 @@ var GTD = {
     },
     header: ['Actionable', 'Waiting For', 'Done', 'Someday'], //FIXME change to taskStatus
     headerColor: ['#f92929', '#cc317c', '#229819', '#cccccc'], //FIXME change to taskStatusColor
-    bodyMargins: [36, 36, 36, 36], // L, T, R, D unit is point
     commentStyle: {
         foregroundColor: '#000000'
     },
@@ -335,26 +334,6 @@ GTD.Summary.getAllTasksFromCol = function(col) {
     return res;
 };
 
-// GTD function assume cursor is inside summary table and find the task
-// description from the summary table.
-GTD.Summary.getTaskFromCursor = function(cursor) {
-    var ele = cursor.getElement();
-    // if (ele.getType() === DocumentApp.ElementType.TEXT) {
-    //     ele = ele.getParent();
-    // }
-    // if (ele.getType() === DocumentApp.ElementType.PARAGRAPH) {
-    //     ele = ele.getParent();
-    // }
-    // if (!ele || ele.getType() != DocumentApp.ElementType.TABLE_CELL) {
-    //     DocumentApp.getUi().alert('Cannot find task under cursor!' );
-    //     return;
-    // }
-
-    return {
-        taskDesc: ele.editAsText().getText()
-    };
-};
-
 GTD.Summary.searchTaskSummaryTable = function() {
     var tables = GTD.body.getTables();
     for (var i = 0; i < tables.length; ++i) {
@@ -432,189 +411,10 @@ GTD.TM.getColIdx = function(status) {
     return GTD.colIdx[status];
 };
 
-/* Get tasks with a particular status
- */
-GTD.TM.getTasksWithStatus = function(status) {
-    var colIdx = GTD.TM.getColIdx(status);
-    return GTD.Summary.getAllTasksFromCol(colIdx);
-};
-
-/* Create a task search table for tasks whose status is in statusList
- */
-GTD.TM.createTaskSearchTable = function(statusList) {
-    var existingTasks = {};
-    for (var i = 0; i < statusList.length; ++i) {
-        var tasks = GTD.TM.getTasksWithStatus(statusList[i]);
-        var thisTasks = [];
-        for (var j = 0; j < tasks.length; ++j) {
-            var taskName = GTD.util.getTaskName(tasks[j]);
-            existingTasks[taskName] = {
-                'status': statusList[i],
-                'task': tasks[j]
-            }
-        }
-    }
-    return existingTasks;
-};
-
-/* Check whether a line is automatically generated (rather than manually added)
- * 1. Any line starts with timestamps
- * 2. Empty line
- * 3. Line starts with #
- */
-GTD.TM.isAutoText = function (line) {
-  var re = /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/i;
-  return !line ||
-         line.startsWith('#') ||
-         line.match(re);
-};
-
-/* parse gtask note and group by lines by functionality
- */
-GTD.TM.parseNote = function(note) {
-  var lines = note.split('\n');
-  var line, autoLines = [], manualLines = [];
-  for (var i = 0; i < lines.length; ++i) {
-    line = lines[i];
-    if (GTD.TM.isAutoText(line)) {
-      autoLines.push(line);
-    } else {
-      manualLines.push(line);
-    }
-  }
-  return {
-    auto: autoLines,
-    manual: manualLines
-  };
-};
-
-/* Geneate a new note in which manual note is commented
- * Input: parseNote which is return value of parseNote
- * Output: a string that will be writen to google task's note section
- */
-GTD.TM.commentManualNote = function(parsedNote) {
-   var resTokens = [];
-   var currentTime = GTD.util.toISO(new Date());
-   resTokens.push('\n' + currentTime + ' Added comment\n#');
-   if (parsedNote.manual.length > 0) {
-      resTokens.push(parsedNote.manual.join('\n# ') + '\n');
-   }
-
-   if (parsedNote.auto.length > 0) {
-     resTokens.push(parsedNote.auto.join('\n'));
-   }
-   return resTokens.join('');
-};
-
-/* Update tasks status bases on information from google tasks
- */
-GTD.TM.updateTaskStatusInBatch = function(gTasksInfo) {
-    // Create a table to search for status of existing tasks
-    var existingTasks = GTD.TM.createTaskSearchTable(GTD.header);
-
-    for (var i = 0; i < gTasksInfo.length; ++i) {
-        var info = GTD.gtask.decodeTaskTitle(gTasksInfo[i].getTitle());
-        // If task is marked completed in gtask, the corresponding
-        // status should be 'Done' regardless of symbol encoded in
-        // title.
-        if (gTasksInfo[i].getStatus() === 'completed') {
-            info.status = 'Done';
-        }
-        if (info.status === 'Unknown') {
-            //TODO(hbhzwj): right now we don't process tasks whose status is
-            //unknown. Need to think whether this is the best approach
-            continue;
-        }
-        var existingInfo = existingTasks[info.taskName];
-        // If the task doesn't exist in the document yet, then create it
-        if (typeof existingInfo === 'undefined') {
-            GTD.util.setCursorAfterFirstSeparator();
-            GTD.insertTask(info.taskName, info.status);
-            continue;
-        } else {
-          // Update task status if the status of gtasks and document doesn't matches
-          if (existingInfo.status !== info.status) {
-            // debug('change task with description: ' + existingInfo.task + ' from ' +
-            //       existingInfo.status + ' to status ' + info.status);
-            GTD.changeTaskStatus({
-              task: {
-                taskDesc: existingInfo.task
-              },
-              status: info.status,
-              disableGTask: true
-            });
-          }
-        }
-
-        var parsedNote = GTD.TM.parseNote(gTasksInfo[i].getNotes());
-        // Insert comment to task if the notes section contains manually
-        // edit notes
-        if (parsedNote.manual.length > 0) {
-          // Insert manual note to task thread
-          GTD.Task.insertComment({
-              threadHeader: GTD.getTaskHeader({taskDesc: existingInfo.task}).header,
-              location: 'thread',
-              message: parsedNote.manual.join('\n')
-          });
-
-          // comment manual note in google tasks
-          var tl = GTD.gtask.getActiveTaskList();
-          GTD.gtask.updateTask(tl.taskListId, tl.parentTask, {
-            title: gTasksInfo[i].getTitle(),
-            notes: GTD.TM.commentManualNote(parsedNote),
-            status: info.status
-          });
-        }
-    }
-};
-
-/* Mark all tasks that are not in google tasks as done
- */
-GTD.TM.markMissingTasksAsDone = function(gTasksInfo) {
-    var existingTasks = GTD.TM.createTaskSearchTable(['Actionable', 'Waiting For']);
-
-    // delete all tasks that is in gTasksInfo
-    for (var i = 0; i < gTasksInfo.length; ++i) {
-        var info = GTD.gtask.decodeTaskTitle(gTasksInfo[i].getTitle());
-        delete existingTasks[info.taskName];
-    }
-
-    for (var key in existingTasks) {
-        if (existingTasks.hasOwnProperty(key)) {
-            GTD.changeTaskStatus({
-                task: {
-                    taskDesc: existingTasks[key].task
-                },
-                status: 'Done',
-                disableGTask: true
-            });
-        }
-    }
-};
-
 
 GTD.Task = {
     CONTENT_ROW: 0,
     SIZE: [2, 3],
-    // THREAD_HEADER_WIDTH: [100, 350, 70, 60]
-    THREAD_HEADER_WIDTH: [70, 450, 70],
-    NOTE_FORMAT: {
-        'code': {
-            'color': '#D9EAD3',
-            'font-family': 'Consolas',
-            'font-size': 11
-        },
-        'email': {
-            'color': '#80D8FF',
-            'font-family': 'Times New Roman',
-            'font-size': 12
-        },
-        'checklist': {
-            'color': '#FFFF8D',
-            'font-family': 'Arial',
-            'font-size': 12
-        }
-    }
 };
 
 GTD.Task.createNewTask = function(name, statusName) {
@@ -680,50 +480,6 @@ GTD.Task.insertThreadHeader = function(name) {
 
 };
 
-GTD.Task.setColumnWidth = function(table) {
-    var i;
-    for (i = 0; i < this.THREAD_HEADER_WIDTH.length; ++i) {
-        table.setColumnWidth(i, this.THREAD_HEADER_WIDTH[i]);
-    }
-};
-
-/* Format the table under the cursor to be a certain format based on
- * types.
- * TODO(hbhzwj): change the function name, which is a misnomer.
- */
-GTD.Task.insertNote = function(noteType) {
-    var document = DocumentApp.getActiveDocument();
-    var cursor = document.getCursor();
-    if (!cursor) {
-        GTD.util.alertNoCursor();
-        return;
-    }
-    var ele = cursor.getElement();
-    var noteCell = ele;
-    // Search up until we find a table cell or return.
-    while (noteCell.getType() !== DocumentApp.ElementType.TABLE_CELL) {
-        noteCell = noteCell.getParent();
-        if (noteCell.getType() == DocumentApp.ElementType.DOCUMENT) {
-            // cannot find a Table cell. Probably because the current cursor is
-            // not inside a table.
-            return;
-        }
-    }
-    // format the table cell.
-    noteCell.setBackgroundColor(GTD.Task.NOTE_FORMAT[noteType]['color']);
-    noteCell.editAsText().setFontFamily(GTD.Task.NOTE_FORMAT[noteType]['font-family']);
-    noteCell.editAsText().setFontSize(GTD.Task.NOTE_FORMAT[noteType]['font-size']);
-    // A workaround to make sure the format of the text is cleared.
-    var text = noteCell.getText();
-    noteCell.clear();
-    noteCell.setText(text);
-};
-
-// GTD.Task.addBody = function(cell) {
-//     var doc = DocumentApp.getActiveDocument();
-//     var position = doc.newPosition(cell, 0);
-//     doc.setCursor(position);
-// };
 /* Insert a comment in current cursor or to a specific thread.
  * If insert to a thread, need to input threadHeader, which is the table
  * element of the thread.
@@ -932,36 +688,11 @@ GTD.Task.isSeparator = function(table) {
 // Google Docs.
 //
 // Author: Jing Conan Wang
-// Email: hbhzwj@gmail.com
+// Email: jingconanwang@gmail.com
 //
 // This code is under GPL license.
 
 // FIXME need to factor the script.js to several smaller files
-
-/* Verify whether the current document is a GTD document
- * Returns true if the document contains a summary table and the page
- * setting is as expected, and false otherwise.
- */
-GTD.isGtdDocument = function() {
-    // Verify that the document contains a summary task table
-    if (GTD.Summary.searchTaskSummaryTable() === null) {
-        return false;
-    }
-
-    // Verify that the margin of the document is okay
-    bodyAttr = GTD.body.getAttributes();
-    marginLeft = bodyAttr[DocumentApp.Attribute.MARGIN_LEFT];
-    marginTop = bodyAttr[DocumentApp.Attribute.MARGIN_TOP];
-    marginRight = bodyAttr[DocumentApp.Attribute.MARGIN_RIGHT];
-    marginBottom = bodyAttr[DocumentApp.Attribute.MARGIN_BOTTOM];
-    if ((marginLeft === GTD.bodyMargins[0]) &&
-        (marginTop === GTD.bodyMargins[1]) &&
-        (marginRight === GTD.bodyMargins[2]) &&
-        (marginBottom === GTD.bodyMargins[3])) {
-        return true;
-    }
-    return false;
-};
 
 GTD.initSummaryTable = function() {
     var taskTable = GTD.Summary.searchTaskSummaryTable();
@@ -969,13 +700,6 @@ GTD.initSummaryTable = function() {
         taskTable = GTD.Summary.createSummaryTable(GTD.body);
     }
     GTD.taskTable = taskTable;
-};
-
-GTD.initPageMargin = function() {
-    this.body.setMarginLeft(this.bodyMargins[0]);
-    this.body.setMarginTop(this.bodyMargins[1]);
-    this.body.setMarginRight(this.bodyMargins[2]);
-    this.body.setMarginBottom(this.bodyMargins[3]);
 };
 
 /* Get the task under cursor
@@ -1074,7 +798,6 @@ GTD.initialize = function() {
 }
 
     GTD.initSummaryTable();
-    GTD.initPageMargin();
     GTD.initialized = true;
 };
 
@@ -1139,25 +862,6 @@ GTD.changeTaskStatusMenuWrapper = function(options) {
         doc.setCursor(position);
     }
 };
-
-
-/////////////////////////////////////////////////////////////
-// These functions are used by javascript HTML services
-/////////////////////////////////////////////////////////////
-/* Insert task
- */
-function runInsertTask(text, status) {
-    return GTD.insertTask(text, status);
-}
-
-/* Change task status
- */
-function changeTaskStatus(comment, statusAfter) {
-    GTD.changeTaskStatusMenuWrapper({
-      statusAfter: statusAfter,
-      comment: comment
-    });
-}
 
 
 function onOpen(e) {
@@ -1233,8 +937,4 @@ function moveTaskToSomeday() {
 
 
 
-
-GTD.templates.insert_task_diag = "<link rel='stylesheet' href='https://ssl.gstatic.com/docs/script/css/add-ons1.css'><h1>Task description</h1><textarea rows='4' cols='50' id='task_desc' placeholder='Please enter a short task description here: e.g., write a report of google apps for jack'></textarea><div><button class='action' id='insert'>Insert</button><button  value='Close' onclick='google.script.host.close()'>Close</button></div><script>document.getElementById('insert').onclick= function(){  var taskDesc = document.getElementById('task_desc').value;  google.script.run.runInsertTask(taskDesc, 'Actionable');  google.script.host.close();};</script>";
-
-GTD.templates.change_task_status = "<link rel='stylesheet' href='https://ssl.gstatic.com/docs/script/css/add-ons1.css'><h1>Comment</h1><textarea rows='4' cols='50' id='comment' placeholder='Please enter your comment here.'></textarea><div><button class='action' id='insert'>Insert</button><button  value='Close' onclick='google.script.host.close()'>Close</button></div><script>document.getElementById('insert').onclick= function(){  var comment = document.getElementById('comment').value;  google.script.run.changeTaskStatus(comment, '{{statusAfter}}');  google.script.host.close();};</script>";
 

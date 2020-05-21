@@ -115,26 +115,6 @@ GTD.Summary.getAllTasksFromCol = function(col) {
     return res;
 };
 
-// GTD function assume cursor is inside summary table and find the task
-// description from the summary table.
-GTD.Summary.getTaskFromCursor = function(cursor) {
-    var ele = cursor.getElement();
-    // if (ele.getType() === DocumentApp.ElementType.TEXT) {
-    //     ele = ele.getParent();
-    // }
-    // if (ele.getType() === DocumentApp.ElementType.PARAGRAPH) {
-    //     ele = ele.getParent();
-    // }
-    // if (!ele || ele.getType() != DocumentApp.ElementType.TABLE_CELL) {
-    //     DocumentApp.getUi().alert('Cannot find task under cursor!' );
-    //     return;
-    // }
-
-    return {
-        taskDesc: ele.editAsText().getText()
-    };
-};
-
 GTD.Summary.searchTaskSummaryTable = function() {
     var tables = GTD.body.getTables();
     for (var i = 0; i < tables.length; ++i) {
