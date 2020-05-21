@@ -1,4 +1,4 @@
-// compiled from git commit version: 794b3d6d60ba6530b5bf3af6787d855e810eff1b
+// compiled from git commit version: 3ce24e2d86ffc915696444f9eb22fb3662378d2d
 var GTD = {
     // Commonly used DOM object
     document: DocumentApp.getActiveDocument(),
@@ -207,10 +207,12 @@ GTD.util.extractTextAndRemoveCursorElement = function() {
       return;
   }
   var ele = cursor.getElement();
+  DocumentApp.getUi().alert('ele is: ' + ele);
   if (ele === null || typeof ele === 'undefined') {
       return null;
   }
-  var text = ele.asText().getText();
+  var text = ele.getText();
+  DocumentApp.getUi().alert('text in the message is: ' + text);
   if (text !== '') {
     ele.editAsText().setText('');
   }
@@ -1201,7 +1203,6 @@ function insertNoteChecklist() {
 
 
 function insertTask() {
-  GTD.initialize();
   var text = GTD.util.extractTextAndRemoveCursorElement();
   if (text === null || (typeof text === 'undefined') || text === '' ) {
       DocumentApp.getUi().alert('Could not find text to create task. ' +
@@ -1209,6 +1210,7 @@ function insertTask() {
                                 'should be used as task description (do not select the text).');
       return;
   }
+  // GTD.initialize();
   GTD.insertTask(text, 'Actionable');
 }
 
