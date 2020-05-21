@@ -55,7 +55,7 @@ For more info about GTD, please read [This awesome book by David Allen](http://w
 
 #Usage
 
-Please click [this click](https://docs.google.com/document/d/18dowuhhSB5kajFRbJpmm7efWjU3V4AxYkuWMqhObPeI/copy), which will make a copy of the template document.
+Please click [this link](https://docs.google.com/document/d/18dowuhhSB5kajFRbJpmm7efWjU3V4AxYkuWMqhObPeI/copy), which will make a copy of the template document.
 
  1. Put your cursor to the text you want to create as a tas, and then click *GTD->create task* to create a task. The beginning of the description will be change to a emoji that represents the status of the task. The status of a new task will be 'Actionable' and the emoji is '🅰️'. The task will also be displayed in the summary table in the beginning part of the document.
  1. You can click *GTD->Insert update* to insert some context information related to this task.
