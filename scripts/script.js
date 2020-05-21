@@ -172,7 +172,6 @@ GTD.getTaskThreadPosition = function(task) {
     var doc = DocumentApp.getActiveDocument();
     var documentProperties = PropertiesService.getDocumentProperties();
     var bookmarkId = documentProperties.getProperty(task.taskDesc);
-    // DocumentApp.getUi().alert('getTaskThreadPosition: task ' + task.taskDesc);
     if (!bookmarkId) {
         Logger.log('PropertiesService unsynced!');
         bookmarkId =  GTD.searchBookmarkIdBasedOnTaskDesc(task.taskDesc);
@@ -183,7 +182,6 @@ GTD.getTaskThreadPosition = function(task) {
         }
     }
     var bookmark = doc.getBookmark(bookmarkId);
-    // DocumentApp.getUi().alert('getTaskThreadPosition: bookmark ' + bookmark);
 
     if (bookmark) {
         return bookmark.getPosition();
