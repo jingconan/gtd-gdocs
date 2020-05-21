@@ -55,28 +55,21 @@ For more info about GTD, please read [This awesome book by David Allen](http://w
 
 #Usage
 
-Here is an [example doc](https://docs.google.com/document/d/18dowuhhSB5kajFRbJpmm7efWjU3V4AxYkuWMqhObPeI/edit?usp=sharing), you can copy it to a new document and start to play.
+Please click [this click](https://docs.google.com/document/d/18dowuhhSB5kajFRbJpmm7efWjU3V4AxYkuWMqhObPeI/copy), which will make a copy of the template document.
 
-If you want to configure by yourself, here are the steps:
-
- 1. Create a new google document.
- 2. Click *Tools->Script Editor...*
- 3. Click Blank Project.
- 4. Paste the code in *build/compiled_script.js* to the window.
- 5. Choose and *onOpen* function and click run in the toolbar.
- 6. You can click *GTD->Insert task* to insert a task. The text from the
-    current line will be used as the task description.
- 7. Type a short description of the task in the popup dialog. After clicking "okay", a task description will be inserted under your cursor and the beginning of the description will be a emoji that represents the status of the task. The status of a new task will be 'Actionable' and the emoji is '🅰️'. The task will also be displayed in the summary table in the beginning part of the document.
- 8. You can click *GTD->Insert update* to insert some context information related to this task.
- 9. Put your cursor in the line of a task (which should have a status emoji at the beginning), and click *GTD->Mark task as Waiting For* to mark the task as a 'Waiting For' task if you have done what you can do and waiting for something, e.g., you colleagues' review. The status emoji should change to '🆆'.
- 10. Click *GTD->Mark task as Done* to mark as a 'Done' task if you are done with this task. The status emoji should change to '✅'.
- 11. You can also click *GTD->Mark task as Actionable* to mark it as an 'Actionable' task again and the status emoji will change to '🅰️'.
- 12. Enjoy your trip!
+ 1. Put your cursor to the text you want to create as a tas, and then click *GTD->create task* to create a task. The beginning of the description will be change to a emoji that represents the status of the task. The status of a new task will be 'Actionable' and the emoji is '🅰️'. The task will also be displayed in the summary table in the beginning part of the document.
+ 1. You can click *GTD->Insert update* to insert some context information related to this task.
+ 1. Put your cursor in the line of a task (which should have a status emoji at the beginning), and click *GTD->Mark task as Waiting For* to mark the task as a 'Waiting For' task if you have done what you can do and waiting for something, e.g., you colleagues' review. The status emoji should change to '🆆'.
+ 1. Click *GTD->Mark task as Done* to mark as a 'Done' task if you are done with this task. The status emoji should change to '✅'.
+ 1. You can also click *GTD->Mark task as Actionable* to mark it as an 'Actionable' task again and the status emoji will change to '🅰️'.
+ 1. Enjoy your trip!
 
 
 #Screenshot
 
-![image](https://github.com/hbhzwj/gtd-gdocs/blob/master/resources/screenshot.png)
+![image](https://github.com/hbhzwj/gtd-gdocs/blob/master/resources/GTD-screenshot-1.png)
+![image](https://github.com/hbhzwj/gtd-gdocs/blob/master/resources/GTD-screenshot-2.png)
+![image](https://github.com/hbhzwj/gtd-gdocs/blob/master/resources/GTD-screenshot-3.png)
 
 
 
