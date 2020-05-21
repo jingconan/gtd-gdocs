@@ -179,7 +179,7 @@ GTD.util.extractTextAndRemoveCursorElement = function() {
   if (ele === null || typeof ele === 'undefined') {
       return null;
   }
-  var text = ele.asText().getText();
+  var text = ele.getText();
   if (text !== '') {
     ele.editAsText().setText('');
   }

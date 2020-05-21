@@ -39,7 +39,6 @@ function insertNoteChecklist() {
 
 
 function insertTask() {
-  GTD.initialize();
   var text = GTD.util.extractTextAndRemoveCursorElement();
   if (text === null || (typeof text === 'undefined') || text === '' ) {
       DocumentApp.getUi().alert('Could not find text to create task. ' +
