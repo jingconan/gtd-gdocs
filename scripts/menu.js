@@ -7,6 +7,7 @@ function onOpen(e) {
         .addItem('Mark task as WaitingFor', 'moveTaskToWaitingFor')
         .addItem('Mark task as Done', 'moveTaskToDone')
         .addItem('Mark task as Someday', 'moveTaskToSomeday')
+        .addItem('Insert date', 'insertDate')
         .addItem('Insert separator', 'insertSeparator')
         .addToUi();
 
@@ -25,19 +26,6 @@ function insertComment() {
     GTD.insertComment();
 }
 
-function insertNoteCode() {
-  GTD.Task.insertNote('code');
-}
-
-function insertNoteEmail() {
-  GTD.Task.insertNote('email');
-}
-
-function insertNoteChecklist() {
-  GTD.Task.insertNote('checklist');
-}
-
-
 function insertTask() {
   var text = GTD.util.extractTextAndRemoveCursorElement();
   if (text === null || (typeof text === 'undefined') || text === '' ) {
@@ -52,7 +40,7 @@ function insertTask() {
 function insertDate() {
   var doc = DocumentApp.getActiveDocument();
   var cursor = doc.getCursor();
-  var text = '\n' + GTD.toISO(new Date()) + '\n';
+  var text = '\n' + GTD.util.toISO(new Date()) + '\n';
   var element = cursor.insertText(text);
   doc.setCursor(doc.newPosition(element, text.length));
 }

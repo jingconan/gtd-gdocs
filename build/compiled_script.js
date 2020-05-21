@@ -1,4 +1,4 @@
-// compiled from git commit version: 3ce24e2d86ffc915696444f9eb22fb3662378d2d
+// compiled from git commit version: 333ec241e37844bfa69756e60298ac9b24cf9f46
 var GTD = {
     // Commonly used DOM object
     document: DocumentApp.getActiveDocument(),
@@ -207,12 +207,10 @@ GTD.util.extractTextAndRemoveCursorElement = function() {
       return;
   }
   var ele = cursor.getElement();
-  DocumentApp.getUi().alert('ele is: ' + ele);
   if (ele === null || typeof ele === 'undefined') {
       return null;
   }
   var text = ele.getText();
-  DocumentApp.getUi().alert('text in the message is: ' + text);
   if (text !== '') {
     ele.editAsText().setText('');
   }
@@ -1171,6 +1169,7 @@ function onOpen(e) {
         .addItem('Mark task as WaitingFor', 'moveTaskToWaitingFor')
         .addItem('Mark task as Done', 'moveTaskToDone')
         .addItem('Mark task as Someday', 'moveTaskToSomeday')
+        .addItem('Insert date', 'insertDate')
         .addItem('Insert separator', 'insertSeparator')
         .addToUi();
 
@@ -1189,19 +1188,6 @@ function insertComment() {
     GTD.insertComment();
 }
 
-function insertNoteCode() {
-  GTD.Task.insertNote('code');
-}
-
-function insertNoteEmail() {
-  GTD.Task.insertNote('email');
-}
-
-function insertNoteChecklist() {
-  GTD.Task.insertNote('checklist');
-}
-
-
 function insertTask() {
   var text = GTD.util.extractTextAndRemoveCursorElement();
   if (text === null || (typeof text === 'undefined') || text === '' ) {
@@ -1210,14 +1196,13 @@ function insertTask() {
                                 'should be used as task description (do not select the text).');
       return;
   }
-  // GTD.initialize();
   GTD.insertTask(text, 'Actionable');
 }
 
 function insertDate() {
   var doc = DocumentApp.getActiveDocument();
   var cursor = doc.getCursor();
-  var text = '\n' + GTD.toISO(new Date()) + '\n';
+  var text = '\n' + GTD.util.toISO(new Date()) + '\n';
   var element = cursor.insertText(text);
   doc.setCursor(doc.newPosition(element, text.length));
 }
