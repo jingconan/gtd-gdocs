@@ -2,36 +2,11 @@
 // Google Docs.
 //
 // Author: Jing Conan Wang
-// Email: hbhzwj@gmail.com
+// Email: jingconanwang@gmail.com
 //
 // This code is under GPL license.
 
 // FIXME need to factor the script.js to several smaller files
-
-/* Verify whether the current document is a GTD document
- * Returns true if the document contains a summary table and the page
- * setting is as expected, and false otherwise.
- */
-GTD.isGtdDocument = function() {
-    // Verify that the document contains a summary task table
-    if (GTD.Summary.searchTaskSummaryTable() === null) {
-        return false;
-    }
-
-    // Verify that the margin of the document is okay
-    bodyAttr = GTD.body.getAttributes();
-    marginLeft = bodyAttr[DocumentApp.Attribute.MARGIN_LEFT];
-    marginTop = bodyAttr[DocumentApp.Attribute.MARGIN_TOP];
-    marginRight = bodyAttr[DocumentApp.Attribute.MARGIN_RIGHT];
-    marginBottom = bodyAttr[DocumentApp.Attribute.MARGIN_BOTTOM];
-    if ((marginLeft === GTD.bodyMargins[0]) &&
-        (marginTop === GTD.bodyMargins[1]) &&
-        (marginRight === GTD.bodyMargins[2]) &&
-        (marginBottom === GTD.bodyMargins[3])) {
-        return true;
-    }
-    return false;
-};
 
 GTD.initSummaryTable = function() {
     var taskTable = GTD.Summary.searchTaskSummaryTable();
@@ -39,13 +14,6 @@ GTD.initSummaryTable = function() {
         taskTable = GTD.Summary.createSummaryTable(GTD.body);
     }
     GTD.taskTable = taskTable;
-};
-
-GTD.initPageMargin = function() {
-    this.body.setMarginLeft(this.bodyMargins[0]);
-    this.body.setMarginTop(this.bodyMargins[1]);
-    this.body.setMarginRight(this.bodyMargins[2]);
-    this.body.setMarginBottom(this.bodyMargins[3]);
 };
 
 /* Get the task under cursor
@@ -144,7 +112,6 @@ GTD.initialize = function() {
 }
 
     GTD.initSummaryTable();
-    GTD.initPageMargin();
     GTD.initialized = true;
 };
 
