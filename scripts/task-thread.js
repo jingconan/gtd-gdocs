@@ -49,17 +49,23 @@ GTD.Task.addThreadSeparator = function() {
     table.setBorderWidth(0);
 };
 
-GTD.Task.insertBookmark = function(name) {
+// Insert a bookmark. If ele is set, it will try to insert
+// a bookmark for the position of insert. Otherwise, it will
+// try to insert at the current cursor.
+GTD.Task.insertBookmark = function(name, ele) {
   var taskDesc = name;
   var doc = DocumentApp.getActiveDocument();
-  var cursor = doc.getCursor();
-  var bookmark = doc.addBookmark(cursor);
-  DocumentApp.getUi().alert('documentProperties.setProperty: taskDesc ' + taskDesc + ' bookmark: ' + bookmark);
 
+  var bookmark;
+  if (typeof ele === 'undefined') {
+    var cursor = doc.getCursor();
+    bookmark = doc.addBookmark(cursor);
+  } else {
+    var position = DocumentApp.getActiveDocument().newPosition(ele, 0);
+    bookmark = position.insertBookmark();
+  }
   var documentProperties = PropertiesService.getDocumentProperties();
   documentProperties.setProperty(name, bookmark.getId());
-  DocumentApp.getUi().alert('documentProperties.setProperty: taskDesc ' + taskDesc + ' bookmarkID: ' + bookmark.getId());
-
 }
 
 GTD.Task.insertThreadHeader = function(name) {
@@ -68,7 +74,7 @@ GTD.Task.insertThreadHeader = function(name) {
     var statusSymbol = GTD.statusSymbol[taskStatus]
     var threadHeaderEle = GTD.util.insertText(statusSymbol + ' ' + name);
 
-    GTD.Task.insertBookmark(name);
+    GTD.Task.insertBookmark(name, threadHeaderEle);
 
     // return task here
     return {
@@ -245,12 +251,10 @@ GTD.Task.getTaskThreadHeader = function(ele) {
       if (task) {
           var position = GTD.getTaskThreadPosition({'taskDesc': task});
           if (!position) {
-              DocumentApp.getUi().alert('Not found task: ' + task);
               res.status = 'not_found'
           } else {
 
             res.header =  position.getElement();
-            DocumentApp.getUi().alert('Found position: ' + res.header.getText());
             res.status = 'cursor_in_summary_table';
           }
       }
@@ -299,7 +303,7 @@ GTD.Task.setThreadHeaderStatus = function(threadHeader, status) {
     var taskDesc = GTD.Task.getTaskDesc(threadHeader);
     // threadHeader.getCell(this.CONTENT_ROW, 0).setText(symbol + ' ' + taskDesc);
     threadHeader.setText(symbol + ' ' + taskDesc);
-    GTD.Task.insertBookmark(taskDesc);
+    GTD.Task.insertBookmark(taskDesc, threadHeader);
 };
 
 // We assume the first part of the content is the status.
