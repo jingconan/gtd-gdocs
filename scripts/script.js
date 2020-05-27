@@ -68,12 +68,12 @@ GTD.changeTaskStatus = function(options) {
 /**
  * Insert task and update information in summary table
  *
- * @param {string} name task name
+ * @param {Text} Google docs Text element for which the task will be created.
  * @param {string} status status of task
  * @returns {object} task object
  */
-GTD.insertTask = function(name, status) {
-    var task = GTD.Task.createNewTask(name, status);
+GTD.insertTask = function(ele, status) {
+    var task = GTD.Task.createNewTask(ele, status);
     if (task === null || (typeof task === 'undefined')) {
         return;
     }

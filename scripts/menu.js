@@ -27,7 +27,8 @@ function insertComment() {
 }
 
 function insertTask() {
-  var text = GTD.util.extractTextAndRemoveCursorElement();
+  // We need to get the whole element instead of just text here.
+  var text = GTD.util.extractElementUnderCursor();
   if (text === null || (typeof text === 'undefined') || text === '' ) {
       DocumentApp.getUi().alert('Could not find text to create task. ' +
                                 'Please put your cursor in the line whose text ' +
