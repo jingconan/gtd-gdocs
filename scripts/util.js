@@ -168,7 +168,7 @@ GTD.util.insertText = function(text) {
   return ele;
 }
 
-GTD.util.extractTextAndRemoveCursorElement = function() {
+GTD.util.extractElementUnderCursor = function() {
   var document = DocumentApp.getActiveDocument();
   var cursor = document.getCursor();
   if (!cursor) {
@@ -179,9 +179,5 @@ GTD.util.extractTextAndRemoveCursorElement = function() {
   if (ele === null || typeof ele === 'undefined') {
       return null;
   }
-  var text = ele.getText();
-  if (text !== '') {
-    ele.editAsText().setText('');
-  }
-  return text;
+  return ele;
 }

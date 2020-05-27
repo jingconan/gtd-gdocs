@@ -1,4 +1,4 @@
-// compiled from git commit version: 2eaceacafed5866ae0979b0a6517bbba805c7b1e
+// compiled from git commit version: 3a3ce9b751d41c2fc2d2819b97433184e7d928c4
 var GTD = {
     // Commonly used DOM object
     document: DocumentApp.getActiveDocument(),
@@ -198,7 +198,7 @@ GTD.util.insertText = function(text) {
   return ele;
 }
 
-GTD.util.extractTextAndRemoveCursorElement = function() {
+GTD.util.extractElementUnderCursor = function() {
   var document = DocumentApp.getActiveDocument();
   var cursor = document.getCursor();
   if (!cursor) {
@@ -209,11 +209,7 @@ GTD.util.extractTextAndRemoveCursorElement = function() {
   if (ele === null || typeof ele === 'undefined') {
       return null;
   }
-  var text = ele.getText();
-  if (text !== '') {
-    ele.editAsText().setText('');
-  }
-  return text;
+  return ele;
 }
 
 
@@ -417,18 +413,15 @@ GTD.Task = {
     SIZE: [2, 3],
 };
 
-GTD.Task.createNewTask = function(name, statusName) {
-    var statusCode = 0;
-    for (var i = 0; i < GTD.header.length; ++i) {
-        if (GTD.header[i] === statusName) {
-            statusCode = i;
-        }
-    }
-    this.status = statusCode;
-    this.subTasksTotal = 0;
-    this.subTasksDone = 0;
-
-    return this.insertThreadHeader(name);
+GTD.Task.createNewTask = function(ele, statusName) {
+    // var statusCode = 0;
+    // for (var i = 0; i < GTD.header.length; ++i) {
+    //     if (GTD.header[i] === statusName) {
+    //         statusCode = i;
+    //     }
+    // }
+    // this.status = statusCode;
+    return this.insertThreadHeader(ele);
 };
 
 GTD.Task.addThreadSeparator = function() {
@@ -463,17 +456,16 @@ GTD.Task.insertBookmark = function(name, ele) {
   documentProperties.setProperty(name, bookmark.getId());
 }
 
-GTD.Task.insertThreadHeader = function(name) {
-    var taskStatus = GTD.header[this.status];
-
-    var statusSymbol = GTD.statusSymbol[taskStatus]
-    var threadHeaderEle = GTD.util.insertText(statusSymbol + ' ' + name);
-
-    GTD.Task.insertBookmark(name, threadHeaderEle);
+GTD.Task.insertThreadHeader = function(threadHeaderEle) {
+    // If threadHeaderEle is just a string, then we insert
+    // the text to the current cursor to create an element.
+    if (typeof threadHeaderEle === 'string') {
+      threadHeaderEle = GTD.util.insertText(statusSymbol + ' ' + name);
+    }
 
     // return task here
     return {
-      taskDesc: name,
+      taskDesc: GTD.Task.getTaskDesc(threadHeaderEle),
       statusBefore: 'NotExist',
       threadHeader: threadHeaderEle
     };
@@ -651,9 +643,9 @@ GTD.Task.setForegroundColor = function(headerTable, color, range) {
 
 GTD.Task.setThreadHeaderStatus = function(threadHeader, status) {
     var symbol = GTD.statusSymbol[status];
+    threadHeader = GTD.Task.clearTaskStatus(threadHeader);
+    threadHeader.insertText(0, symbol + ' ');
     var taskDesc = GTD.Task.getTaskDesc(threadHeader);
-    // threadHeader.getCell(this.CONTENT_ROW, 0).setText(symbol + ' ' + taskDesc);
-    threadHeader.setText(symbol + ' ' + taskDesc);
     GTD.Task.insertBookmark(taskDesc, threadHeader);
 };
 
@@ -665,6 +657,25 @@ GTD.Task.getThreadHeaderStatus = function(threadHeader) {
     var symbol = tokens[0];
     return GTD.symbolStatusMap[symbol];
 }
+
+// We assume the remaining part of the content is the task description.
+GTD.Task.clearTaskStatus = function(threadHeader) {
+  var text = threadHeader.getText();
+  for (var key in GTD.statusSymbol) {
+      // check if the property/key is defined in the object itself, not in parent
+      if (GTD.statusSymbol.hasOwnProperty(key)) {
+        if (text.startsWith(GTD.statusSymbol[key] + ' ')) {
+            // if ((typeof threadHeader === 'undefined') ||
+            //     (typeof threadHeader.deleteText === 'undefined')) {
+            //     continue;
+            // }
+            threadHeader = threadHeader.editAsText().deleteText(0, GTD.statusSymbol[key].length);
+            return threadHeader;
+        }
+      }
+  }
+  return threadHeader;
+};
 
 // We assume the remaining part of the content is the task description.
 GTD.Task.getTaskDesc = function(threadHeader) {
@@ -754,12 +765,12 @@ GTD.changeTaskStatus = function(options) {
 /**
  * Insert task and update information in summary table
  *
- * @param {string} name task name
+ * @param {Text} Google docs Text element for which the task will be created.
  * @param {string} status status of task
  * @returns {object} task object
  */
-GTD.insertTask = function(name, status) {
-    var task = GTD.Task.createNewTask(name, status);
+GTD.insertTask = function(ele, status) {
+    var task = GTD.Task.createNewTask(ele, status);
     if (task === null || (typeof task === 'undefined')) {
         return;
     }
@@ -893,7 +904,8 @@ function insertComment() {
 }
 
 function insertTask() {
-  var text = GTD.util.extractTextAndRemoveCursorElement();
+  // We need to get the whole element instead of just text here.
+  var text = GTD.util.extractElementUnderCursor();
   if (text === null || (typeof text === 'undefined') || text === '' ) {
       DocumentApp.getUi().alert('Could not find text to create task. ' +
                                 'Please put your cursor in the line whose text ' +
