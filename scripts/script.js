@@ -9,11 +9,16 @@
 // FIXME need to factor the script.js to several smaller files
 
 GTD.initSummaryTable = function() {
-    var taskTable = GTD.Summary.searchTaskSummaryTable();
-    if (taskTable === null) {
-        taskTable = GTD.Summary.createSummaryTable(GTD.body);
+  var taskTable = GTD.Summary.searchTaskSummaryTable();
+  if (taskTable === null) {
+    taskTable = GTD.Summary.createSummaryTable(GTD.body);
+    if (taskTable === null || (typeof taskTable === 'undefined')) {
+      return false;
     }
-    GTD.taskTable = taskTable;
+  }
+
+  GTD.taskTable = taskTable;
+  return true;
 };
 
 /* Get the task under cursor
@@ -77,6 +82,11 @@ GTD.insertTask = function(ele, status) {
     if (task === null || (typeof task === 'undefined')) {
         return;
     }
+
+    if (GTD.initialize() !== true) {
+      return;
+    }
+
     // Update task's status in summary table.
     GTD.changeTaskStatus({
         task: task,
@@ -90,29 +100,33 @@ GTD.insertComment = function() {
     GTD.Task.insertComment();
 };
 
-GTD.initialize = function() {
-    if (GTD.initialized === true) {
-        return;
-    }
+GTD.initialize = function() { 
+  if (GTD.initialized === true) {
+    return true;
+  }
 
-    // Set background of document to be solarized light color
-    var style = {};
-    var doc = DocumentApp.getActiveDocument().getBody();
-    doc.setAttributes(style);
+  // Set background of document to be solarized light color
+  var style = {};
+  var doc = DocumentApp.getActiveDocument().getBody();
+  doc.setAttributes(style);
 
-    // symbolStatusMap is a mapping from a symbol to the actual
-    // status. In the task thread, we only use symbol to indicate
-    // task staus, this map will be used to do lookup to get
-    // the actual status.
-    GTD.symbolStatusMap = {};
-    for (var key in GTD.statusSymbol) {
+  // symbolStatusMap is a mapping from a symbol to the actual
+  // status. In the task thread, we only use symbol to indicate
+  // task staus, this map will be used to do lookup to get
+  // the actual status.
+  GTD.symbolStatusMap = {};
+  for (var key in GTD.statusSymbol) {
     if (GTD.statusSymbol.hasOwnProperty(key)) {
-        GTD.symbolStatusMap[GTD.statusSymbol[key]] = key;
+      GTD.symbolStatusMap[GTD.statusSymbol[key]] = key;
     }
-}
+  }
 
-    GTD.initSummaryTable();
-    GTD.initialized = true;
+
+  if (GTD.initSummaryTable() === false) {
+    return false;
+  }
+  GTD.initialized = true;
+  return true;
 };
 
 GTD.searchBookmarkIdBasedOnTaskDesc = function(taskDesc) {
@@ -157,7 +171,9 @@ GTD.getTaskThreadPosition = function(task) {
 
 
 GTD.changeTaskStatusMenuWrapper = function(options) {
-    GTD.initialize();
+    if (GTD.initialize() !== true) {
+      return;
+    }
     var statusAfter = options.statusAfter;
     var ret = GTD.getSelectedTask(statusAfter);
     if (ret.status !== 'SUCCESS') {

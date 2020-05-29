@@ -1,4 +1,4 @@
-// compiled from git commit version: 3a3ce9b751d41c2fc2d2819b97433184e7d928c4
+// compiled from git commit version: 26f5300c4273d397a9d50891d4bff0b90a2fe66c
 var GTD = {
     // Commonly used DOM object
     document: DocumentApp.getActiveDocument(),
@@ -93,6 +93,15 @@ GTD.util.insertTableAtCursor = function(cells) {
     }
 };
 
+GTD.util.insertTableAtBegining = function(cells) {
+    var document = DocumentApp.getActiveDocument();
+    var body = document.getBody();
+    var table = body.insertTable(0, cells);
+    return table;
+};
+
+
+
 GTD.util.insertTableAfterThreadHeader = function(options) {
     var body = DocumentApp.getActiveDocument().getBody();
     var index = body.getChildIndex(options.threadHeader);
@@ -111,34 +120,6 @@ GTD.util.setCursorAtStart = function() {
     var doc = DocumentApp.getActiveDocument();
     var position = doc.newPosition(doc.getBody(), 0);
     doc.setCursor(position);
-};
-
-GTD.util.setCursorAfterFirstSeparator = function() {
-    var doc = DocumentApp.getActiveDocument();
-    var body = doc.getBody();
-    var tables = body.getTables();
-    for (var i = 0; i < tables.length; ++i) {
-        var table = tables[i];
-        if (GTD.Task.isSeparator(table)) {
-            var index = body.getChildIndex(table);
-            var position = doc.newPosition(body, index+1);
-            doc.setCursor(position);
-            return;
-        } else if (GTD.Task.isThreadHeader(table)) {
-            var index = body.getChildIndex(table);
-            var position = doc.newPosition(body, index-1);
-            doc.setCursor(position);
-            GTD.Task.addThreadSeparator();
-            return;
-        }
-    }
-    // This means that the document doesn't contain any task separator,
-    // we insert a separator after summay table
-    var summayTable = GTD.Summary.getSummaryTable();
-    var index = body.getChildIndex(summayTable);
-    var position = doc.newPosition(body, index+1);
-    doc.setCursor(position);
-    GTD.Task.addThreadSeparator();
 };
 
 
@@ -372,8 +353,9 @@ GTD.Summary._createDefaultTableContent = function () {
 
 GTD.Summary.createSummaryTable = function (body) {
     GTD.util.setCursorAtStart();
-    var table = GTD.util.insertTableAtCursor(GTD.Summary._createDefaultTableContent());
-    if (!table) {
+    var summayTableContent = GTD.Summary._createDefaultTableContent();
+    var table = GTD.util.insertTableAtBegining(summayTableContent);
+    if (table === 'element_not_found' || table === 'cursor_not_found') {
         DocumentApp.getUi().alert('Cannot create task summary table!');
         return;
     }
@@ -579,7 +561,6 @@ GTD.Task.getTaskThreadHeader = function(ele) {
 
     // DocumentApp.getUi().alert('ele.Type: ' + ele.getType());
     if (!ele || ele.getType() != DocumentApp.ElementType.TABLE) {
-        DocumentApp.getUi().alert('Cannot find task header under cursor! ele.type: ' + ele.getType());
         res.status = 'not_found'
         return res;
     }
@@ -665,10 +646,6 @@ GTD.Task.clearTaskStatus = function(threadHeader) {
       // check if the property/key is defined in the object itself, not in parent
       if (GTD.statusSymbol.hasOwnProperty(key)) {
         if (text.startsWith(GTD.statusSymbol[key] + ' ')) {
-            // if ((typeof threadHeader === 'undefined') ||
-            //     (typeof threadHeader.deleteText === 'undefined')) {
-            //     continue;
-            // }
             threadHeader = threadHeader.editAsText().deleteText(0, GTD.statusSymbol[key].length);
             return threadHeader;
         }
@@ -677,17 +654,21 @@ GTD.Task.clearTaskStatus = function(threadHeader) {
   return threadHeader;
 };
 
+
 // We assume the remaining part of the content is the task description.
 GTD.Task.getTaskDesc = function(threadHeader) {
-    var text = threadHeader.getText();
-    var tokens = text.split(' ');
-    return tokens.slice(1).join(' ');
-};
-
-GTD.Task.isThreadHeader = function(table) {
-    return (table.getNumRows() === this.SIZE[0]) &&
-           (table.getRow(0).getNumChildren() === this.SIZE[1]) &&
-           (table.getCell(0, 0).getText() == 'Timestamp');
+  var text = threadHeader.getText();
+  for (var key in GTD.statusSymbol) {
+    // check if the property/key is defined in the object itself, not in parent
+    if (GTD.statusSymbol.hasOwnProperty(key)) {
+      var prefix = GTD.statusSymbol[key] + ' ';
+       if (text.startsWith(prefix)) {
+         text = text.replace(prefix, '');
+         return text;
+        }
+      }
+  }
+  return text;
 };
 
 GTD.Task.isSeparator = function(table) {
@@ -706,11 +687,16 @@ GTD.Task.isSeparator = function(table) {
 // FIXME need to factor the script.js to several smaller files
 
 GTD.initSummaryTable = function() {
-    var taskTable = GTD.Summary.searchTaskSummaryTable();
-    if (taskTable === null) {
-        taskTable = GTD.Summary.createSummaryTable(GTD.body);
+  var taskTable = GTD.Summary.searchTaskSummaryTable();
+  if (taskTable === null) {
+    taskTable = GTD.Summary.createSummaryTable(GTD.body);
+    if (taskTable === null || (typeof taskTable === 'undefined')) {
+      return false;
     }
-    GTD.taskTable = taskTable;
+  }
+
+  GTD.taskTable = taskTable;
+  return true;
 };
 
 /* Get the task under cursor
@@ -774,6 +760,11 @@ GTD.insertTask = function(ele, status) {
     if (task === null || (typeof task === 'undefined')) {
         return;
     }
+
+    if (GTD.initialize() !== true) {
+      return;
+    }
+
     // Update task's status in summary table.
     GTD.changeTaskStatus({
         task: task,
@@ -787,29 +778,33 @@ GTD.insertComment = function() {
     GTD.Task.insertComment();
 };
 
-GTD.initialize = function() {
-    if (GTD.initialized === true) {
-        return;
-    }
+GTD.initialize = function() { 
+  if (GTD.initialized === true) {
+    return true;
+  }
 
-    // Set background of document to be solarized light color
-    var style = {};
-    var doc = DocumentApp.getActiveDocument().getBody();
-    doc.setAttributes(style);
+  // Set background of document to be solarized light color
+  var style = {};
+  var doc = DocumentApp.getActiveDocument().getBody();
+  doc.setAttributes(style);
 
-    // symbolStatusMap is a mapping from a symbol to the actual
-    // status. In the task thread, we only use symbol to indicate
-    // task staus, this map will be used to do lookup to get
-    // the actual status.
-    GTD.symbolStatusMap = {};
-    for (var key in GTD.statusSymbol) {
+  // symbolStatusMap is a mapping from a symbol to the actual
+  // status. In the task thread, we only use symbol to indicate
+  // task staus, this map will be used to do lookup to get
+  // the actual status.
+  GTD.symbolStatusMap = {};
+  for (var key in GTD.statusSymbol) {
     if (GTD.statusSymbol.hasOwnProperty(key)) {
-        GTD.symbolStatusMap[GTD.statusSymbol[key]] = key;
+      GTD.symbolStatusMap[GTD.statusSymbol[key]] = key;
     }
-}
+  }
 
-    GTD.initSummaryTable();
-    GTD.initialized = true;
+
+  if (GTD.initSummaryTable() === false) {
+    return false;
+  }
+  GTD.initialized = true;
+  return true;
 };
 
 GTD.searchBookmarkIdBasedOnTaskDesc = function(taskDesc) {
@@ -854,7 +849,9 @@ GTD.getTaskThreadPosition = function(task) {
 
 
 GTD.changeTaskStatusMenuWrapper = function(options) {
-    GTD.initialize();
+    if (GTD.initialize() !== true) {
+      return;
+    }
     var statusAfter = options.statusAfter;
     var ret = GTD.getSelectedTask(statusAfter);
     if (ret.status !== 'SUCCESS') {
