@@ -63,6 +63,15 @@ GTD.util.insertTableAtCursor = function(cells) {
     }
 };
 
+GTD.util.insertTableAtBegining = function(cells) {
+    var document = DocumentApp.getActiveDocument();
+    var body = document.getBody();
+    var table = body.insertTable(0, cells);
+    return table;
+};
+
+
+
 GTD.util.insertTableAfterThreadHeader = function(options) {
     var body = DocumentApp.getActiveDocument().getBody();
     var index = body.getChildIndex(options.threadHeader);
@@ -81,34 +90,6 @@ GTD.util.setCursorAtStart = function() {
     var doc = DocumentApp.getActiveDocument();
     var position = doc.newPosition(doc.getBody(), 0);
     doc.setCursor(position);
-};
-
-GTD.util.setCursorAfterFirstSeparator = function() {
-    var doc = DocumentApp.getActiveDocument();
-    var body = doc.getBody();
-    var tables = body.getTables();
-    for (var i = 0; i < tables.length; ++i) {
-        var table = tables[i];
-        if (GTD.Task.isSeparator(table)) {
-            var index = body.getChildIndex(table);
-            var position = doc.newPosition(body, index+1);
-            doc.setCursor(position);
-            return;
-        } else if (GTD.Task.isThreadHeader(table)) {
-            var index = body.getChildIndex(table);
-            var position = doc.newPosition(body, index-1);
-            doc.setCursor(position);
-            GTD.Task.addThreadSeparator();
-            return;
-        }
-    }
-    // This means that the document doesn't contain any task separator,
-    // we insert a separator after summay table
-    var summayTable = GTD.Summary.getSummaryTable();
-    var index = body.getChildIndex(summayTable);
-    var position = doc.newPosition(body, index+1);
-    doc.setCursor(position);
-    GTD.Task.addThreadSeparator();
 };
 
 

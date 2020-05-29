@@ -169,7 +169,6 @@ GTD.Task.getTaskThreadHeader = function(ele) {
 
     // DocumentApp.getUi().alert('ele.Type: ' + ele.getType());
     if (!ele || ele.getType() != DocumentApp.ElementType.TABLE) {
-        DocumentApp.getUi().alert('Cannot find task header under cursor! ele.type: ' + ele.getType());
         res.status = 'not_found'
         return res;
     }
@@ -263,17 +262,21 @@ GTD.Task.clearTaskStatus = function(threadHeader) {
   return threadHeader;
 };
 
+
 // We assume the remaining part of the content is the task description.
 GTD.Task.getTaskDesc = function(threadHeader) {
-    var text = threadHeader.getText();
-    var tokens = text.split(' ');
-    return tokens.slice(1).join(' ');
-};
-
-GTD.Task.isThreadHeader = function(table) {
-    return (table.getNumRows() === this.SIZE[0]) &&
-           (table.getRow(0).getNumChildren() === this.SIZE[1]) &&
-           (table.getCell(0, 0).getText() == 'Timestamp');
+  var text = threadHeader.getText();
+  for (var key in GTD.statusSymbol) {
+    // check if the property/key is defined in the object itself, not in parent
+    if (GTD.statusSymbol.hasOwnProperty(key)) {
+      var prefix = GTD.statusSymbol[key] + ' ';
+       if (text.startsWith(prefix)) {
+         text = text.replace(prefix, '');
+         return text;
+        }
+      }
+  }
+  return text;
 };
 
 GTD.Task.isSeparator = function(table) {

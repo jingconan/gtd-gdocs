@@ -157,8 +157,9 @@ GTD.Summary._createDefaultTableContent = function () {
 
 GTD.Summary.createSummaryTable = function (body) {
     GTD.util.setCursorAtStart();
-    var table = GTD.util.insertTableAtCursor(GTD.Summary._createDefaultTableContent());
-    if (!table) {
+    var summayTableContent = GTD.Summary._createDefaultTableContent();
+    var table = GTD.util.insertTableAtBegining(summayTableContent);
+    if (table === 'element_not_found' || table === 'cursor_not_found') {
         DocumentApp.getUi().alert('Cannot create task summary table!');
         return;
     }
