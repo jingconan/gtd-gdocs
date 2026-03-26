@@ -4,7 +4,7 @@
   "description": "Great Task Document",
   "main": "compile.js",
   "dependencies": {
-    "glob": "^5.0.15",
+    "glob": "^13.0.6",
     "recursive-readdir": "^1.2.1"
   },
   "devDependencies": {},
